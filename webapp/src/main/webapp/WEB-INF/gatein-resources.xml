@@ -1,0 +1,42 @@
+<gatein-resources xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://www.exoplatform.org/xml/ns/gatein_resources_1_4
+                                      http://www.exoplatform.org/xml/ns/gatein_resources_1_4"
+                  xmlns="http://www.exoplatform.org/xml/ns/gatein_resources_1_4">
+    <!-- Ce bloc ajoutera un nouveau fichier CSS qui sera chargé
+    dans la page avec un portlet associé
+     (il ne sera pas disponible pour les autres pages) -->
+  <portlet-skin>
+      <!-- nom de l'application : le nom d'affichage de la guerre dans le fichier web.xml -->
+    <application-name>demande-conge-extension-webapp</application-name>
+      <!-- nom du portlet défini dans le fichier portlet.xml -->
+    <portlet-name>demandeCongePortlet</portlet-name>
+      <!-- Nom du skin : dans notre cas Community -->
+    <skin-name>Community</skin-name>
+      <!-- Chemin vers le fichier CSS sous cette application Web-->
+    <css-path>/css/demandeCongeApp.css</css-path>
+  </portlet-skin>
+
+    <!--    Ce bloc ajoutera un nouveau code JavaScript au site.
+    Ce code CSS sera chargé dans la page avec un portlet associé
+    (il ne sera pas disponible pour les autres pages).-->
+  <portlet>
+      <!-- nom du portlet défini dans le fichier portlet.xml -->
+    <name>demandeCongePortlet</name>
+      <!-- Le fichier JS sera ajouté en tant que module Javascript -->
+    <module>
+      <script>
+          <!-- JS est déjà minifié par NPM, pas besoin de le minifier à nouveau -->
+        <minify>false</minify>
+          <!-- Chemin vers le fichier JS sous cette application Web-->
+        <path>/js/demandeCongeApp.bundle.js</path>
+      </script>
+        <!-- Dépendances Javascript pour ce module JS -->
+      <depends>
+        <module>vue</module>
+      </depends>
+      <depends>
+        <module>eXoVueI18n</module>
+      </depends>
+    </module>
+  </portlet>
+</gatein-resources>

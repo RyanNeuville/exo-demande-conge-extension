@@ -1,0 +1,29 @@
+<portlet-app version="2.0"
+             xmlns="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd
+			 http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd">
+
+    <!-- bloc pour définir un nouveau portlet-->
+	<portlet>
+        <!-- Nom du portlet -->
+		<portlet-name>demandeCongePortlet</portlet-name>
+        <!-- Classe Portlet -->
+		<portlet-class>org.exoplatform.commons.api.portlet.GenericDispatchedViewPortlet</portlet-class>
+        <!-- Paramètres nécessaires au lancement du portlet. Dans ce cas, le chemin d'accès au fichier HTML de l'application VueJS -->
+        <init-param>
+		  <name>portlet-view-dispatched-file-path</name>
+		  <value>/index.html</value>
+     	</init-param>
+        <!-- types MIME pris en charge -->
+		<supports>
+			<mime-type>text/html</mime-type>
+		</supports>
+
+        <!-- Informations supplémentaires pour le portlet -->
+		<portlet-info>
+			<title>Application de gestion de conge</title>
+		</portlet-info>
+	</portlet>
+
+</portlet-app>
