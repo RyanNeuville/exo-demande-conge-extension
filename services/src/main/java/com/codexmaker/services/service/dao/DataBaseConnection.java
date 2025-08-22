@@ -6,8 +6,10 @@ package com.codexmaker.services.service.dao;
  * elle utilise un singleton pour garantir qu'une seule connexion est utilisée tout au long de l'application.
  * En cas d'erreur lors de l'établissement de la connexion, une exception est levée.
  */
+
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 import com.codexmaker.services.utils.Constants;
@@ -20,10 +22,10 @@ public class DataBaseConnection {
 
     private static Connection connection;
 
-    private DataBaseConnection() {
-
+    DataBaseConnection() {
     }
 
+    /** Méthode pour obtenir la connexion à la base de données */
     public static synchronized Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()){
             try {
@@ -43,6 +45,7 @@ public class DataBaseConnection {
         return connection;
     }
 
+    /** Méthode pour fermer la connexion à la base de données */
     public static void closeConnection(){
         if (connection != null) {
             logger.info(Constants.CLOSING_CONNECTION);

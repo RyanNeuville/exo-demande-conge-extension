@@ -1,67 +1,78 @@
 package com.codexmaker.services.service;
 
-import com.codexmaker.services.model.dto.DemandeCongeDTO;
 import com.codexmaker.services.model.entity.DemandeConge;
 
-import java.time.LocalDate;
 import java.util.List;
 
 /**
-* interface pour le service de gestion des demandes de congé.
-* Fournit des méthodes pour créer, modifier, supprimer et consulter les demandes de congé.
-* */
-
+ * Interface de service pour la gestion des demandes de congé.
+ * Définit le contrat des opérations métier disponibles.
+ */
 public interface DemandeCongeService {
 
     /**
-     * Cette methode Soumet une nouvelle demande de congé pour un utilisateur donné.
-     * @return Le DTO de la demande soumise avec son identifiant et son statut.
+     * Soumet une nouvelle demande de congé.
+     * @param demande La demande à soumettre.
+     * @param currentUserId L'identifiant de l'utilisateur eXo qui soumet la demande.
+     * @return La demande soumise avec son ID généré.
+     * @throws IllegalArgumentException si les données sont invalides ou le solde insuffisant.
      */
-    DemandeCongeDTO soumettreDemande(DemandeCongeDTO demandeDto, String userId);
+    DemandeConge soumettreDemande(DemandeConge demande, String currentUserId);
 
     /**
-     * Cette methode Récupère toutes les demandes de congé d'un utilisateur spécifique.
-     * @return Une liste de DTO de demandes de congé pour l'utilisateur spécifié.
+     * Approuve une demande de congé.
+     * @param demandeId L'identifiant de la demande à approuver.
+     * @param commentaires Les commentaires du manager.
+     * @throws IllegalArgumentException si la demande est introuvable ou le statut est incorrect.
+     * @throws SecurityException si le manager n'est pas autorisé.
      */
-    List<DemandeCongeDTO> getDemandesUtilisateur(String userId);
+    void approuverDemande(int demandeId,  String commentaires);
 
     /**
-     * Cette methode Récupère toutes les demandes de congé en attente d'approbation pour un manager ou admin spécifique.
-     * @return Une liste de DTO de demandes de congé en attente pour le manager spécifié.
+     * Refuse une demande de congé.
+     * @param demandeId L'identifiant de la demande à refuser.
+     * @param commentaires Les commentaires du manager.
+     * @throws IllegalArgumentException si la demande est introuvable ou le statut est incorrect.
+     * @throws SecurityException si le manager n'est pas autorisé.
      */
-    List<DemandeCongeDTO> getDemandesEnAttenteManager(String managerId);
+    void refuserDemande(int demandeId, String commentaires);
 
     /**
-     * Cette methode Modifie une demande de congé existante.
-     * @return Le DTO de la demande mise à jour.
+     * Annule une demande de congé.
+     * @param demandeId L'identifiant de la demande à annuler.
+     * @param userId L'identifiant de l'utilisateur qui annule sa demande.
+     * @throws IllegalArgumentException si la demande est introuvable ou le statut est incorrect.
+     * @throws SecurityException si l'utilisateur n'est pas autorisé.
      */
-    DemandeCongeDTO annulerDemande(Long demandeId, String userId);
-
-
-    /**
-     * Cette methode Récupère toutes les demandes de congé.
-     * @return Une liste de DTO de toutes les demandes de congé.
-     */
-    List<DemandeCongeDTO> getAllDemandes();
+    void annulerDemande(int demandeId, String userId);
 
     /**
-     * Cette methode Approuve une demande de congé.
-     *
-     * @return Le DTO de la demande mise à jour.
+     * Récupère toutes les demandes de congé pour un utilisateur donné.
+     * @param userId L'identifiant de l'utilisateur.
+     * @return Une liste de demandes de congé.
      */
-    DemandeConge approuverDemande(Long demandeId, String managerId);
+    List<DemandeConge> getDemandesUtilisateur(String userId);
 
     /**
-     * Cette methode Refuse une demande de congé.
-     * @return Le DTO de la demande mise à jour.
+     * Récupère une demande de congé par son ID.
+     * @param demandeId L'ID de la demande.
+     * @return La demande de congé, ou null si introuvable.
      */
-    DemandeConge refuserDemande(Long demandeId, String managerId);
+    DemandeConge getDemandeById(int demandeId);
 
     /**
-     * Cette methode Calcule la durée en jours ouvrés entre deux dates.
-     * @param dateDebut La date de début du congé.
-     * @param dateFin La date de fin du congé.
-     * @return Le nombre de jours ouvrés entre les deux dates.
+     * Récupère toutes les demandes en attente d'approbation (pour les ADMIN).
+     * @param approverId L'ID de l'approbateur pour vérification des droits.
+     * @return Une liste de demandes en attente.
+     * @throws SecurityException si l'approbateur n'est pas autorisé.
      */
-    int calculerDureeJoursOuvres(LocalDate dateDebut, LocalDate dateFin);
+    List<DemandeConge> getDemandesEnAttente(String approverId);
+
+    /**
+     * Récupère toutes les demandes de congé, quel que soit l'utilisateur ou le statut (pour les Admin).
+     * @param adminId L'ID de l'admin pour vérification des droits.
+     * @return Une liste de toutes les demandes de congé.
+     * @throws SecurityException si l'utilisateur n'est pas autorisé.
+     */
+    List<DemandeConge> getAllDemandes(String adminId);
 }
