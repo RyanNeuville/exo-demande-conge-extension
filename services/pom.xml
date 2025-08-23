@@ -15,7 +15,9 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.release>17</maven.compiler.release>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.release>21</maven.compiler.release>
 	</properties>
 
 	<dependencyManagement>
@@ -96,12 +98,6 @@
 			<version>5.11.0</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.10.0</version>
-			<scope>test</scope>
-		</dependency>
 
 		<dependency>
 			<groupId>org.mockito</groupId>
@@ -115,15 +111,11 @@
 			<version>5.5.0</version>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.3.1</version>
-            </plugin>
-        </plugins>
-    </build>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 </project>

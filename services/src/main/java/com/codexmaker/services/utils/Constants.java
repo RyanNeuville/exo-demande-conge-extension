@@ -98,7 +98,15 @@ public class Constants {
     public static final String ERROR_DRIVER_NOT_FOUND = "Le pilote de base de données n'a pas été trouvé. Veuillez vérifier la configuration du projet.";
     public static final String ERROR_CLOSE_CONNECTION = "Erreur lors de la fermeture de la connexion à la base de données";
     public static final String ERROR_USER_SAVE = "Erreur lors de la sauvegarde de l'utilisateur.";
-    public static final String ERROR_USER_FIND = "Erreur lors de la recherche de l'utilisateur par ID.";
+    public static final String ERROR_USER_FIND_BY_ID = "Erreur lors de la recherche de l'utilisateur par ID.";
     public static final String ERROR_USER_LEAVE_REQUEST_BALANCE_UPDATE = "Erreur lors de la mise à jour du solde de l'utilisateur.";
-
+    public static final String ERROR_NOT_COLLUM_IN_RESULTSET = "Les colonnes 'user_nom'/'user_prenom' ne sont pas dans le ResultSet. ";
+    public static final String ERROR_LEAVE_REQUEST_SAVE = "Erreur lors de la sauvegarde de la demande de congé.";
+    public static final String ERROR_LEAVE_REQUEST_UPDATE = "Erreur lors de la mise à jour de la demande de congé.";
+    public static final String ERROR_LEAVE_REQUEST_FIND_BY_ID = "Erreur lors de la recherche de la demande par ID.";
+    public static final String ERROR_GET_LEAVE_REQUEST_BY_ID_WITH_VIEW = "Erreur lors de la récupération des demandes par ID utilisateur via la vue.";
+    public static final String ERROR_GET_ALL_LEAVE_REQUEST = "Erreur lors de la récupération de toutes les demandes.";
+    public static final String ERROR_NOT_FOUND_STATUS = "Statut non supporté pour la mise à jour: ";
+    public static final String ERROR_STATUS_LEAVE_REQUEST_UPDATE = "Erreur lors de la mise à jour du statut de la demande.";
+    public static final String ERROR_VERIFY_USER_ROLE = "Erreur lors de la vérification du rôle de l'utilisateur ";
 }

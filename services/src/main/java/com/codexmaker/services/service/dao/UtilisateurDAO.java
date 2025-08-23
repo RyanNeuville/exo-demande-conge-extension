@@ -66,7 +66,7 @@ public class UtilisateurDAO {
                 return mapResultSetToUtilisateur(rs);
             }
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, Constants.ERROR_USER_FIND, e);
+            LOGGER.log(Level.SEVERE, Constants.ERROR_USER_FIND_BY_ID, e);
         } finally {
             DataBaseConnection.closeConnection();
         }
