@@ -9,7 +9,6 @@ package com.codexmaker.services.service.dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 import com.codexmaker.services.utils.Constants;

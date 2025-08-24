@@ -62,7 +62,7 @@ public class Constants {
 
 
 
-    /** constantes pour la connexion a la base de donnees */
+    /** constantes pour la connexion à la base de donnees */
     public static final String DB_URL = "jdbc:mysql://localhost:3306/exo_demande_conges";
     public static final String DB_USER = "root";
     public static final String DB_PASSWORD = "NOUVEAU_MOT_DE_PASSE";
