@@ -47,9 +47,8 @@ public class DataBaseConnection {
     /** Méthode pour fermer la connexion à la base de données */
     public static void closeConnection(){
         if (connection != null) {
-            logger.info(Constants.CLOSING_CONNECTION);
             try {
-                if (connection != null && !connection.isClosed()) {
+                if (!connection.isClosed()) {
                     connection.close();
                     logger.info(Constants.SUCCESS_CLOSE_CONNECTION);
                 }

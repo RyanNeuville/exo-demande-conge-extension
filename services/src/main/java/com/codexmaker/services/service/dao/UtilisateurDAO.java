@@ -19,7 +19,7 @@ public class UtilisateurDAO {
     /**
      * Map un ResultSet sur une entité Utilisateur.
      */
-    private Utilisateur mapResultSetToUtilisateur(ResultSet rs) throws SQLException {
+    Utilisateur mapResultSetToUtilisateur(ResultSet rs) throws SQLException {
         Utilisateur utilisateur = new Utilisateur();
         utilisateur.setId(rs.getString("id"));
         utilisateur.setNom(rs.getString("nom"));
@@ -74,6 +74,11 @@ public class UtilisateurDAO {
         return null;
     }
 
+    public static void main(String[] args) throws SQLException {
+        UtilisateurDAO utilisateurDAO = new UtilisateurDAO();
+
+    }
+
     /**
      * Met à jour le solde de congés d'un utilisateur.
      */
@@ -90,11 +95,5 @@ public class UtilisateurDAO {
         } finally {
             DataBaseConnection.closeConnection();
         }
-    }
-
-    public static void main(String[] args) throws SQLException {
-        UtilisateurDAO use = new UtilisateurDAO();
-
-       System.out.println( use.findById("12").toString());
     }
 }
