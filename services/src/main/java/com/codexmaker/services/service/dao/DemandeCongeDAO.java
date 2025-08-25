@@ -22,7 +22,7 @@ public class DemandeCongeDAO {
      * Map un ResultSet sur une entité DemandeConge.
      * Prend en charge les champs supplémentaires de l'utilisateur.
      */
-    private DemandeConge mapResultSetToDemandeConge(ResultSet rs) throws SQLException {
+    DemandeConge mapResultSetToDemandeConge(ResultSet rs) throws SQLException {
         DemandeConge demande = new DemandeConge();
         demande.setId(rs.getInt("id"));
         demande.setUserId(rs.getString("user_id"));
