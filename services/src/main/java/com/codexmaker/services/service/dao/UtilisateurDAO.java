@@ -45,6 +45,7 @@ public class UtilisateurDAO {
             pstmt.setString(5, utilisateur.getRole().toString());
             pstmt.setInt(6, utilisateur.getSoldeDemande());
             pstmt.executeUpdate();
+            LOGGER.info("Utilisateur enregistrer avec sussces ");
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, Constants.ERROR_USER_SAVE, e);
         } finally {
@@ -89,5 +90,11 @@ public class UtilisateurDAO {
         } finally {
             DataBaseConnection.closeConnection();
         }
+    }
+
+    public static void main(String[] args) throws SQLException {
+        UtilisateurDAO use = new UtilisateurDAO();
+
+       System.out.println( use.findById("12").toString());
     }
 }

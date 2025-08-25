@@ -1,16 +1,18 @@
 package com.codexmaker.services.api.impl;
 
-import com.codexmaker.services.api.ExoUserService;
+import com.codexmaker.services.api.DemandeCongeAPiService;
 import com.codexmaker.services.utils.Constants;
 import org.exoplatform.services.organization.OrganizationService;
 import org.exoplatform.services.organization.User;
 import org.exoplatform.services.organization.UserHandler;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DemandeCongeAPiServiceImpl {
+@ApplicationScoped
+public class DemandeCongeAPiServiceImpl implements DemandeCongeAPiService {
     private static final Logger LOGGER = Logger.getLogger(DemandeCongeAPiServiceImpl.class.getName());
 
     /**
@@ -26,6 +28,7 @@ public class DemandeCongeAPiServiceImpl {
      * @param userId L'identifiant unique de l'utilisateur (username eXo).
      * @return L'objet User d'eXo, ou null si l'utilisateur n'est pas trouvé.
      */
+    @Override
     public User findExoUserById(String userId) {
         try {
             if (organizationService == null) {
@@ -46,6 +49,7 @@ public class DemandeCongeAPiServiceImpl {
      * @param userId L'identifiant de l'utilisateur.
      * @return Le nom complet de l'utilisateur (firstName + lastName), ou null s'il n'est pas trouvé.
      */
+    @Override
     public String getExoUserFullName(String userId) {
         User user = findExoUserById(userId);
         return (user != null) ? user.getUserName() : null;
@@ -61,6 +65,7 @@ public class DemandeCongeAPiServiceImpl {
      * @param role Le rôle a vérifié.
      * @return true si l'utilisateur a le rôle, false sinon.
      */
+    @Override
     public boolean hasExoRole(String userId, String role) {
         try {
             /** return organizationService.getMembershipHandler().findMembershipsOfUser(userId).contains(role); */
