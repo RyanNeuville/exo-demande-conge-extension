@@ -74,11 +74,6 @@ public class UtilisateurDAO {
         return null;
     }
 
-    public static void main(String[] args) throws SQLException {
-        UtilisateurDAO utilisateurDAO = new UtilisateurDAO();
-
-    }
-
     /**
      * Met à jour le solde de congés d'un utilisateur.
      */
