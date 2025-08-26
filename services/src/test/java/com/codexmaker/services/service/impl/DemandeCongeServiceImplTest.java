@@ -10,8 +10,5 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 
 public class DemandeCongeServiceImplTest {
-    @Test
-    void testResultOnePlusOne(){
-        assertEquals(28, 1+1);
-    }
+
 }

@@ -137,6 +137,24 @@ public class DemandeCongeDAO {
         return null;
     }
 
+    public List<DemandeConge> findByStatus(Statut statut){
+        List<DemandeConge> demandesEnAttente = new ArrayList<>();
+        try {
+            Connection conn = DataBaseConnection.getConnection();
+            String sql =  String.format(Constants.SQL_GET_LEAVE_REQUESTS_WHERE_STATUS_EN_ATTENTE, TABLE_NAME);
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                demandesEnAttente.add(mapResultSetToDemandeConge(rs));
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, Constants.ERROR_GET_ALL_LEAVE_REQUEST, e);
+        } finally {
+            DataBaseConnection.closeConnection();
+        }
+        return demandesEnAttente;
+    }
+
     /**
      * Récupère toutes les demandes de congé d'un utilisateur, y compris les noms/prénoms via la vue.
      */

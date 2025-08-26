@@ -18,6 +18,7 @@ public class Constants {
     public static final String SQL_CREATE_LEAVE_REQUEST = "INSERT INTO %s (user_id, nom, prenom, date_debut, date_fin, type_conge, statut, motif, commentaires_manager, date_soumission, date_modification, solde_demande, duree_jours_ouvres) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     public static final String SQL_UPDATE_LEAVE_REQUEST = "UPDATE %s SET user_id = ?, nom = ?, prenom = ?, date_debut = ?, date_fin = ?, type_conge = ?, statut = ?, motif = ?, commentaires_manager = ?, date_modification = ?, solde_demande = ?, duree_jours_ouvres = ? WHERE id = ?";
     public static final String SQL_DELETE_LEAVE_REQUEST = "DELETE FROM %s WHERE id = ?";
+    public static final String SQL_GET_LEAVE_REQUESTS_WHERE_STATUS_EN_ATTENTE = "SLECT * FROM %s WHERE statut = 'EN_ATTENTE'";
 
     /** Requêtes spécifiques pour la gestion des demandes de congé */
     public static final String SQL_APPROVE_LEAVE_REQUEST = "UPDATE %s SET statut = 'APPROUVEE', date_modification = ?, commentaires_manager = ? WHERE id = ?";
