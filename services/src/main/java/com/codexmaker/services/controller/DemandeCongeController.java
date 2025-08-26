@@ -26,28 +26,24 @@ import org.json.JSONObject;
  * Ressource REST (Contrôleur JAX-RS) pour la gestion des demandes de congé.
  * Expose les fonctionnalités du service via des endpoints HTTP.
  */
+
 /** Indique que ce bean est géré par CDI et a une portée de requête */
 @RequestScoped
-@Path("/conges") // Chemin de base pour toutes les opérations de ce contrôleur
+@Path("/conges") /** Chemin de base pour toutes les opérations de ce contrôleur */
 public class DemandeCongeController implements ResourceContainer {
 
     private static final Log LOG = ExoLogger.getLogger(DemandeCongeController.class);
 
-    // Injection du service via CDI
+    /** Injection du service via CDI */
     @Inject
     private DemandeCongeService demandeCongeService;
 
-    private static final String USER_ID_SESSION = "exoUserId"; // Nom de l'attribut de session pour l'ID utilisateur
+    /** Nom de l'attribut de session pour l'ID utilisateur */
+    private static final String USER_ID_SESSION = "exoUserId";
     private static final String UNAUTHORIZED_MSG = "Utilisateur non authentifié ou session expirée.";
     private static final String FAILED_TITLE = "title";
     private static final String FAILED_RESPONSE_MESSAGE = "message";
     private static final String FAILED_RESPONSE_CODE = "statusCode";
-
-    // Constructor injection for testing or explicit CDI use (though @Inject on fields is also common for CDI)
-    // If you remove @Inject from the field, you'd need this constructor if you want CDI to inject it here:
-    // public DemandeCongeRestService(DemandeCongeService demandeCongeService) {
-    //     this.demandeCongeService = demandeCongeService;
-    // }
 
     /**
      * Récupère l'ID de l'utilisateur connecté depuis la session HTTP.
@@ -56,13 +52,13 @@ public class DemandeCongeController implements ResourceContainer {
      * @return L'ID de l'utilisateur ou null si non authentifié.
      */
     private String getUserId(HttpServletRequest request) {
-        // Option 1: Via Principal (méthode préférée si l'authentification eXo remplit Principal)
+        /** Option 1 : Via Principal (méthode préférée si l'authentification eXo remplit Principal) */
         Principal principal = request.getUserPrincipal();
         if (principal != null) {
             return principal.getName();
         }
 
-        // Option 2: Via la session (pour la simulation de login ou si Principal n'est pas rempli ainsi)
+        /** Option 2 : Via la session (pour la simulation de login ou si Principal n'est pas rempli ainsi) */
         HttpSession session = request.getSession(false);
         if (session != null && session.getAttribute(USER_ID_SESSION) != null) {
             return session.getAttribute(USER_ID_SESSION).toString();
@@ -89,10 +85,10 @@ public class DemandeCongeController implements ResourceContainer {
         if (serviceResponse.getResponse() != null) {
             return Response.status(serviceResponse.getStatus())
                     .entity(serviceResponse.getResponse())
-                    .type(MediaType.APPLICATION_JSON) // Assurez-vous que le type est JSON
+                    .type(MediaType.APPLICATION_JSON)
                     .build();
         } else {
-            // Si la réponse est null, le message d'erreur est déjà formaté en JSON par le service
+            /** Si la réponse est null, le message d'erreur est déjà formaté en JSON par le service */
             return Response.status(serviceResponse.getStatus())
                     .entity(serviceResponse.getMessage())
                     .type(MediaType.APPLICATION_JSON)
@@ -100,11 +96,11 @@ public class DemandeCongeController implements ResourceContainer {
         }
     }
 
-    // --- Endpoints d'Authentification (Simulation, comme dans l'exemple du professeur) ---
+    /** --- Endpoints d'Authentification (Simulation) --- */
 
     @POST
     @Path("/login")
-    @PermitAll // Permet l'accès sans authentification préalable
+    @PermitAll /** Permet l'accès sans authentification préalable */
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     public Response login(@Context HttpServletRequest request,
@@ -115,8 +111,8 @@ public class DemandeCongeController implements ResourceContainer {
                     .entity(createErrorResponse("Erreur d'authentification", "Nom d'utilisateur ou mot de passe manquant.", 400))
                     .build();
         }
-        // Simulation très simple: tout mot de passe avec un username est "authentifié"
-        // En prod, ceci ferait appel à un service d'authentification eXo
+        /** Simulation très simple : tout mot de passe avec un username est "authentifié" */
+        /** En prod, ceci ferait appel à un service d'authentification eXo */
         request.getSession(true).setAttribute(USER_ID_SESSION, username);
         LOG.info("Utilisateur '{}' authentifié (simulation) et session créée.", username);
         return Response.ok(Collections.singletonMap("status", "authentifié")).build();
@@ -130,7 +126,8 @@ public class DemandeCongeController implements ResourceContainer {
         HttpSession session = request.getSession(false);
         if (session != null) {
             session.removeAttribute(USER_ID_SESSION);
-            session.invalidate(); // Invalide toute la session
+            /** Invalide toute la session */
+            session.invalidate();
         }
         LOG.info("Utilisateur déconnecté et session invalidée.");
         return Response.ok(Collections.singletonMap("status", "déconnecté")).build();
@@ -152,7 +149,7 @@ public class DemandeCongeController implements ResourceContainer {
         return Response.ok(sessionInfo).build();
     }
 
-    // --- Endpoints pour les Demandes de Congé ---
+    /** --- Endpoints pour les Demandes de Congé --- */
 
     @POST
     @Path("/demandes")
@@ -171,7 +168,7 @@ public class DemandeCongeController implements ResourceContainer {
 
     @PUT
     @Path("/demandes/{demandeId}/approuver")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED) // ou MediaType.APPLICATION_JSON si commentaires sont dans un JSON
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     public Response approuverDemande(@Context HttpServletRequest request,
                                      @PathParam("demandeId") int demandeId,
@@ -182,14 +179,14 @@ public class DemandeCongeController implements ResourceContainer {
                     .entity(createErrorResponse("Authentification requise", UNAUTHORIZED_MSG, 401))
                     .build();
         }
-        // La vérification du rôle du manager/admin se fait dans le service
+
         DemandeCongeResponse response = demandeCongeService.approuverDemande(demandeId, commentaires);
         return handleServiceResponse(response);
     }
 
     @PUT
     @Path("/demandes/{demandeId}/refuser")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED) // ou MediaType.APPLICATION_JSON
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     public Response refuserDemande(@Context HttpServletRequest request,
                                    @PathParam("demandeId") int demandeId,
@@ -237,7 +234,7 @@ public class DemandeCongeController implements ResourceContainer {
     @Path("/demandes/{demandeId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDemandeById(@Context HttpServletRequest request, @PathParam("demandeId") int demandeId) {
-        String userId = getUserId(request); // Pourrait être utilisé pour une vérification d'accès si besoin
+        String userId = getUserId(request);
         if (userId == null) {
             return Response.status(Response.Status.UNAUTHORIZED)
                     .entity(createErrorResponse("Authentification requise", UNAUTHORIZED_MSG, 401))
@@ -257,7 +254,7 @@ public class DemandeCongeController implements ResourceContainer {
                     .entity(createErrorResponse("Authentification requise", UNAUTHORIZED_MSG, 401))
                     .build();
         }
-        // La vérification du rôle de l'approbateur se fait dans le service
+
         DemandeCongeResponse response = demandeCongeService.getDemandesEnAttente(approverId);
         return handleServiceResponse(response);
     }
@@ -272,7 +269,7 @@ public class DemandeCongeController implements ResourceContainer {
                     .entity(createErrorResponse("Authentification requise", UNAUTHORIZED_MSG, 401))
                     .build();
         }
-        // La vérification du rôle de l'admin se fait dans le service
+
         DemandeCongeResponse response = demandeCongeService.getAllDemandes(adminId);
         return handleServiceResponse(response);
     }
