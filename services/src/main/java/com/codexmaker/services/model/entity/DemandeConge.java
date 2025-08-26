@@ -2,6 +2,7 @@ package com.codexmaker.services.model.entity;
 
 import com.codexmaker.services.model.enums.Statut;
 import com.codexmaker.services.model.enums.TypeConge;
+import lombok.Builder;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -13,6 +14,7 @@ import java.util.Objects;
  * les dates, le type de congé, le statut, et d'autres détails pertinents.
  */
 
+@Builder
 public class DemandeConge {
 
     private int id;

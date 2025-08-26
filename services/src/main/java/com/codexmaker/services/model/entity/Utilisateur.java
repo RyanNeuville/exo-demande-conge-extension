@@ -7,8 +7,11 @@ package com.codexmaker.services.model.entity;
  */
 
 import com.codexmaker.services.model.enums.Role;
+import lombok.Builder;
+
 import java.util.Objects;
 
+@Builder
 public class Utilisateur {
     /** Identifiant unique de l'utilisateur eXo */
     private String id;

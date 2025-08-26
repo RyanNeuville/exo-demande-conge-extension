@@ -1,8 +1,9 @@
 package com.codexmaker.services.model.entity;
 
 
+import lombok.Builder;
 
-
+@Builder
 public class DemandeCongeResponse {
 
     private Object response;
