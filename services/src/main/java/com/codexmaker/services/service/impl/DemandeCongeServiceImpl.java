@@ -6,7 +6,7 @@ import com.codexmaker.services.model.entity.DemandeConge;
 import com.codexmaker.services.model.entity.DemandeCongeResponse;
 import com.codexmaker.services.model.entity.Utilisateur;
 import com.codexmaker.services.model.enums.Statut;
-import com.codexmaker.services.model.enums.Role; // Nécessaire pour initialiser l'utilisateur
+import com.codexmaker.services.model.enums.Role;
 import com.codexmaker.services.service.DemandeCongeService;
 import com.codexmaker.services.api.impl.DemandeCongeAPiServiceImpl;
 import com.codexmaker.services.utils.Constants;
@@ -19,22 +19,19 @@ import org.json.JSONObject;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Implémentation du service de gestion des demandes de congé.
  * Cette classe contient la logique métier et orchestre les opérations entre les DAOs
  * pour la persistance et ExoUserService pour l'intégration avec eXo Platform.
  */
-@ApplicationScoped // Indique que ce bean est géré par CDI
+@ApplicationScoped
 public class DemandeCongeServiceImpl implements DemandeCongeService {
 
     private static final Log LOG = ExoLogger.getLogger(DemandeCongeServiceImpl.class);
 
-    // Injection des DAOs et des services externes via CDI
+    /** Injection des DAOs et des services externes via CDI */
     @Inject
     private DemandeCongeDAO demandeCongeDAO;
     @Inject
@@ -42,7 +39,7 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
     @Inject
     private DemandeCongeAPiServiceImpl exoUserService;
 
-    // Constantes pour les messages d'erreur JSON (similaires à l'exemple du professeur)
+    /** Constantes pour les messages d'erreur JSON (similaires à l'exemple du professeur) */
     private static final String FAILED_TITLE = "title";
     private static final String FAILED_RESPONSE_MESSAGE = "message";
     private static final String FAILED_RESPONSE_CODE = "statusCode";
@@ -59,7 +56,7 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
 
     @Override
     public DemandeCongeResponse soumettreDemande(DemandeConge demande, String currentUserId) {
-        // Validation basique des données d'entrée
+        /** Validation basique des données d'entrée */
         if (demande == null || currentUserId == null || currentUserId.isEmpty()) {
             LOG.warn("Soumission de demande invalide : données manquantes.");
             return DemandeCongeResponse.builder()
@@ -93,13 +90,13 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
                     .build();
         }
 
-        // 1. Récupérer ou créer l'utilisateur dans notre base de données locale
+        /** 1. Récupérer ou créer l'utilisateur dans notre base de données locale */
         Utilisateur utilisateur = utilisateurDAO.findById(currentUserId);
         if (utilisateur == null) {
-            // L'utilisateur n'existe pas dans notre base, on le récupère d'eXo et on le persiste
+            /** L'utilisateur n'existe pas dans notre base, on le récupère d'eXo et on le persiste */
             User exoUser = exoUserService.findExoUserById(currentUserId);
             if (exoUser != null) {
-                // Créer un nouvel utilisateur dans notre base avec des valeurs par défaut
+                /** Créer un nouvel utilisateur dans notre base avec des valeurs par défaut */
                 utilisateur = new Utilisateur(currentUserId, exoUser.getFirstName(), exoUser.getLastName(), exoUser.getEmail(), Role.EMPLOYE, 25); // 25 jours par défaut
                 utilisateurDAO.save(utilisateur);
                 LOG.info("Utilisateur eXo '{}' créé dans la base locale.", currentUserId);
@@ -113,7 +110,7 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
             }
         }
 
-        // 2. Calculer la durée du congé
+        /** 2. Calculer la durée du congé */
         int dureeDemandeJoursOuvres = calculerJoursOuvres(demande.getDateDebut(), demande.getDateFin());
         if (dureeDemandeJoursOuvres <= 0) {
             LOG.warn("Soumission de demande invalide pour {}: durée du congé <= 0 jours ouvrés.", currentUserId);
@@ -124,7 +121,7 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
                     .build();
         }
 
-        // 3. Vérifier le solde de congés
+        /** 3. Vérifier le solde de congés */
         if (utilisateur.getSoldeDemande() < dureeDemandeJoursOuvres) {
             LOG.warn("Soumission de demande refusée pour {}: solde insuffisant ({} < {}).", currentUserId, utilisateur.getSoldeDemande(), dureeDemandeJoursOuvres);
             return DemandeCongeResponse.builder()
@@ -134,19 +131,22 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
                     .build();
         }
 
-        // 4. Préparer l'entité DemandeConge et la persister
+        /** 4. Préparer l'entité DemandeConge et la persister */
         demande.setUserId(currentUserId);
         demande.setNom(utilisateur.getNom());
         demande.setPrenom(utilisateur.getPrenom());
         demande.setStatut(Statut.EN_ATTENTE);
         demande.setDateSoumission(LocalDate.now());
-        demande.setDateModification(LocalDate.now()); // Date de modification initiale
+        /** Date de modification initiale */
+        demande.setDateModification(LocalDate.now());
         demande.setDureeJoursOuvres(dureeDemandeJoursOuvres);
-        demande.setCommentairesManager(null); // Pas de commentaires manager à la soumission
-        demande.setSoldeDemande(utilisateur.getSoldeDemande()); // Stocke le solde de l'utilisateur au moment de la demande (pour historique)
+        /** Pas de commentaires manager à la soumission */
+        demande.setCommentairesManager(null);
+        /** Stocke le solde de l'utilisateur au moment de la demande (pour historique) */
+        demande.setSoldeDemande(utilisateur.getSoldeDemande());
 
         try {
-            DemandeConge savedDemande = demandeCongeDAO.save(demande); // Le DAO gère l'ID
+            DemandeConge savedDemande = demandeCongeDAO.save(demande);
             LOG.info("Nouvelle demande soumise avec l'ID {} par l'utilisateur {}.", savedDemande.getId(), currentUserId);
             return DemandeCongeResponse.builder()
                     .response(savedDemande)
@@ -180,28 +180,27 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
                     demandeId, demande.getStatut());
             return DemandeCongeResponse.builder()
                     .response(null)
-                    .status(409) // Conflict
+                    .status(409)
                     .message(createErrorResponse("Statut incorrect", "La demande doit être en attente pour être approuvée.", 409))
                     .build();
         }
 
-        // 1. Mettre à jour le statut de la demande et les commentaires
+        /** 1. Mettre à jour le statut de la demande et les commentaires */
         try {
             demandeCongeDAO.updateStatut((long) demandeId, Statut.APPROUVEE, commentaires, LocalDate.now());
             LOG.info("Demande ID {} approuvée.", demandeId);
 
-            // 2. Mettre à jour le solde de l'utilisateur
+            /** 2. Mettre à jour le solde de l'utilisateur */
             Utilisateur utilisateur = utilisateurDAO.findById(demande.getUserId());
             if (utilisateur == null) {
                 LOG.error("Utilisateur (ID: {}) introuvable pour la demande approuvée (ID: {}). Solde non mis à jour.", demande.getUserId(), demandeId);
-                // On pourrait considérer cela comme une erreur mais laisser la demande approuvée.
             } else {
                 utilisateur.setSoldeDemande(utilisateur.getSoldeDemande() - demande.getDureeJoursOuvres());
                 utilisateurDAO.updateSolde(utilisateur.getId(), utilisateur.getSoldeDemande());
                 LOG.info("Solde de l'utilisateur {} mis à jour à {}.", utilisateur.getId(), utilisateur.getSoldeDemande());
             }
 
-            // Récupérer la demande mise à jour pour la réponse
+            /** Récupérer la demande mise à jour pour la réponse */
             DemandeConge updatedDemande = demandeCongeDAO.findById(demandeId);
             return DemandeCongeResponse.builder()
                     .response(updatedDemande)
@@ -243,8 +242,6 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
             demandeCongeDAO.updateStatut((long) demandeId, Statut.REFUSEE, commentaires, LocalDate.now());
             LOG.info("Demande ID {} refusée.", demandeId);
 
-            // Pas de modification du solde de congés en cas de refus
-
             DemandeConge updatedDemande = demandeCongeDAO.findById(demandeId);
             return DemandeCongeResponse.builder()
                     .response(updatedDemande)
@@ -277,7 +274,7 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
                     demandeId, userId);
             return DemandeCongeResponse.builder()
                     .response(null)
-                    .status(403) // Forbidden
+                    .status(403)
                     .message(createErrorResponse(UNAUTHORIZED, "Vous n'êtes pas autorisé à annuler cette demande.", 403))
                     .build();
         }
@@ -368,7 +365,7 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
 
     @Override
     public DemandeCongeResponse getDemandesEnAttente(String approverId) {
-        // Vérification des permissions de l'approbateur (Admin, Manager ou RH)
+        /** Vérification des permissions de l'approbateur (Admin) */
         if (!exoUserService.hasExoRole(approverId, Constants.ROLE_ADMIN)) {
             LOG.warn("Tentative d'accéder aux demandes en attente par un utilisateur non autorisé : {}.", approverId);
             return DemandeCongeResponse.builder()
@@ -398,7 +395,7 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
 
     @Override
     public DemandeCongeResponse getAllDemandes(String adminId) {
-        // Vérification des permissions (Admin ou RH)
+        /** Vérification des permissions (Admin) */
         if (!exoUserService.hasExoRole(adminId, Constants.ROLE_ADMIN)) {
             LOG.warn("Tentative d'accéder à toutes les demandes par un utilisateur non autorisé : {}.", adminId);
             return DemandeCongeResponse.builder()
@@ -441,7 +438,6 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
         LocalDate dateCourante = debut;
         while (!dateCourante.isAfter(fin)) {
             if (dateCourante.getDayOfWeek() != DayOfWeek.SATURDAY && dateCourante.getDayOfWeek() != DayOfWeek.SUNDAY) {
-                // TODO: Intégrer la logique des jours fériés ici si nécessaire pour Kozao Africa
                 joursOuvres++;
             }
             dateCourante = dateCourante.plusDays(1);
