@@ -6,7 +6,7 @@
         <groupId>com.codexmaker.demandeconge</groupId>
         <artifactId>demande-conge-extention</artifactId>
         <version>1.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath> <!-- Ajustez selon la structure -->
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>emande-conge-extention-webapp</artifactId>
