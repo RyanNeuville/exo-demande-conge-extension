@@ -26,6 +26,8 @@ public class DemandeCongeDAO {
         DemandeConge demande = new DemandeConge();
         demande.setId(rs.getInt("id"));
         demande.setUserId(rs.getString("user_id"));
+        demande.setNom(rs.getString("nom"));
+        demande.setPrenom(rs.getString("prenom"));
 
         /** Les noms d'utilisateur peuvent venir directement de la vue jointe ou être null si non présents.
          * 'user_nom', 'user_prenom' de la vue pour éviter les conflits en basede donnees.

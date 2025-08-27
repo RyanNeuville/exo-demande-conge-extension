@@ -3,8 +3,11 @@ package com.codexmaker.services.service.dao;
 import com.codexmaker.services.model.entity.Utilisateur;
 import com.codexmaker.services.model.enums.Role;
 import com.codexmaker.services.utils.Constants;
+import io.qameta.allure.Step;
+import io.qameta.allure.junit5.AllureJunit5;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,6 +16,7 @@ import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(AllureJunit5.class)
 public class UtilisateurDAOTest {
     UtilisateurDAO utilisateurDAO = new UtilisateurDAO();
 
@@ -21,6 +25,7 @@ public class UtilisateurDAOTest {
 
 
     @Test
+    @Step("Recuperer un utilisateur a partir de son id - succes")
     @DisplayName("Test findById - Success: Find user")
     void findById() throws Exception{
         Utilisateur user = utilisateurDAO.findById("12");
@@ -38,6 +43,7 @@ public class UtilisateurDAOTest {
     }
 
     @Test
+    @Step("Modifier le solde de conge d'un utilisateur- succes")
     @DisplayName("Test updateSolde - Success: Updates solde")
     void updateSolde() throws Exception{
         try {
@@ -51,6 +57,7 @@ public class UtilisateurDAOTest {
     }
 
     @Test
+    @Step("Enregistree un utilisateur - succes")
     @DisplayName("Test save - Success: Inserts user into DB")
     void save() throws Exception{
         Utilisateur userSave = new Utilisateur("2", "Neuville", "Feukouo", "neuville@gmail.com", Role.EMPLOYE, 20);
@@ -71,6 +78,7 @@ public class UtilisateurDAOTest {
     }
 
     @Test
+    @Step("Mapping du resultset en objet Utilisateur - succes")
     @DisplayName("Test mapResultSetToUtilisateur - Success: Maps RS to Utilisateur correctly")
     void mapResultSetToUtilisateur_Success() throws SQLException {
         try (

@@ -1,5 +1,7 @@
 package com.codexmaker.services.api.impl;
 
+import io.qameta.allure.Step;
+import io.qameta.allure.junit5.AllureJunit5;
 import org.exoplatform.services.organization.OrganizationService;
 import org.exoplatform.services.organization.User;
 import org.exoplatform.services.organization.UserHandler;
@@ -19,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * unitaires pour vérifier le comportement de l'implémentation de l'API.
  */
 
+@ExtendWith(AllureJunit5.class)
 @ExtendWith(MockitoExtension.class)
 public class DemandeCongeAPiServiceImplTest {
 
@@ -38,6 +41,7 @@ public class DemandeCongeAPiServiceImplTest {
     }
 
     @Test
+    @Step("Recherche un utilisateur d'exo avec l'id - succees")
     @DisplayName("Test findExoUserById - Succès : Retourne un utilisateur valide")
     void findExoUserById_Success() throws Exception {
         User mockUser = mock(User.class);
@@ -50,6 +54,7 @@ public class DemandeCongeAPiServiceImplTest {
     }
 
     @Test
+    @Step("Recherche un utilisateur d'exo avec l'id - echec")
     @DisplayName("Test findExoUserById - Échec : Utilisateur non trouvé")
     void findExoUserById_UserNotFound() throws Exception {
         when(userHandler.findUserByName("unknown")).thenReturn(null);
@@ -61,6 +66,7 @@ public class DemandeCongeAPiServiceImplTest {
     }
 
     @Test
+    @Step("Recherche un utilisateur avec l'id d'exo - Exeption")
     @DisplayName("Test findExoUserById - Exception : Gère l'erreur et retourne null")
     void findExoUserById_Exception() throws Exception {
         when(userHandler.findUserByName("errorUser")).thenThrow(new RuntimeException("Erreur simulée"));
@@ -72,6 +78,7 @@ public class DemandeCongeAPiServiceImplTest {
     }
 
     @Test
+    @Step("Recuper le nom d'un utilisateur d'exo - succes")
     @DisplayName("Test getExoUserFullName - Succes : Retourne le nom complet")
     void getExoUserFullName_Success() throws Exception{
         User mockUser = mock(User.class);
@@ -84,6 +91,7 @@ public class DemandeCongeAPiServiceImplTest {
     }
 
     @Test
+    @Step("Recuper le nom d'un utilisateur d'exo - echec")
     @DisplayName("Test getExoUserFullName - Échec : Utilisateur non trouvé")
     void getExoUserFullName_UserNotFound() throws Exception{
         when(userHandler.findUserByName("unknown")).thenReturn(null);
