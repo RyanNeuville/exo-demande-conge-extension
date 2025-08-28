@@ -10,8 +10,6 @@ import com.codexmaker.services.model.enums.Role;
 import com.codexmaker.services.service.DemandeCongeService;
 import com.codexmaker.services.api.impl.DemandeCongeAPiServiceImpl;
 import com.codexmaker.services.utils.Constants;
-import javax.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.organization.User;
@@ -26,17 +24,13 @@ import java.util.List;
  * Cette classe contient la logique métier et orchestre les opérations entre les DAOs
  * pour la persistance et ExoUserService pour l'intégration avec eXo Platform.
  */
-@ApplicationScoped
 public class DemandeCongeServiceImpl implements DemandeCongeService {
 
     private static final Log LOG = ExoLogger.getLogger(DemandeCongeServiceImpl.class);
 
     /** Injection des DAOs et des services externes via CDI */
-    @Inject
     private DemandeCongeDAO demandeCongeDAO;
-    @Inject
     private UtilisateurDAO utilisateurDAO;
-    @Inject
     private DemandeCongeAPiServiceImpl exoUserService;
 
     /** Constantes pour les messages d'erreur JSON (similaires à l'exemple du professeur) */

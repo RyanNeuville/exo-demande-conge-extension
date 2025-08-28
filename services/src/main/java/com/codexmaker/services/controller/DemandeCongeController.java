@@ -5,8 +5,6 @@ import com.codexmaker.services.model.entity.DemandeCongeResponse;
 import com.codexmaker.services.service.DemandeCongeService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import jakarta.inject.Inject;
-import javax.enterprise.context.RequestScoped;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
@@ -28,14 +26,12 @@ import org.json.JSONObject;
  */
 
 /** Indique que ce bean est géré par CDI et a une portée de requête */
-@RequestScoped
 @Path("/conges") /** Chemin de base pour toutes les opérations de ce contrôleur */
 public class DemandeCongeController implements ResourceContainer {
 
     private static final Log LOG = ExoLogger.getLogger(DemandeCongeController.class);
 
     /** Injection du service via CDI */
-    @Inject
     private DemandeCongeService demandeCongeService;
 
     /** Nom de l'attribut de session pour l'ID utilisateur */
@@ -269,7 +265,6 @@ public class DemandeCongeController implements ResourceContainer {
                     .entity(createErrorResponse("Authentification requise", UNAUTHORIZED_MSG, 401))
                     .build();
         }
-
         DemandeCongeResponse response = demandeCongeService.getAllDemandes(adminId);
         return handleServiceResponse(response);
     }
