@@ -24,7 +24,7 @@ xmlns="http://www.exoplatform.org/xml/ns/kernel_1_2.xsd">
 									<string>digital-workplace</string>
 								</value>
 								<value>
-									<string>demande-conge-extention-webapp</string>
+									<string>demande-conge-extension-webapp</string>
 								</value>
 							</collection>
 						</field>
