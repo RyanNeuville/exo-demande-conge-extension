@@ -74,6 +74,8 @@ services:
     volumes:
       - exo_data:/srv/exo
       - exo_logs:/var/log/exo
+      - ./libs/demande-conge-estension-services.jar:/opt/exo/lib/demande-conge-estension-services.jar
+      - ./webapps/demande-conge-estension-webapp.war:/opt/exo/webapp/demande-conge-estension-webapp.war
     networks:
       - exo-net
 

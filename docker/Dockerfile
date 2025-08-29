@@ -2,3 +2,7 @@
 # Dockerfile (pour personnaliser exo)
 # -----------------------------------
 FROM exoplatform/exo-community:7.0.0
+
+# Copie du module dans le conteneur (en fonction de vos chemin d'acces)
+COPY ./demande-conge-estension-services.jar /opt/exo/lib
+COPY ./demande-conge-estension-webapp.war /opt/exo/webapp
