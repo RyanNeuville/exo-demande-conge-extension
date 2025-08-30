@@ -46,8 +46,6 @@ exo-demande-conge-extension/
 │
 └── docker/        # Fichier de configurartion d'installation d'exo platform
     ├── sql   # init database
-    ├── libs   # les jar
-    ├── webapps  # les war
     ├── .env         # variables d'environnement (port, etc..)
     ├── docker-compose.yml   # exécution des services (exo, mysql, elasticsearch, onlyoffice)
     └── Dockerfile    # pour personnaliser exo
@@ -157,7 +155,7 @@ webapp/target/*.war
       - ./demande-conge-extension-services.jar:/opt/exo/lib/demande-conge-extension-services.jar
       - ./demande-conge-extension-webapp.war:/opt/exo/webapps/demande-conge-extension-webapp.war
    ```
-
+    - ajuster le chemin d'acces à l'artefact .war et .jar en fonction de pour vous il est recommander de les copier dans le dossier docker
 2. **Exécuter le container**
 
    ```bash
