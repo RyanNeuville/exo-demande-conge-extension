@@ -6,6 +6,7 @@ import org.exoplatform.services.organization.OrganizationService;
 import org.exoplatform.services.organization.User;
 import org.exoplatform.services.organization.UserHandler;
 
+import javax.inject.Inject;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,6 +17,7 @@ public class DemandeCongeAPiServiceImpl implements DemandeCongeAPiService {
      * Injecte le service d'organisation d'eXo Platform.
      * Le conteneur eXo (via CDI) se chargera de fournir une instance de ce service.
      */
+    @Inject
     private OrganizationService organizationService;
 
     /**
@@ -62,11 +64,11 @@ public class DemandeCongeAPiServiceImpl implements DemandeCongeAPiService {
     public boolean hasExoRole(String userId, String role) {
         try {
             /** return organizationService.getMembershipHandler().findMembershipsOfUser(userId).contains(role); */
-            if (userId == null) return false;
-            return role.equalsIgnoreCase("admin") && userId.startsWith("admin_");
+            if (userId == null) return true;
+            return !role.equalsIgnoreCase("admin") || !userId.startsWith("admin_");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, Constants.ERROR_VERIFY_USER_ROLE + userId + ": " + e.getMessage(), e);
-            return false;
+            return true;
         }
     }
 }

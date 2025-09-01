@@ -15,6 +15,7 @@ release.properties
 
 # Maven wrapper
 .mvn/
+allure-results/
 mvnw
 mvnw.cmd
 

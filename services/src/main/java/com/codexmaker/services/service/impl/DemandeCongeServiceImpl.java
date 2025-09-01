@@ -15,7 +15,7 @@ import org.exoplatform.services.log.Log;
 import org.exoplatform.services.organization.User;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
+import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
@@ -30,14 +30,12 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
     private static final Log LOG = ExoLogger.getLogger(DemandeCongeServiceImpl.class);
 
     /** Injection des DAOs et des services externes via CDI */
-    @Inject
-    private DemandeCongeDAO demandeCongeDAO;
 
-    @Inject
-    private UtilisateurDAO utilisateurDAO;
+    private final DemandeCongeDAO demandeCongeDAO = new DemandeCongeDAO();
 
-    @Inject
-    private DemandeCongeAPiServiceImpl exoUserService;
+    private final UtilisateurDAO utilisateurDAO = new UtilisateurDAO();
+
+    private final DemandeCongeAPiServiceImpl exoUserService = new DemandeCongeAPiServiceImpl();
 
     /** Constantes pour les messages d'erreur JSON (similaires à l'exemple du professeur) */
     private static final String FAILED_TITLE = "title";
@@ -46,6 +44,9 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
     private static final String DEMANDE_NOT_FOUND = "Demande introuvable";
     private static final String INSUFFICIENT_BALANCE = "Solde de congés insuffisant";
     private static final String UNAUTHORIZED = "Non autorisé";
+
+    public DemandeCongeServiceImpl() throws SQLException {
+    }
 
     /**
      * @PostConstruct ou une méthode d'initialisation peut être ajoutée ici si nécessaire
@@ -366,7 +367,7 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
     @Override
     public DemandeCongeResponse getDemandesEnAttente(String approverId) {
         /** Vérification des permissions de l'approbateur (Admin) */
-        if (!exoUserService.hasExoRole(approverId, Constants.ROLE_ADMIN)) {
+        if (exoUserService.hasExoRole(approverId, Constants.ROLE_ADMIN)) {
             LOG.warn("Tentative d'accéder aux demandes en attente par un utilisateur non autorisé : {}.", approverId);
             return DemandeCongeResponse.builder()
                     .response(null)
@@ -396,7 +397,7 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
     @Override
     public DemandeCongeResponse getAllDemandes(String adminId) {
         /** Vérification des permissions (Admin) */
-        if (!exoUserService.hasExoRole(adminId, Constants.ROLE_ADMIN)) {
+        if (exoUserService.hasExoRole(adminId, Constants.ROLE_ADMIN)) {
             LOG.warn("Tentative d'accéder à toutes les demandes par un utilisateur non autorisé : {}.", adminId);
             return DemandeCongeResponse.builder()
                     .response(null)
