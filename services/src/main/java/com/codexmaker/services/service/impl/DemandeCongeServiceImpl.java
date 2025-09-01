@@ -15,6 +15,7 @@ import org.exoplatform.services.log.Log;
 import org.exoplatform.services.organization.User;
 import org.json.JSONObject;
 
+import javax.inject.Inject;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
@@ -29,8 +30,13 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
     private static final Log LOG = ExoLogger.getLogger(DemandeCongeServiceImpl.class);
 
     /** Injection des DAOs et des services externes via CDI */
+    @Inject
     private DemandeCongeDAO demandeCongeDAO;
+
+    @Inject
     private UtilisateurDAO utilisateurDAO;
+
+    @Inject
     private DemandeCongeAPiServiceImpl exoUserService;
 
     /** Constantes pour les messages d'erreur JSON (similaires à l'exemple du professeur) */

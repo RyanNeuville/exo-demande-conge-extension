@@ -79,6 +79,8 @@ services:
       - /home/ryan/Bureau/exo-platform-community-docker/webapps/custom-extension-webapp.war:/opt/exo/webapps/custom-extension-webapp.war
       - ./demande-conge-extension-services.jar:/opt/exo/lib/demande-conge-extension-services.jar
       - ./demande-conge-extension-webapp.war:/opt/exo/webapps/demande-conge-extension-webapp.war
+      - /home/ryan/Bureau/exo-platform-community-docker/sources/my-connections-birthdays-extension/services/target/my-connections-birthdays-extension-services.jar:/opt/exo/lib/my-connections-birthdays-extension-services.jar
+      - /home/ryan/Bureau/exo-platform-community-docker/sources/my-connections-birthdays-extension/webapp/target/my-connections-birthdays-extension-webapp.war:/opt/exo/webapps/my-connections-birthdays-extension-webapp.war
     networks:
       - exo-net
 

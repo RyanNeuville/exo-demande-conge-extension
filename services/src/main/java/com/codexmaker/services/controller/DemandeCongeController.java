@@ -10,6 +10,7 @@ import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
 
 import javax.annotation.security.PermitAll;
+import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -32,6 +33,7 @@ public class DemandeCongeController implements ResourceContainer {
     private static final Log LOG = ExoLogger.getLogger(DemandeCongeController.class);
 
     /** Injection du service via CDI */
+    @Inject
     private DemandeCongeService demandeCongeService;
 
     /** Nom de l'attribut de session pour l'ID utilisateur */

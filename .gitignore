@@ -2,7 +2,6 @@
 # Java / Maven (multi-module)
 # ===========================
 target/
-allure-results/
 */target/
 !.mvn/wrapper/maven-wrapper.jar
 !.mvn/wrapper/maven-wrapper.properties
