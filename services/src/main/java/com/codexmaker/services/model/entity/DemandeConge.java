@@ -24,10 +24,10 @@ public class DemandeConge {
     private String nom;
     private String prenom;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern="yyyy-MM-dd")
     private LocalDate dateDebut;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern="yyyy-MM-dd")
     private LocalDate dateFin;
     @JsonSerialize(using = ToStringSerializer.class)
     private TypeConge typeConge;

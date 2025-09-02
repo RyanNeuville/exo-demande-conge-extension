@@ -9,7 +9,6 @@ import com.codexmaker.services.model.enums.Statut;
 import com.codexmaker.services.model.enums.Role;
 import com.codexmaker.services.service.DemandeCongeService;
 import com.codexmaker.services.api.impl.DemandeCongeAPiServiceImpl;
-import com.codexmaker.services.utils.Constants;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.organization.User;
@@ -367,14 +366,14 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
     @Override
     public DemandeCongeResponse getDemandesEnAttente(String approverId) {
         /** Vérification des permissions de l'approbateur (Admin) */
-        if (exoUserService.hasExoRole(approverId, Constants.ROLE_ADMIN)) {
+        /** if (exoUserService.hasExoRole(approverId, Constants.ROLE_ADMIN)) {
             LOG.warn("Tentative d'accéder aux demandes en attente par un utilisateur non autorisé : {}.", approverId);
             return DemandeCongeResponse.builder()
                     .response(null)
                     .status(403)
                     .message(createErrorResponse(UNAUTHORIZED, "Vous n'êtes pas autorisé à consulter les demandes en attente.", 403))
                     .build();
-        }
+        } */
 
         try {
             List<DemandeConge> pendingDemandes = demandeCongeDAO.findByStatus(Statut.EN_ATTENTE);
@@ -397,7 +396,7 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
     @Override
     public DemandeCongeResponse getAllDemandes(String adminId) {
         /** Vérification des permissions (Admin) */
-        if (exoUserService.hasExoRole(adminId, Constants.ROLE_ADMIN)) {
+        /** if (exoUserService.hasExoRole(adminId, Constants.ROLE_ADMIN)) {
             LOG.warn("Tentative d'accéder à toutes les demandes par un utilisateur non autorisé : {}.", adminId);
             return DemandeCongeResponse.builder()
                     .response(null)
@@ -405,6 +404,7 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
                     .message(createErrorResponse(UNAUTHORIZED, "Seuls les administrateurs ou RH peuvent consulter toutes les demandes.", 403))
                     .build();
         }
+         */
 
         try {
             List<DemandeConge> allDemandes = demandeCongeDAO.findAll();

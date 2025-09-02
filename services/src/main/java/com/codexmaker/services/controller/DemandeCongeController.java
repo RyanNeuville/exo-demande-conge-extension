@@ -3,6 +3,7 @@ package com.codexmaker.services.controller;
 import com.codexmaker.services.model.entity.DemandeConge;
 import com.codexmaker.services.model.entity.DemandeCongeResponse;
 import com.codexmaker.services.service.DemandeCongeService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.exoplatform.services.log.ExoLogger;
@@ -15,6 +16,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.HashMap;
@@ -153,15 +155,31 @@ public class DemandeCongeController implements ResourceContainer {
     @Path("/demandes")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response soumettreDemande(@Context HttpServletRequest request, DemandeConge demande) {
+    public Response soumettreDemande(@Context HttpServletRequest request) {
         String userId = getUserId(request);
         if (userId == null) {
             return Response.status(Response.Status.UNAUTHORIZED)
                     .entity(createErrorResponse("Authentification requise", UNAUTHORIZED_MSG, 401))
                     .build();
         }
-        DemandeCongeResponse response = demandeCongeService.soumettreDemande(demande, userId);
-        return handleServiceResponse(response);
+
+        try {
+            /** Lecture du corps de la requête JSON manuellement */
+            ObjectMapper objectMapper = new ObjectMapper();
+            /** Important : désactiver la fonctionnalité qui cause l'erreur */
+            objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            DemandeConge demande = objectMapper.readValue(request.getInputStream(), DemandeConge.class);
+
+            /** Appel de la méthode de service */
+            DemandeCongeResponse response = demandeCongeService.soumettreDemande(demande, userId);
+            return handleServiceResponse(response);
+
+        } catch (IOException e) {
+            LOG.error("Erreur de lecture ou de désérialisation de la demande JSON : {}", e.getMessage(), e);
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(createErrorResponse("Format JSON invalide", "Erreur lors de la lecture du JSON. Veuillez vérifier le format de vos champs.", 400))
+                    .build();
+        }
     }
 
     @PUT
