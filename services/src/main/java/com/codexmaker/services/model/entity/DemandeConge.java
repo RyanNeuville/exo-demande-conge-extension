@@ -2,7 +2,9 @@ package com.codexmaker.services.model.entity;
 
 import com.codexmaker.services.model.enums.Statut;
 import com.codexmaker.services.model.enums.TypeConge;
-import lombok.Builder;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -21,13 +23,23 @@ public class DemandeConge {
     private String userId;
     private String nom;
     private String prenom;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dateDebut;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dateFin;
+    @JsonSerialize(using = ToStringSerializer.class)
     private TypeConge typeConge;
+    @JsonSerialize(using = ToStringSerializer.class)
     private Statut statut;
     private String motif;
     private String commentairesManager;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dateSoumission;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dateModification;
     private int soldeDemande;
     private int dureeJoursOuvres;

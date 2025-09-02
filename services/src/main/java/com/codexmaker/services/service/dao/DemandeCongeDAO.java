@@ -64,13 +64,13 @@ public class DemandeCongeDAO {
             pstmt.setString(1, demande.getUserId());
             pstmt.setString(2, demande.getNom());
             pstmt.setString(3, demande.getPrenom());
-            pstmt.setDate(4, Date.valueOf(demande.getDateDebut()));
-            pstmt.setDate(5, Date.valueOf(demande.getDateFin()));
+            pstmt.setDate(4, java.sql.Date.valueOf(demande.getDateDebut()));
+            pstmt.setDate(5, java.sql.Date.valueOf(demande.getDateFin()));
             pstmt.setString(6, demande.getTypeConge().toString());
             pstmt.setString(7, demande.getStatut().toString());
             pstmt.setString(8, demande.getMotif());
             pstmt.setString(9, demande.getCommentairesManager());
-            pstmt.setDate(10, Date.valueOf(demande.getDateSoumission()));
+            pstmt.setDate(10, java.sql.Date.valueOf(demande.getDateSoumission()));
             pstmt.setDate(11, null);
             pstmt.setInt(12, demande.getSoldeDemande());
             pstmt.setInt(13, demande.getDureeJoursOuvres());
