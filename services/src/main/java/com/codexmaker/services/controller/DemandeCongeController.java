@@ -4,6 +4,7 @@ import com.codexmaker.services.model.entity.DemandeConge;
 import com.codexmaker.services.model.entity.DemandeCongeResponse;
 import com.codexmaker.services.service.DemandeCongeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.exoplatform.services.log.ExoLogger;
@@ -166,8 +167,10 @@ public class DemandeCongeController implements ResourceContainer {
         try {
             /** Lecture du corps de la requête JSON manuellement */
             ObjectMapper objectMapper = new ObjectMapper();
-            /** Important : désactiver la fonctionnalité qui cause l'erreur */
-            objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+            /** Étape clé : Enregistrer le module pour les dates de Java 8 */
+            objectMapper.registerModule(new JavaTimeModule());
+
             DemandeConge demande = objectMapper.readValue(request.getInputStream(), DemandeConge.class);
 
             /** Appel de la méthode de service */
