@@ -5,7 +5,7 @@
         xmlns="http://www.gatein.org/xml/ns/gatein_objects_1_6">
 
   <page>
-    <name>demandeCongeoPage</name>
+    <name>demandeCongePage</name>
     <title>Demande Conge App</title>
 
     <access-permissions>*:/platform/users</access-permissions>
@@ -22,7 +22,7 @@
 
         <title>Demande Conge Portlet</title>
         <access-permissions>*:/platform/users</access-permissions>
-        <show-info-bar>true</show-info-bar>
+        <show-info-bar>false</show-info-bar>
       </portlet-application>
 
     </container>
