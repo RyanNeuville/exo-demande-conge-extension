@@ -19,6 +19,16 @@ public class DataBaseConnection {
     /** Logger pour enregistrer les messages de connexion et d'erreur */
     private static final Logger logger = Logger.getLogger(DataBaseConnection.class.getName());
 
+    /** Récupère les variables d'environnement définies dans le docker-compose */
+    private static final String DB_HOST = "mysql"; // Nom du service MySQL dans le docker-compose
+    private static final String DB_PORT = "3306";
+    private static final String DB_NAME = System.getenv("MYSQL_DATABASE");
+    private static final String DB_USER = System.getenv("MYSQL_USER");
+    private static final String DB_PASSWORD = System.getenv("MYSQL_PASSWORD");
+
+    /** L'URL de connexion JDBC, utilisant le nom du service Docker comme hôte */
+    private static final String JDBC_URL = "jdbc:mysql://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME + "?useSSL=false&serverTimezone=UTC";
+
     private static Connection connection;
 
     DataBaseConnection() {
@@ -28,18 +38,13 @@ public class DataBaseConnection {
     public static synchronized Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()){
             try {
-                Class.forName(Constants.DB_DRIVER);
-                connection = DriverManager.getConnection(Constants.DB_URL, Constants.DB_USER, Constants.DB_PASSWORD);
-                if (connection != null) {
-                    logger.info(Constants.SUCCESS_CONNECTION);
-                }
-            } catch (SQLException e) {
-                logger.severe(Constants.ERROR_DATABASE_CONNECTION + e.getMessage());
-                throw new RuntimeException(Constants.FAILED_TO_CONNECT_TO_DATABASE, e);
+                /** Charge le driver JDBC */
+                Class.forName("com.mysql.cj.jdbc.Driver");
             } catch (ClassNotFoundException e) {
-                logger.severe(Constants.ERROR_DRIVER_NOT_FOUND + e.getMessage());
-                throw new RuntimeException(e);
+                /** Gère l'erreur si le driver n'est pas trouvé. */
+                throw new SQLException("MySQL JDBC Driver non trouvé.", e);
             }
+            return DriverManager.getConnection(JDBC_URL, DB_USER, DB_PASSWORD);
         }
         return connection;
     }
