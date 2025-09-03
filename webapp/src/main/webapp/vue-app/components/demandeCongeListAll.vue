@@ -60,13 +60,7 @@ export default {
 };
 </script>
 
-<style>
-body {
-  font-family: Arial, sans-serif;
-  margin: 20px;
-  background: #f4f6f9;
-}
-
+<style scoped>
 h2 {
   text-align: center;
   color: #333;

@@ -60,7 +60,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .conge-form-container {
   max-width: 500px;
   margin: 40px auto;

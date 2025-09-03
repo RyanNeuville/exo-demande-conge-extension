@@ -29,7 +29,6 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
     private static final Log LOG = ExoLogger.getLogger(DemandeCongeServiceImpl.class);
 
     /** Injection des DAOs et des services externes via CDI */
-
     private final DemandeCongeDAO demandeCongeDAO = new DemandeCongeDAO();
 
     private final UtilisateurDAO utilisateurDAO = new UtilisateurDAO();

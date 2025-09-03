@@ -50,7 +50,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .conges-section {
   margin: 20px;
   font-family: Arial, sans-serif;

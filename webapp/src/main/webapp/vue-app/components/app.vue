@@ -72,7 +72,7 @@ const awesome = ref(false);
 
 <style scoped>
 header {
-  height: 20vh;
+  height: auto;
   background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
     url("https://images.unsplash.com/photo-1521737604893-d14cc237f11d")
       no-repeat center center/cover;
@@ -146,14 +146,15 @@ header p {
   border-radius: 12px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   font-family: Arial, sans-serif;
+}
 
-  h2 {
+ .conge-form-container h2 {
     text-align: center;
     margin-bottom: 20px;
     color: #333;
   }
 
-  .conge-form .form-group {
+  .conge-form-container .conge-form .form-group {
     margin-bottom: 15px;
   }
 
@@ -164,7 +165,7 @@ header p {
     color: #444;
   }
 
-  .conge-form input,
+  .conge-form-container .conge-form input,
   .conge-form select,
   .conge-form textarea {
     width: 100%;
@@ -174,20 +175,20 @@ header p {
     font-size: 14px;
   }
 
-  .conge-form input:focus,
+  .conge-form-container .conge-form input:focus,
   .conge-form select:focus,
   .conge-form textarea:focus {
     border-color: #007bff;
     outline: none;
   }
 
-  .form-actions {
+  .conge-form-container .form-actions {
     display: flex;
     justify-content: space-between;
     margin-top: 20px;
   }
 
-  .btn {
+  .conge-form-container .btn {
     padding: 10px 18px;
     border: none;
     border-radius: 6px;
@@ -195,18 +196,17 @@ header p {
     font-weight: bold;
   }
 
-  .btn.cancel {
+  .conge-form-container .btn.cancel {
     background: #dc3545;
     color: #fff;
   }
 
-  .btn.submit {
+  .conge-form-container .btn.submit {
     background: #007bff;
     color: #fff;
   }
 
-  .btn:hover {
+  .conge-form-container .btn:hover {
     opacity: 0.9;
   }
-}
 </style>
