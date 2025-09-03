@@ -4,11 +4,14 @@
       <h1>Bienvenue sur votre Espace Congés</h1>
       <p>Gérez facilement vos demandes de congés en quelques clics</p>
 
-      <button @click="awesome = !awesome" class="btn">Faire une demande</button>
+      <button @click="awesome = !awesome" class="btn">
+        <span v-if="awesome">Ne plus faire la demande</span>
+        <span v-else>Faire une demande</span>
+      </button>
     </header>
 
     <!-- Composant DemandeCongeForm -->
-    <div class="conge-form-container">
+    <div class="conge-form-container" v-if="awesome">
       <h2>Demande de Congé</h2>
       <form class="conge-form">
         <!-- Date de début -->
@@ -62,10 +65,9 @@
 </template>
 
 <script setup>
-import demandeCongeForm from './demandeCongeForm.vue';
-import {ref} from 'vue';
+import ref from 'vue';
 
-const awesome = ref(false)
+const awesome = ref(false);
 </script>
 
 <style scoped>
