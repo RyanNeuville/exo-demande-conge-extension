@@ -23,7 +23,7 @@ public class UserDemandes implements Serializable {
         this.demandes = demandes;
     }
 
-    // Getters and setters
+    /** Getters et setters */
     public String getUserName() {
         return userName;
     }

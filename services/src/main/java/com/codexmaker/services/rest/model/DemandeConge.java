@@ -38,7 +38,7 @@ public class DemandeConge implements Serializable {
         this.soumisLe = soumisLe;
     }
 
-    // Getters and setters
+    /** Getters et setters */
     public Long getId() {
         return id;
     }

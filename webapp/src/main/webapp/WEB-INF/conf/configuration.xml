@@ -16,8 +16,8 @@
     </component>
 
     <component>
-        <key>com.codexmaker.services.rest.DemandeCongeRestService</key>
-        <type>com.codexmaker.services.rest.DemandeCongeRestService</type>
+        <key>com.codexmaker.services.rest.service.DemandeCongeRestService</key>
+        <type>com.codexmaker.services.rest.service.DemandeCongeRestService</type>
     </component>
 
     <component>

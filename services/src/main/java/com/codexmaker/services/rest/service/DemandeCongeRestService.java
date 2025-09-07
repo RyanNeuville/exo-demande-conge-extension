@@ -1,4 +1,4 @@
-package com.codexmaker.services.rest;
+package com.codexmaker.services.rest.service;
 
 import com.codexmaker.services.rest.model.DemandeConge;
 import com.codexmaker.services.rest.model.UserDemandes;
