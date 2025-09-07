@@ -10,7 +10,20 @@
     <component>
         <type>com.codexmaker.services.controller.DemandeCongeController</type>
     </component>
+    <component>
+        <key>com.codexmaker.services.api.DemandeCongeDAO</key>
+        <type>com.codexmaker.services.api.DemandeCongeDAO</type>
+    </component>
 
+    <component>
+        <key>com.codexmaker.services.rest.DemandeCongeRestService</key>
+        <type>com.codexmaker.services.rest.DemandeCongeRestService</type>
+    </component>
+
+    <component>
+        <key>com.codexmaker.services.rest.DemandeCongeRESTService</key>
+        <type>com.codexmaker.services.rest.DemandeCongeRESTService</type>
+    </component>
     <import>war:/conf/custom-extension/bundle-configuration.xml</import>
     <import>war:/conf/custom-extension/portal-configuration.xml</import>
 </configuration>

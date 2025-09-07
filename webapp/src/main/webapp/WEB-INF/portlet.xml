@@ -21,6 +21,7 @@
 		</supports>
 
         <!-- Informations supplémentaires pour le portlet -->
+		<resource-bundle>locale.portlet.demandeCongeApp</resource-bundle>
 		<portlet-info>
 			<title>Application de gestion de conge</title>
 		</portlet-info>

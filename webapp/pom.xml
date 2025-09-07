@@ -9,7 +9,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>emande-conge-extension-webapp</artifactId>
+    <artifactId>demande-conge-extension-webapp</artifactId>
     <packaging>war</packaging>
     <name>demande-conge-extension-webapp</name>
 

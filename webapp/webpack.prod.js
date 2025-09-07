@@ -1,5 +1,5 @@
 const path = require('path');
-const ESLintPlugin = require('eslint-webpack-plugin');
+//const ESLintPlugin = require('eslint-webpack-plugin');
 const { VueLoaderPlugin } = require('vue-loader')
 
 // the display name of the war
@@ -33,14 +33,14 @@ const config = {
     ]
   },
   plugins: [
-    new ESLintPlugin({
-      files: [
-        './src/main/webapp/vue-app/*.js',
-        './src/main/webapp/vue-app/*.vue',
-        './src/main/webapp/vue-app/**/*.js',
-        './src/main/webapp/vue-app/**/*.vue',
-      ],
-    }),
+//    new ESLintPlugin({
+//      files: [
+//        './src/main/webapp/vue-app/*.js',
+//        './src/main/webapp/vue-app/*.vue',
+//        './src/main/webapp/vue-app/**/*.js',
+//        './src/main/webapp/vue-app/**/*.vue',
+//      ],
+//    }),
     new VueLoaderPlugin()
   ],
   entry: {

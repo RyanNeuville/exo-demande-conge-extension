@@ -19,7 +19,8 @@ INSERT INTO `demande_conge` (`user_id`, `nom`, `prenom`, `date_debut`, `date_fin
 ('1', 'Martin', 'Léa', '2025-10-15', '2025-10-25', 'CONGES_PAYES', 'EN_ATTENTE', 'Vacances en famille à la montagne', NULL, CURDATE(), NULL, 25, 7);
 
 -- Demande de Chloé Lefebvre (approuvée)
-INSERT INTO `demande_conge` (`user_id`, `nom`, `prenom`, `date_debut`, `date_fin`, `type_conge`, `statut`, `motif`, `commentaires_manager`, `date_soumission`, `date_modification`, `solde_demande`, `duree_jours_ouvres`) VALUES
+INSERT INTO `demande_conge` (
+`user_id`, `nom`, `prenom`, `date_debut`, `date_fin`, `type_conge`, `statut`, `motif`, `commentaires_manager`, `date_soumission`, `date_modification`, `solde_demande`, `duree_jours_ouvres`) VALUES
 ('3', 'Lefebvre', 'Chloe', '2025-09-01', '2025-09-05', 'RTT', 'APPROUVEE', 'Pour un week-end prolongé', 'Demande approuvée. Profitez-en!', CURDATE() - INTERVAL 10 DAY, CURDATE() - INTERVAL 8 DAY, 18, 5);
 
 -- Demande de Léa Martin (refusée)

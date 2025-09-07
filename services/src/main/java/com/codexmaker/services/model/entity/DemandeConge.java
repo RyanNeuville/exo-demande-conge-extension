@@ -5,8 +5,11 @@ import com.codexmaker.services.model.enums.TypeConge;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import org.exoplatform.commons.api.persistence.ExoEntity;
 
+import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 /**
@@ -16,32 +19,64 @@ import java.util.Objects;
  * les dates, le type de congé, le statut, et d'autres détails pertinents.
  */
 
+@Entity(name = "DemandeConge")
+@Table(name = "demande_conge")
+@ExoEntity
 public class DemandeConge {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
-    private String demandeId;
+
+    @Column(name = "demande_id", unique = true)
+    private String demandeId; // Génére un UUID ou similaire lors de la création
+
+    @Column(name = "user_id")
     private String userId;
+
+    @Column(name = "nom")
     private String nom;
+
+    @Column(name = "prenom")
     private String prenom;
 
-    @JsonFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @Column(name = "date_debut")
     private LocalDate dateDebut;
 
-    @JsonFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @Column(name = "date_fin")
     private LocalDate dateFin;
+
+    @Enumerated(EnumType.STRING)
     @JsonSerialize(using = ToStringSerializer.class)
+    @Column(name = "type_conge")
     private TypeConge typeConge;
+
+    @Enumerated(EnumType.STRING)
     @JsonSerialize(using = ToStringSerializer.class)
+    @Column(name = "statut")
     private Statut statut;
+
+    @Column(name = "motif")
     private String motif;
+
+    @Column(name = "commentaires_manager")
     private String commentairesManager;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @Column(name = "date_soumission")
     private LocalDate dateSoumission;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @Column(name = "date_modification")
     private LocalDate dateModification;
+
+    @Column(name = "solde_demande")
     private int soldeDemande;
+
+    @Column(name = "duree_jours_ouvres")
     private int dureeJoursOuvres;
 
     public DemandeConge() {}
@@ -77,6 +112,12 @@ public class DemandeConge {
     public int getDureeJoursOuvres() { return dureeJoursOuvres; }
     public void setDureeJoursOuvres(int dureeJoursOuvres) { this.dureeJoursOuvres = dureeJoursOuvres; }
 
+    public void calculerDuree() {
+        if (dateDebut != null && dateFin != null) {
+            this.dureeJoursOuvres = (int) ChronoUnit.DAYS.between(dateDebut, dateFin) + 1; // Adapte pour jours ouvrés réels
+        }
+    }
+
     @Override
     public String toString() {
         return "DemandeConge{" +
@@ -109,5 +150,10 @@ public class DemandeConge {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public void calculerSolde() {
+        int soldeInitial = 30; // Fictif, remplace par une requête à un service RH
+        this.soldeDemande = soldeInitial - this.dureeJoursOuvres;
     }
 }

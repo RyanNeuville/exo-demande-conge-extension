@@ -16,13 +16,13 @@
         <values-param>
           <name>init.resources</name>
           <description>Store the following resources into the db for the first launch</description>
-            <value>locale.addon.Sample</value>
+            <value>locale.addon.demandeCongeApp</value>
         </values-param>
           <!-- ce groupe de ressources sera ajouté aux groupes de ressources du portail (site)-->
         <values-param>
           <name>portal.resource.names</name>
             <!-- l'emplacement des ensembles de ressources sous le dossier des ressources -->
-          <value>locale.addon.Sample</value>
+          <value>locale.addon.demandeCongeApp</value>
         </values-param>
       </init-params>
     </component-plugin>

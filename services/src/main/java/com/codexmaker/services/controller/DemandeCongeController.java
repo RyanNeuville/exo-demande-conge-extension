@@ -30,7 +30,7 @@ import org.json.JSONObject;
  */
 
 /** Indique que ce bean est géré par CDI et a une portée de requête */
-@Path("/conges") /** Chemin de base pour toutes les opérations de ce contrôleur */
+@Path("/congess") /** Chemin de base pour toutes les opérations de ce contrôleur */
 public class DemandeCongeController implements ResourceContainer {
 
     private static final Log LOG = ExoLogger.getLogger(DemandeCongeController.class);
