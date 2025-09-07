@@ -1,5 +1,5 @@
 package com.codexmaker.services.rest.api;
 
-public class DemandeCongeService {
+public interface DemandeCongeService {
 
 }

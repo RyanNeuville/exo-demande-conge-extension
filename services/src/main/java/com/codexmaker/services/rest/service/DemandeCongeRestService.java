@@ -2,6 +2,7 @@ package com.codexmaker.services.rest.service;
 
 import com.codexmaker.services.rest.model.DemandeConge;
 import com.codexmaker.services.rest.model.UserDemandes;
+import com.codexmaker.services.rest.util.Constants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.exoplatform.commons.utils.ListAccess;
 import org.exoplatform.container.ExoContainerContext;
@@ -28,15 +29,15 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-@Path("/conges")
+@Path(Constants.MAIN_END_POINT)
 @Produces(MediaType.APPLICATION_JSON)
 public class DemandeCongeRestService implements ResourceContainer {
 
     private static final Log LOG = ExoLogger.getLogger(DemandeCongeRestService.class);
-    private static final String DEMANDES_FILE = Objects.requireNonNull(DemandeCongeRestService.class.getResource("/com/codexmaker/services/rest/data/demandes.json")).getPath();
+    private static final String DEMANDES_FILE = Objects.requireNonNull(DemandeCongeRestService.class.getResource(Constants.DEMANDES_FILE_PATH)).getPath();
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final AtomicLong ID_GENERATOR = new AtomicLong(1);
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(Constants.DATE_FORMAT_PATERN);
 
     private final IdentityManager identityManager;
     private final RelationshipManager relationshipManager;
@@ -59,7 +60,7 @@ public class DemandeCongeRestService implements ResourceContainer {
             Identity identity = ConversationState.getCurrent().getIdentity();
             return organizationService.getMembershipHandler().findMembershipsByUserAndGroup(getAuthenticatedUserName(), "/platform/administrators").isEmpty();
         } catch (Exception e) {
-            LOG.error("Error checking admin role", e);
+            LOG.error(Constants.CHECKING_ROLE_ERROR, e);
             return true;
         }
     }
@@ -72,7 +73,7 @@ public class DemandeCongeRestService implements ResourceContainer {
             }
             return OBJECT_MAPPER.readValue(file, OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, UserDemandes.class));
         } catch (Exception e) {
-            LOG.error("Error reading demandes.json", e);
+            LOG.error(Constants.LOG_ERROR_READING_FILE, e);
             return new ArrayList<>();
         }
     }
@@ -84,17 +85,17 @@ public class DemandeCongeRestService implements ResourceContainer {
             if (!file.exists()) {
                 file.createNewFile();
                 OBJECT_MAPPER.writeValue(file, new ArrayList<>());
-                LOG.info("Created new demandes.json file at {}", DEMANDES_FILE);
+                LOG.info(Constants.LOG_INFO_DEMANDE_FILE_CREATED, DEMANDES_FILE);
             }
             OBJECT_MAPPER.writeValue(file, userDemandes);
-            LOG.info("Successfully wrote to demandes.json");
+            LOG.info(Constants.LOG_INFO_DEMANDE_FILE_CREATED_SUCCESS);
         } catch (Exception e) {
-            LOG.error("Error writing to demandes.json at {}", DEMANDES_FILE, e);
+            LOG.error(Constants.LOG_ERROR_CREATED_DEMANDE, DEMANDES_FILE, e);
         }
     }
 
     @POST
-    @Path("/submit")
+    @Path(Constants.SUBMIT_END_POINT)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @RolesAllowed("users")
     public Response submitDemande(@FormParam("dateDebut") String dateDebut,
@@ -135,7 +136,7 @@ public class DemandeCongeRestService implements ResourceContainer {
                     dateFin,
                     typeConge,
                     motif,
-                    "EN_ATTENTE",
+                    Constants.STATUT_EN_ATTENTE,
                     new SimpleDateFormat("yyyy-MM-dd").format(new Date())
             );
 
@@ -151,7 +152,7 @@ public class DemandeCongeRestService implements ResourceContainer {
     }
 
     @GET
-    @Path("/all")
+    @Path(Constants.ALL_DEMANDES_END_POINT)
     @RolesAllowed("administrators")
     public Response getAllDemandes() {
         try {
@@ -170,7 +171,7 @@ public class DemandeCongeRestService implements ResourceContainer {
     }
 
     @GET
-    @Path("/my")
+    @Path(Constants.MY_DEMANDE_END_POINT)
     @RolesAllowed("users")
     public Response getMyDemandes() {
         try {
@@ -193,7 +194,7 @@ public class DemandeCongeRestService implements ResourceContainer {
     }
 
     @GET
-    @Path("/relations")
+    @Path(Constants.MY_RELATIONS_DEMANDE_END_POINT)
     @RolesAllowed("users")
     public Response getRelationsDemandes() {
         String userName = null;
@@ -235,7 +236,7 @@ public class DemandeCongeRestService implements ResourceContainer {
 
 
     @GET
-    @Path("/enattente")
+    @Path(Constants.DEMANDE_EN_ATTANTE_END_POINT)
     @RolesAllowed("administrators")
     public Response getEnAttenteDemandes() {
         try {
@@ -247,7 +248,7 @@ public class DemandeCongeRestService implements ResourceContainer {
             List<UserDemandes> enAttenteDemandes = allDemandes.stream()
                     .map(ud -> {
                         List<DemandeConge> enAttente = ud.getDemandes().stream()
-                                .filter(d -> "EN_ATTENTE".equals(d.getStatus()))
+                                .filter(d -> Constants.STATUT_EN_ATTENTE.equals(d.getStatus()))
                                 .collect(Collectors.toList());
                         return new UserDemandes(ud.getUserName(), ud.getFullName(), enAttente);
                     })
@@ -262,7 +263,7 @@ public class DemandeCongeRestService implements ResourceContainer {
     }
 
     @PUT
-    @Path("/update")
+    @Path(Constants.UPDATE_DEMANDE_END_POINT)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @RolesAllowed("administrators")
     public Response updateDemande(@FormParam("userName") String userName,
@@ -291,7 +292,7 @@ public class DemandeCongeRestService implements ResourceContainer {
             }
 
             DemandeConge demande = userDemandes.getDemandes().get(index);
-            if (!"EN_ATTENTE".equals(demande.getStatus())) {
+            if (!Constants.STATUT_EN_ATTENTE.equals(demande.getStatus())) {
                 return Response.status(Response.Status.BAD_REQUEST).entity("Only EN_ATTENTE demandes can be updated").build();
             }
 
@@ -310,7 +311,7 @@ public class DemandeCongeRestService implements ResourceContainer {
     }
 
     @POST
-    @Path("/approve")
+    @Path(Constants.APPROUVER_DEMANDE_END_POINT )
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @RolesAllowed("administrators")
     public Response approveDemande(@FormParam("userName") String userName,
@@ -331,11 +332,11 @@ public class DemandeCongeRestService implements ResourceContainer {
             }
 
             DemandeConge demande = userDemandes.getDemandes().get(index);
-            if (!"EN_ATTENTE".equals(demande.getStatus())) {
+            if (!Constants.STATUT_EN_ATTENTE.equals(demande.getStatus())) {
                 return Response.status(Response.Status.BAD_REQUEST).entity("Only EN_ATTENTE demandes can be approved").build();
             }
 
-            demande.setStatus("APPROUVEE");
+            demande.setStatus(Constants.STATUT_APPROUVEE);
             writeDemandesFile(allDemandes);
             LOG.info("Demande approved for user {} at index {}", userName, index);
             return Response.ok().build();
@@ -346,7 +347,7 @@ public class DemandeCongeRestService implements ResourceContainer {
     }
 
     @POST
-    @Path("/reject")
+    @Path(Constants.REJETER_DEMANDE_END_POINT)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @RolesAllowed("administrators")
     public Response rejectDemande(@FormParam("userName") String userName,
@@ -367,11 +368,11 @@ public class DemandeCongeRestService implements ResourceContainer {
             }
 
             DemandeConge demande = userDemandes.getDemandes().get(index);
-            if (!"EN_ATTENTE".equals(demande.getStatus())) {
+            if (!Constants.STATUT_EN_ATTENTE.equals(demande.getStatus())) {
                 return Response.status(Response.Status.BAD_REQUEST).entity("Only EN_ATTENTE demandes can be rejected").build();
             }
 
-            demande.setStatus("REJETEE");
+            demande.setStatus(Constants.STATUT_REJETEE);
             writeDemandesFile(allDemandes);
             LOG.info("Demande rejected for user {} at index {}", userName, index);
             return Response.ok().build();
@@ -382,7 +383,7 @@ public class DemandeCongeRestService implements ResourceContainer {
     }
 
     @POST
-    @Path("/cancel")
+    @Path(Constants.CANCEL_DEMANDE_END_POINT)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @RolesAllowed("administrators")
     public Response cancelDemande(@FormParam("userName") String userName,
@@ -403,7 +404,7 @@ public class DemandeCongeRestService implements ResourceContainer {
             }
 
             DemandeConge demande = userDemandes.getDemandes().get(index);
-            if (!"EN_ATTENTE".equals(demande.getStatus())) {
+            if (!Constants.STATUT_EN_ATTENTE.equals(demande.getStatus())) {
                 return Response.status(Response.Status.BAD_REQUEST).entity("Only EN_ATTENTE demandes can be canceled").build();
             }
 
