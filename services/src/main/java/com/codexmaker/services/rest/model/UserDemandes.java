@@ -14,6 +14,12 @@ public class UserDemandes implements Serializable {
     @JsonProperty("demandes")
     private List<DemandeConge> demandes;
 
+    @JsonProperty("quota")
+    private int quota;
+
+    @JsonProperty("usedDays")
+    private int usedDays;
+
     public UserDemandes() {
     }
 
@@ -21,6 +27,14 @@ public class UserDemandes implements Serializable {
         this.userName = userName;
         this.fullName = fullName;
         this.demandes = demandes;
+    }
+
+    public UserDemandes(String userName, String fullName, List<DemandeConge> demandes, int quota, int usedDays){
+        this.userName = userName;
+        this.fullName = fullName;
+        this.demandes = demandes;
+        this.quota = quota;
+        this.usedDays = usedDays;
     }
 
     /** Getters et setters */
@@ -46,5 +60,21 @@ public class UserDemandes implements Serializable {
 
     public void setDemandes(List<DemandeConge> demandes) {
         this.demandes = demandes;
+    }
+
+    public int getQuota() {
+        return quota;
+    }
+
+    public void setQuota(int quota) {
+        this.quota = quota;
+    }
+
+    public int getUsedDays() {
+        return usedDays;
+    }
+
+    public void setUsedDays(int usedDays) {
+        this.usedDays = usedDays;
     }
 }
