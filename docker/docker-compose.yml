@@ -74,8 +74,8 @@ services:
     volumes:
       - exo_data:/srv/exo
       - exo_logs:/var/log/exo
-      - ./alfresco-extension-services.jar:/opt/exo/lib/alfresco-extension-services.jar
-      - ./alfresco-extension-webapp.war:/opt/exo/webapps/alfresco-extension-webapp.war
+      - /home/ryan/Bureau/exo-platform-community-docker/sources/custom-extension/services/target/custom-extension-services.jar:/opt/exo/lib/custom-extension-services.jar
+      - /home/ryan/Bureau/exo-platform-community-docker/sources/custom-extension/webapp/target/custom-extension-webapp.war:/opt/exo/webapps/custom-extension-webapp.war
       - ./demande-conge-extension-services.jar:/opt/exo/lib/demande-conge-extension-services.jar
       - ./demande-conge-extension-webapp.war:/opt/exo/webapps/demande-conge-extension-webapp.war
     networks:
