@@ -42,7 +42,7 @@ L'intégration se fait via deux fichiers XML clés situés dans `WEB-INF/`.
 - Définit le portlet `demandeCongePortlet`.
 - Utilise `GenericDispatchedViewPortlet` pour servir un fichier statique : `/index.html`.
 - **Index.html** : Ce fichier sert de coquille vide (`<div id="demandeCongeApp"></div>`) où l'application Vue.js viendra se monter.
-  - ⚠️ **Note Importante** : `index.html` inclut des dépendances CSS externes (DaisyUI, Tailwind, FontAwesome) via CDN. Cela nécessite un accès Internet pour le client final.
+  - **Note Importante** : `index.html` inclut des dépendances CSS externes (DaisyUI, Tailwind, FontAwesome) via CDN. Cela nécessite un accès Internet pour le client final.
 
 ### 3.2 `gatein-resources.xml` (Spécifique eXo)
 
@@ -60,7 +60,7 @@ L'intégration se fait via deux fichiers XML clés situés dans `WEB-INF/`.
   1. Détecte la langue de l'utilisateur (`eXo.env.portal.language`).
   2. Charge les traductions via `exoi18n.loadLanguageAsync` (API eXo).
   3. Une fois chargé, initialise l'instance Vue et la monte sur `#demandeCongeApp`.
-- **Mécanisme de Polling (⚠️ Point d'Attention)** :
+- **Mécanisme de Polling (Point d'Attention)** :
   - Un `setInterval` de **3 secondes** est utilisé pour rafraîchir les données.
   - Il itère "brutalement" sur les enfants du composant racine (`vm.$children[0]...`) pour appeler `fetchMyDemandes`, `fetchRelationsDemandes`, etc.
   - **Critique** : Cette approche est inefficace et crée une charge réseau constante. L'utilisation de WebSockets ou au moins d'un état global (Store) avec une logique de rafraîchissement contrôlée serait préférable.
