@@ -1,5 +1,7 @@
 package com.codexmaker.services.rest.model.entity;
 
+import java.util.List;
+
 public class Administrateur extends Utilisateur{
 
     /** Methodes metier */

@@ -1,5 +1,6 @@
 package com.codexmaker.services.rest.model.entity;
 
+import com.codexmaker.services.rest.model.TypeConge;
 import com.codexmaker.services.rest.model.enums.StatutDemande;
 
 import java.time.LocalDate;

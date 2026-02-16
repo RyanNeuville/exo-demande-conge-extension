@@ -3,6 +3,7 @@ package com.codexmaker.services.rest.model.entity;
 import com.codexmaker.services.rest.model.enums.Role;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public abstract class Utilisateur {
     /** attribut commun a tous les utilisateurs */
@@ -15,7 +16,7 @@ public abstract class Utilisateur {
     private int soldeConges;
 
     /** Liste des demandes soumises par cet utilisateur */
-    private List<DemandeConge> demandes = new List<DemandeConge>();
+    private List<DemandeConge> demandes = new ArrayList<>();
 
     /** Constructeur */
     public Utilisateur() {
