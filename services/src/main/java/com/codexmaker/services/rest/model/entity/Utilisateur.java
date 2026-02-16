@@ -15,7 +15,7 @@ public abstract class Utilisateur {
     private int soldeConges;
 
     /** Liste des demandes soumises par cet utilisateur */
-    private List<DemandeConge> demandes = new ArrayList<>();
+    private List<DemandeConge> demandes = new List<DemandeConge>();
 
     /** Constructeur */
     public Utilisateur() {
