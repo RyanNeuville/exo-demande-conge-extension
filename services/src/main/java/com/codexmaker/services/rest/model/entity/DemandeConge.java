@@ -4,6 +4,7 @@ import com.codexmaker.services.rest.model.enums.StatutDemande;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 public class DemandeConge {
     private String id;
@@ -25,7 +26,7 @@ public class DemandeConge {
     private LocalDate dateModification;
     private int soldeCongesAvant;
     private int dureeJoursOuvres;
-    private List<HistoriqueEtat> historique = new List<HistoriqueEtat>();
+    private List<HistoriqueEtat> historique = new ArrayList<>();
 
     public DemandeConge() {
     }
