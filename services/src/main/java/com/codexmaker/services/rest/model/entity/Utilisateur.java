@@ -3,6 +3,7 @@ package com.codexmaker.services.rest.model.entity;
 import com.codexmaker.services.rest.model.enums.Role;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public abstract class Utilisateur {
     /** attribut commun a tous les utilisateurs */
