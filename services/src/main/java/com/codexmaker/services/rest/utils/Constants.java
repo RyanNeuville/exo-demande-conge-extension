@@ -1,4 +1,4 @@
-package com.codexmaker.services.rest.util;
+package com.codexmaker.services.rest.utils;
 
 public class Constants {
     public static final String DEMANDES_FILE_PATH = "/com/codexmaker/services/rest/data/demandes.json";

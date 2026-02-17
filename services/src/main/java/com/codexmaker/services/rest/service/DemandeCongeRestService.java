@@ -2,7 +2,7 @@ package com.codexmaker.services.rest.service;
 
 import com.codexmaker.services.rest.model.DemandeConge;
 import com.codexmaker.services.rest.model.UserDemandes;
-import com.codexmaker.services.rest.util.Constants;
+import com.codexmaker.services.rest.utils.Constants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.exoplatform.commons.utils.ListAccess;
 import org.exoplatform.container.ExoContainerContext;
