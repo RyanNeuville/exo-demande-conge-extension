@@ -1,4 +1,4 @@
-package com.codexmaker.services.rest.model;
+package com.codexmaker.services.rest.model.entity;
 
 public class TypeConge {
     private String id;
