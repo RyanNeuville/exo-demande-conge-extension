@@ -31,9 +31,6 @@ public class DemandeCongeResponseDTO {
     private int soldeCongesAvant;
     private int dureeJoursOuvres;
 
-    /** Historiques */
-    private List<HistoriqueEtatSummaryDTO> historique;
-
     public DemandeCongeResponseDTO() {
     }
 
@@ -41,8 +38,7 @@ public class DemandeCongeResponseDTO {
             LocalDate dateDebut, boolean demiJourneeDebut, LocalDate dateFin, boolean demiJourneeFin,
             TypeConge typeConge, StatutDemande statut, String motif, String commentaireEmploye,
             String commentaireValideur, String valideurId, String nomValideur, LocalDateTime dateSoumission,
-            LocalDateTime dateValidation, LocalDateTime dateModification, int soldeCongesAvant, int dureeJoursOuvres,
-            List<HistoriqueEtatSummaryDTO> historique) {
+            LocalDateTime dateValidation, LocalDateTime dateModification, int soldeCongesAvant, int dureeJoursOuvres) {
         this.id = id;
         this.numero = numero;
         this.userId = userId;
@@ -64,7 +60,6 @@ public class DemandeCongeResponseDTO {
         this.dateModification = dateModification;
         this.soldeCongesAvant = soldeCongesAvant;
         this.dureeJoursOuvres = dureeJoursOuvres;
-        this.historique = historique;
     }
 
     public String getId() {
@@ -233,14 +228,6 @@ public class DemandeCongeResponseDTO {
 
     public void setDureeJoursOuvres(int dureeJoursOuvres) {
         this.dureeJoursOuvres = dureeJoursOuvres;
-    }
-
-    public List<HistoriqueEtatSummaryDTO> getHistorique() {
-        return historique;
-    }
-
-    public void setHistorique(List<HistoriqueEtatSummaryDTO> historique) {
-        this.historique = historique;
     }
 
 }
