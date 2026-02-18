@@ -12,9 +12,9 @@ public class DatabaseInitializer {
 
     public static void initialize() {
         try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement()) {
+                Statement stmt = conn.createStatement()) {
 
-            /** Lecture du fichier init_db.sql qui ce trouve dans exo-demande-conge-extension/services/src/main/resources/init_db.sql */
+            /** Lecture du fichier init_db.sql */
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(
                             DatabaseInitializer.class.getClassLoader().getResourceAsStream("init_db.sql")))) {
@@ -22,13 +22,19 @@ public class DatabaseInitializer {
                 StringBuilder sql = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    sql.append(line).append("\n");
+                    String trimmedLine = line.trim();
+                    /** Ignorer les lignes vides ou les commentaires */ 
+                    if (trimmedLine.isEmpty() || trimmedLine.startsWith("--")) {
+                        continue;
+                    }
+                    /** Ajouter un espace au lieu de \n pour éviter les coupures de mots */
+                    sql.append(line).append(" "); 
                 }
 
-                /** Exécution des statements pour rendre les requetes plus performates */ 
+                /** Exécution des statements */
                 for (String statement : sql.toString().split(";")) {
                     statement = statement.trim();
-                    if (!statement.isEmpty() && !statement.startsWith("--")) {
+                    if (!statement.isEmpty()) {
                         stmt.execute(statement);
                     }
                 }
@@ -37,8 +43,10 @@ public class DatabaseInitializer {
             }
         } catch (Exception e) {
             LOGGER.severe("Échec initialisation DB : " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Initialisation DB échouée" + e.getMessage());
+            /** Gardez la trace pour le débogage */
+            e.printStackTrace(); 
+            throw new RuntimeException("Initialisation DB échouée: " + e.getMessage());
         }
     }
+
 }
