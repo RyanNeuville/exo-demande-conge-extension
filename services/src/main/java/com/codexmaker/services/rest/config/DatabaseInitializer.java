@@ -37,7 +37,8 @@ public class DatabaseInitializer {
             }
         } catch (Exception e) {
             LOGGER.severe("Échec initialisation DB : " + e.getMessage());
-            throw new RuntimeException("Initialisation DB échouée", e);
+            e.printStackTrace();
+            throw new RuntimeException("Initialisation DB échouée" + e.getMessage());
         }
     }
 }

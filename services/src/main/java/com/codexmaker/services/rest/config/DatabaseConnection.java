@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 public final class DatabaseConnection {
 
     private static final Logger LOGGER = Logger.getLogger(DatabaseConnection.class.getName());
-    private static final String DB_URL = "jdbc:sqlite:demande_conge.db";
+    private static final String DB_URL = "jdbc:sqlite:./demande_conge.db";
 
     private static Connection connection;
 
