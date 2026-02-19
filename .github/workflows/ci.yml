@@ -1,0 +1,167 @@
+# .github/workflows/ci.yml
+name: CI – Build & Tests
+
+# Déclencheurs : sur push ET pull_request vers main et dev et etc...
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - "feat/**"
+      - "fix/**"
+      - "refactor/**"
+      - "docs/**"
+      - "test/**"
+      - "chore/**"
+      - "perf/**"
+      - "style/**"
+      - "build/**"
+      - "ci/**"
+      - "revert/**"
+      - "release/**"
+      - "workflow/**"
+      - "feature/**"
+      - "bugfix/**"
+      - "refactor/**"
+      - "docs/**"
+      - "test/**"
+      - "chore/**"
+      - "perf/**"
+      - "style/**"
+      - "build/**"
+      - "ci/**"
+      - "revert/**"
+      - "release/**"
+      - "workflow/**"
+  pull_request:
+    branches:
+      - main
+      - dev
+      - "feat/**"
+      - "fix/**"
+      - "refactor/**"
+      - "docs/**"
+      - "test/**"
+      - "chore/**"
+      - "perf/**"
+      - "style/**"
+      - "build/**"
+      - "ci/**"
+      - "revert/**"
+      - "release/**"
+      - "workflow/**"
+      - "feature/**"
+      - "bugfix/**"
+      - "refactor/**"
+      - "docs/**"
+      - "test/**"
+      - "chore/**"
+      - "perf/**"
+      - "style/**"
+      - "build/**"
+      - "ci/**"
+      - "revert/**"
+      - "release/**"
+      - "workflow/**"
+
+# Evite les runs redondants (annule le run précédent si un nouveau push arrive)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ─────────────────────────────────────────────────
+  # JOB 1 : Compilation et Tests du module services
+  # ─────────────────────────────────────────────────
+  build-services:
+    name: 🔨 Build & Tests Java (services)
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Récupère le code source
+      - name: 📥 Checkout du code
+        uses: actions/checkout@v4
+
+      # 2. Configure Java 21 (Temurin = OpenJDK gratuit de Adoptium)
+      - name: ☕ Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: "maven" # Cache automatique de ~/.m2
+
+      # 3. Compile + Lance les tests + Génère le JAR
+      - name: 🧪 Compilation et tests (mvn verify)
+        run: mvn clean verify --no-transfer-progress
+        working-directory: .
+        # --no-transfer-progress = logs propres sans barres de progression
+
+      # 4. Publie le rapport de tests JUnit dans l'interface GitHub
+      - name: 📊 Publier le rapport de tests
+        uses: dorny/test-reporter@v1
+        if: always() # Toujours exécuter, même si les tests échouent
+        with:
+          name: Rapport JUnit – Services
+          path: services/target/surefire-reports/TEST-*.xml
+          reporter: java-junit
+
+      # 5. Sauvegarde le JAR comme artifact téléchargeable
+      - name: 📦 Upload du JAR (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: services-jar
+          path: services/target/demande-conge-extension-services.jar
+          retention-days: 7 # Disponible 7 jours
+
+  # ─────────────────────────────────────────────────
+  # JOB 2 : Build du module webapp (Vue.js + WAR)
+  # ─────────────────────────────────────────────────
+  build-webapp:
+    name: 🌐 Build Vue.js & WAR (webapp)
+    runs-on: ubuntu-latest
+    # Ce job démarre en PARALLÈLE avec build-services (pas de dépendance)
+
+    steps:
+      - name: 📥 Checkout du code
+        uses: actions/checkout@v4
+
+      # Node.js pour le build Vue.js
+      - name: 🟢 Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: webapp/package-lock.json
+
+      # Java nécessaire pour mvn package (génère le WAR)
+      - name: ☕ Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: "maven"
+
+      # Installation des dépendances NPM (version exacte du lock file)
+      - name: 📦 Installation des dépendances NPM
+        run: npm ci
+        working-directory: webapp
+
+      # Build Vue.js avec Webpack
+      - name: 🏗️ Build Vue.js (npm run build)
+        run: npm run build
+        working-directory: webapp
+
+      # Package Maven pour générer le WAR final
+      - name: 🏗️ Package Maven (génération WAR)
+        run: mvn package -pl webapp -am --no-transfer-progress -DskipTests
+        # -pl webapp : seulement le module webapp
+        # -am : include les modules dont il dépend (parent pom)
+        # -DskipTests : on a déjà testé dans le job 1
+
+      # Upload du WAR
+      - name: 📦 Upload du WAR (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: webapp-war
+          path: webapp/target/demande-conge-extension-webapp.war
+          retention-days: 7
