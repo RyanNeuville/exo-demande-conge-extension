@@ -94,31 +94,34 @@ public final class SqlQueries {
 
     public static final String ANNULER_DEMANDE_EN_ATTENTE = "UPDATE demande_conge SET " +
             "statut = 'ANNULEE', date_modification = ?, date_validation = ? " +
-            "WHERE id = ?" + " AND numero = ?";
+            "WHERE id = ?";
 
     public static final String SOUMETTRE_DEMANDE_EN_ATTENTE = "UPDATE demande_conge SET " +
             "statut = 'EN_ATTENTE', date_modification = ?, date_validation = ? " +
-            "WHERE id = ?" + " AND numero = ?";
+            "WHERE id = ?";
 
-    public static final String CONSULTER_DEMANDE_A_TRAITER = "SELECT id, numero, user_id, nom, prenom, date_debut, demi_journee_debut, " +
+    public static final String CONSULTER_DEMANDE_A_TRAITER = "SELECT id, numero, user_id, nom, prenom, date_debut, demi_journee_debut, "
+            +
             "date_fin, demi_journee_fin, type_conge_id, statut, motif, commentaire_employe, " +
             "commentaire_valideur, valideur_id, date_soumission, date_modification, " +
             "date_validation, solde_conges_avant, duree_jours_ouvres " +
             "FROM demande_conge WHERE statut = 'EN_ATTENTE' AND valideur_id = ? ORDER BY date_soumission ASC";
 
-    public static final String VALIDER_DEMANDE_EN_ATTENTE = "UPDATE demande_conge SET " +
+    public static final String UPDATE_STATUT_VALIDE = "UPDATE demande_conge SET " +
             "statut = 'VALIDE', date_modification = ?, date_validation = ?, commentaire_valideur = ? " +
-            "WHERE id = ?" + " AND numero = ?";
+            "WHERE id = ?";
 
-    public static final String REFUSER_DEMANDE_EN_ATTENTE = "UPDATE demande_conge SET " +
+    public static final String UPDATE_STATUT_REFUSE = "UPDATE demande_conge SET " +
             "statut = 'REFUSE', date_modification = ?, date_validation = ?, commentaire_valideur = ? " +
-            "WHERE id = ?" + " AND numero = ?";
-    
+            "WHERE id = ?";
+
     public static final String AJOUTER_COMMENTAIRE_VALIDATION = "UPDATE demande_conge SET " +
             "commentaire_valideur = ? " +
             "WHERE id = ?" + " AND numero = ?";
-    
+
     public static final String SUPPRIMER_DEMANDE = "DELETE FROM demande_conge WHERE id = ? AND numero = ?";
+
+    public static final String SELECT_DEMANDES_PAR_VALIDEUR = "SELECT * FROM demande_conge WHERE valideur_id = ? ORDER BY date_soumission DESC";
 
     /** HISTORIQUE_ETAT */
     public static final String INSERT_HISTORIQUE_ETAT = "INSERT INTO historique_etat (" +
