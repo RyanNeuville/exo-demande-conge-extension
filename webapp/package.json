@@ -17,6 +17,8 @@
   "author": "eXo",
   "license": "LGPL",
   "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
     "@vitejs/plugin-vue": "^6.0.4",
     "babel-loader": "^10.0.0",
     "css-loader": "^7.1.3",
