@@ -121,13 +121,28 @@ public final class Constants {
 
     /** CATÉGORIE : MESSAGES DE LOG */
 
-    public static final String LOG_DEMANDE_SOUMISE = "Demande de congé soumise avec succès - ID: {}";
-    public static final String LOG_DEMANDE_APPROUVEE = "Demande approuvée - ID: {} - Valideur: {}";
-    public static final String LOG_DEMANDE_REFUSEE = "Demande refusée - ID: {} - Valideur: {}";
-    public static final String LOG_DEMANDE_ANNULEE = "Demande annulée par l'utilisateur - ID: {}";
-    public static final String LOG_SOLDE_MIS_A_JOUR = "Solde mis à jour pour utilisateur {} : {} jours restants";
-    public static final String LOG_CHEVAUCHEMENT_DETECTE = "Tentative de soumission avec chevauchement - User: {}";
-    public static final String LOG_ERREUR_TECHNIQUE = "Erreur technique lors de {} - Détail: {}";
+    /** Logs généraux opérationnels */
+    public static final String LOG_DEMANDE_BROUILLON_CREE = "Brouillon de demande créé - Utilisateur: {} - ID temporaire: {}";
+    public static final String LOG_DEMANDE_SOUmise = "Demande de congé soumise avec succès - ID: {} - Utilisateur: {}";
+    public static final String LOG_DEMANDE_MODIFIEE = "Demande modifiée avec succès - ID: {} - Utilisateur: {}";
+    public static final String LOG_DEMANDE_ANNULEE = "Demande annulée par l'utilisateur - ID: {} - Utilisateur: {}";
+    public static final String LOG_DEMANDE_VALIDEE = "Demande validée - ID: {} - Valideur: {} - Commentaire: {}";
+    public static final String LOG_DEMANDE_REFUSEE = "Demande refusée - ID: {} - Valideur: {} - Commentaire: {}";
+    public static final String LOG_COMMENTAIRE_AJOUTE = "Commentaire de validation ajouté - Demande ID: {} - Valideur: {}";
+    public static final String LOG_DEMANDE_SUPPRIMEE = "Demande supprimée - ID: {} - Par: {} (Administrateur)";
+    public static final String LOG_TYPE_CONGE_CREE = "Nouveau type de congé créé - ID: {} - Libellé: {} - Par: {}";
+    public static final String LOG_TYPE_CONGE_MODIFIE = "Type de congé modifié - ID: {} - Libellé: {} - Par: {}";
+    public static final String LOG_TYPE_CONGE_SUPPRIME = "Type de congé supprimé - ID: {} - Par: {}";
+    public static final String LOG_SOLDE_MIS_A_JOUR = "Solde congés mis à jour - Utilisateur: {} - Nouveau solde: {}";
+    public static final String LOG_RAPPORT_EXPORT = "Rapport des congés exporté - Par: {} (Administrateur)";
+
+    /** Logs de vérification et erreurs métier */
+    public static final String LOG_SOLDE_INSUFFISANT = "Solde insuffisant pour soumission - Utilisateur: {} - Solde: {} - Demandé: {}";
+    public static final String LOG_CHEVAUCHEMENT_DETECTE = "Chevauchement de dates détecté - Utilisateur: {} - Demande ID: {}";
+    public static final String LOG_STATUT_INCORRECT = "Statut incorrect pour l'action - Demande ID: {} - Statut actuel: {}";
+    public static final String LOG_NON_AUTORISE = "Action non autorisée - Utilisateur: {} - Rôle: {} - Action: {}";
+    public static final String LOG_DATE_INVALIDE = "Dates invalides - Début: {} - Fin: {} - Utilisateur: {}";
+    public static final String LOG_ERREUR_TECHNIQUE = "Erreur technique lors de {} - Utilisateur: {} - Détail: {}";
 
     /** CATÉGORIE : VARIABLES STATIQUES / VALEURS FIXES */
 
