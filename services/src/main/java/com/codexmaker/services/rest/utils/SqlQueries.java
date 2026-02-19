@@ -198,4 +198,12 @@ public final class SqlQueries {
             "GROUP BY user_id, nom, prenom ORDER BY total_jours DESC LIMIT 5";
 
     public static final String DASH_ADMIN_SOLDE_MOYEN_PAR_ROLE = "SELECT role, AVG(solde_conges) AS solde_moyen FROM utilisateur GROUP BY role";
+
+    /** VERIFICATION DES CHEVAUCHEMENT DE CONGES */
+    public static final String CHECK_CHEVAUCHEMENT = "SELECT COUNT(*) FROM demande_conge " +
+            "WHERE user_id = ? " +
+            "AND statut NOT IN ('REFUSEE', 'ANNULEE') " +
+            "AND id != ? " +
+            "AND (date_debut <= ? AND date_fin >= ?) " +
+            "LIMIT 1";
 }
