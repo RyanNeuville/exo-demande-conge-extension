@@ -1,33 +1,85 @@
 package com.codexmaker.services.rest.utils;
 
-public class Constants {
-    public static final String DEMANDES_FILE_PATH = "/com/codexmaker/services/rest/data/demandes.json";
-    public static final String DATE_FORMAT_PATERN = "yyyy-MM-dd";
+/**
+ * Regroupe toutes les constantes du projet pour éviter les chaînes de
+ * caractères en dur.
+ * Toutes les valeurs sont en français pour faciliter la lecture et la
+ * maintenance.
+ */
+public final class Constants {
 
-    /** End point */
-    public static final String MAIN_END_POINT = "/conges";
-    public static final String SUBMIT_END_POINT = "/submit";
-    public static final String ALL_DEMANDES_END_POINT = "/all";
-    public static final String MY_DEMANDE_END_POINT = "/my";
-    public static final String MY_RELATIONS_DEMANDE_END_POINT = "/relations";
-    public static final String DEMANDE_EN_ATTANTE_END_POINT = "/enattente";
-    public static final String UPDATE_DEMANDE_END_POINT = "/update";
-    public static final String APPROUVER_DEMANDE_END_POINT = "/approve";
-    public static final String REJETER_DEMANDE_END_POINT = "/reject";
-    public static final String CANCEL_DEMANDE_END_POINT = "/cancel";
+    private Constants() {
+    }
 
-    /** Messages d'erreurs */
-    public static final String CHECKING_ROLE_ERROR = "Error checking admin role";
+    /** CATÉGORIE : ENDPOINTS API (REST) */
 
+    public static final String API_BASE = "/api";
+    public static final String API_DEMANDES = API_BASE + "/demandes";
+    public static final String API_DEMANDES_BY_ID = API_DEMANDES + "/{id}";
+    public static final String API_DEMANDES_UTILISATEUR = API_DEMANDES + "/utilisateur";
+    public static final String API_DEMANDES_EN_ATTENTE = API_DEMANDES + "/en-attente";
+    public static final String API_DEMANDES_APPROUVER = API_DEMANDES + "/{id}/approuver";
+    public static final String API_DEMANDES_REFUSER = API_DEMANDES + "/{id}/refuser";
+    public static final String API_DEMANDES_ANNULER = API_DEMANDES + "/{id}/annuler";
 
-    /** Messagess de logs */
-    public static final String LOG_INFO_DEMANDE_FILE_CREATED = "Created new demandes.json file at {}";
-    public static final String LOG_INFO_DEMANDE_FILE_CREATED_SUCCESS = "Successfully wrote to demandes.json";
-    public static final String LOG_ERROR_CREATED_DEMANDE = "Error writing to demandes.json at {}";
-    public static final String LOG_ERROR_READING_FILE = "Error reading demandes.json";
+    /** CATÉGORIE : MESSAGES DE SUCCÈS (français, clairs et réutilisables) */
 
-    /** variables */
+    public static final String SUCCES_DEMANDE_SOUMISE = "Votre demande de congé a été soumise avec succès.";
+    public static final String SUCCES_DEMANDE_APPROUVEE = "La demande de congé a été approuvée.";
+    public static final String SUCCES_DEMANDE_REFUSEE = "La demande de congé a été refusée.";
+    public static final String SUCCES_DEMANDE_ANNULEE = "Votre demande de congé a été annulée.";
+    public static final String SUCCES_SOLDE_MIS_A_JOUR = "Solde de congés mis à jour avec succès.";
+    public static final String SUCCES_OPERATION_EFFECTUEE = "Opération effectuée avec succès.";
+
+    /** CATÉGORIE : MESSAGES D'ERREUR (français, explicites et réutilisables) */
+
+    public static final String ERREUR_UTILISATEUR_NON_TROUVE = "Utilisateur non trouvé.";
+    public static final String ERREUR_DEMANDE_NON_TROUVEE = "Demande de congé non trouvée.";
+    public static final String ERREUR_SOLDE_INSUFFISANT = "Solde de congés insuffisant pour cette demande.";
+    public static final String ERREUR_CHEVAUCHEMENT_DATES = "Chevauchement détecté avec une autre demande.";
+    public static final String ERREUR_STATUT_INCORRECT = "Le statut de la demande ne permet pas cette action.";
+    public static final String ERREUR_NON_AUTORISE = "Vous n'êtes pas autorisé à effectuer cette action.";
+    public static final String ERREUR_DATE_INVALIDE = "La date de début doit être antérieure ou égale à la date de fin.";
+    public static final String ERREUR_MOTIF_VIDE = "Le motif de la demande est obligatoire.";
+    public static final String ERREUR_OPERATION_ECHOUEE = "L'opération a échoué. Veuillez réessayer.";
+    public static final String ERREUR_TECHNIQUE = "Une erreur technique s'est produite. Contactez l'administrateur.";
+
+    /** CATÉGORIE : MESSAGES DE LOG (pour Logger) */
+
+    public static final String LOG_DEMANDE_SOUMISE = "Demande de congé soumise avec succès - ID: {}";
+    public static final String LOG_DEMANDE_APPROUVEE = "Demande approuvée - ID: {} - Valideur: {}";
+    public static final String LOG_DEMANDE_REFUSEE = "Demande refusée - ID: {} - Valideur: {}";
+    public static final String LOG_DEMANDE_ANNULEE = "Demande annulée par l'utilisateur - ID: {}";
+    public static final String LOG_SOLDE_MIS_A_JOUR = "Solde mis à jour pour utilisateur {} : {} jours restants";
+    public static final String LOG_CHEVAUCHEMENT_DETECTE = "Tentative de soumission avec chevauchement - User: {}";
+    public static final String LOG_ERREUR_TECHNIQUE = "Erreur technique lors de {} - Détail: {}";
+
+    /** CATÉGORIE : VARIABLES STATIQUES / VALEURS FIXES */
+
+    public static final int SOLDE_INITIAL_PAR_DEFAUT = 25;
+    public static final int MAX_JOURS_DEMANDE_AUTORISE = 30;
+    public static final String FORMAT_NUMERO_DEMANDE = "DC-%d-%04d"; // ex: DC-2025-0001
+    public static final String FORMAT_DATE_SQLITE = "yyyy-MM-dd";
+    public static final String FORMAT_DATE_HEURE_SQLITE = "yyyy-MM-dd HH:mm:ss";
+
+    /** CATÉGORIE : PATTERNS / REGEX / FORMATS */
+
+    public static final String PATTERN_EMAIL = "^[A-Za-z0-9+_.-]+@(.+)$";
+    public static final String PATTERN_UUID = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}";
+    public static final String PATTERN_DATE = "\\d{4}-\\d{2}-\\d{2}";
+
+    /** CATÉGORIE : AUTRES CATÉGORIES UTILES */
+
+    public static final String ROLE_EMPLOYE = "EMPLOYE";
+    public static final String ROLE_RESPONSABLE = "RESPONSABLE";
+    public static final String ROLE_ADMINISTRATEUR = "ADMINISTRATEUR";
+
+    public static final String STATUT_BROUILLON = "BROUILLON";
     public static final String STATUT_EN_ATTENTE = "EN_ATTENTE";
-    public static final String STATUT_REJETEE = "REJETEE";
-    public static final String STATUT_APPROUVEE = "APPROUVEE";
+    public static final String STATUT_VALIDEE = "VALIDEE";
+    public static final String STATUT_REFUSEE = "REFUSEE";
+    public static final String STATUT_ANNULEE = "ANNULEE";
+
+    public static final String MESSAGE_VALIDATION_OK = "Demande validée avec succès.";
+    public static final String MESSAGE_REFUS_OK = "Demande refusée avec succès.";
 }
