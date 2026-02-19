@@ -1,0 +1,56 @@
+# .github/workflows/release.yml
+name: CD – Release des artefacts
+
+# Se déclenche uniquement quand tu crées un tag de version
+on:
+    push:
+        tags:
+            - "v*.*.*" # Ex: v1.0.0, v1.2.3
+
+jobs:
+    release:
+        name: 📦 Créer la Release GitHub
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: 📥 Checkout du code
+              uses: actions/checkout@v4
+
+            - name: ☕ Setup Java 21
+              uses: actions/setup-java@v4
+              with:
+                  java-version: "21"
+                  distribution: "temurin"
+                  cache: "maven"
+
+            - name: 🟢 Setup Node.js 20
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: "npm"
+                  cache-dependency-path: webapp/package-lock.json
+
+            - name: 📦 Installation NPM
+              run: npm ci
+              working-directory: webapp
+
+            - name: 🏗️ Build Vue.js
+              run: npm run build
+              working-directory: webapp
+
+            # Build complet sans les tests (déjà validés par la CI)
+            - name: 🏗️ Build Maven complet (JAR + WAR)
+              run: mvn clean package --no-transfer-progress -DskipTests
+
+            # Crée automatiquement une GitHub Release avec les deux artefacts
+            - name: 🚀 Créer la GitHub Release
+              uses: softprops/action-gh-release@v2
+              with:
+                  # Les fichiers à joindre à la release
+                  files: |
+                      services/target/demande-conge-extension-services.jar
+                      webapp/target/demande-conge-extension-webapp.war
+                  # Corps du changelog automatique basé sur les commits
+                  generate_release_notes: true
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
