@@ -40,7 +40,6 @@ public final class Constants {
      */
     public static final String API_DEMANDES_HISTORIQUE = API_DEMANDES_BY_ID + "/historique";
 
-
     /** 2. GESTION MANAGÉRIALE (Responsable) */
     /**
      * GET : Consulter les demandes de son équipe ("Consulter demandes à traiter")
@@ -53,7 +52,6 @@ public final class Constants {
     public static final String API_DEMANDES_VALIDER = API_DEMANDES_BY_ID + "/valider";
     /** PUT : Refuser une demande ("Refuser une demande") */
     public static final String API_DEMANDES_REFUSER = API_DEMANDES_BY_ID + "/refuser";
-
 
     /** 3. GESTION ADMINISTRATIVE (Administrateur) */
     /**
@@ -84,29 +82,44 @@ public final class Constants {
     /** DELETE : Supprimer un type de congé */
     public static final String API_TYPES_CONGES_BY_ID = API_TYPES_CONGES + "/{id}";
 
-    /** CATÉGORIE : MESSAGES DE SUCCÈS (français, clairs et réutilisables) */
+    /** CATÉGORIE : MESSAGES DE SUCCÈS */
 
-    public static final String SUCCES_DEMANDE_SOUMISE = "Votre demande de congé a été soumise avec succès.";
-    public static final String SUCCES_DEMANDE_APPROUVEE = "La demande de congé a été approuvée.";
-    public static final String SUCCES_DEMANDE_REFUSEE = "La demande de congé a été refusée.";
-    public static final String SUCCES_DEMANDE_ANNULEE = "Votre demande de congé a été annulée.";
+    public static final String SUCCES_DEMANDE_BROUILLON_CREEE = "Brouillon de demande de congé créé avec succès.";
+    public static final String SUCCES_DEMANDE_SOUmise = "Votre demande de congé a été soumise avec succès.";
+    public static final String SUCCES_DEMANDE_MODIFIEE = "Demande de congé modifiée avec succès.";
+    public static final String SUCCES_DEMANDE_ANNULEE = "Votre demande de congé a été annulée avec succès.";
+    public static final String SUCCES_DEMANDE_VALIDEE = "La demande de congé a été validée avec succès.";
+    public static final String SUCCES_DEMANDE_REFUSEE = "La demande de congé a été refusée avec succès.";
+    public static final String SUCCES_COMMENTAIRE_AJOUTE = "Commentaire de validation ajouté avec succès.";
+    public static final String SUCCES_DEMANDE_SUPPRIMEE = "Demande de congé supprimée avec succès.";
+    public static final String SUCCES_TYPE_CONGE_CREE = "Nouveau type de congé créé avec succès.";
+    public static final String SUCCES_TYPE_CONGE_MODIFIE = "Type de congé modifié avec succès.";
+    public static final String SUCCES_TYPE_CONGE_SUPPRIME = "Type de congé supprimé avec succès.";
     public static final String SUCCES_SOLDE_MIS_A_JOUR = "Solde de congés mis à jour avec succès.";
     public static final String SUCCES_OPERATION_EFFECTUEE = "Opération effectuée avec succès.";
+    public static final String SUCCES_RAPPORT_EXPORT = "Rapport exporté avec succès.";
 
-    /** CATÉGORIE : MESSAGES D'ERREUR (français, explicites et réutilisables) */
+    /** CATÉGORIE : MESSAGES D'ERREUR */
 
     public static final String ERREUR_UTILISATEUR_NON_TROUVE = "Utilisateur non trouvé.";
     public static final String ERREUR_DEMANDE_NON_TROUVEE = "Demande de congé non trouvée.";
+    public static final String ERREUR_DEMANDE_NON_MODIFIABLE = "Cette demande ne peut plus être modifiée (statut non autorisé).";
+    public static final String ERREUR_DEMANDE_NON_ANNULABLE = "Cette demande ne peut plus être annulée (statut non autorisé).";
     public static final String ERREUR_SOLDE_INSUFFISANT = "Solde de congés insuffisant pour cette demande.";
-    public static final String ERREUR_CHEVAUCHEMENT_DATES = "Chevauchement détecté avec une autre demande.";
-    public static final String ERREUR_STATUT_INCORRECT = "Le statut de la demande ne permet pas cette action.";
-    public static final String ERREUR_NON_AUTORISE = "Vous n'êtes pas autorisé à effectuer cette action.";
+    public static final String ERREUR_CHEVAUCHEMENT_DATES = "Chevauchement détecté avec une autre demande existante.";
+    public static final String ERREUR_STATUT_INCORRECT = "Le statut actuel de la demande ne permet pas cette action.";
+    public static final String ERREUR_NON_AUTORISE_VALIDER = "Vous n'êtes pas autorisé à valider cette demande.";
+    public static final String ERREUR_NON_AUTORISE_REFUSER = "Vous n'êtes pas autorisé à refuser cette demande.";
+    public static final String ERREUR_NON_AUTORISE_SUPPRIMER = "Vous n'êtes pas autorisé à supprimer cette demande.";
     public static final String ERREUR_DATE_INVALIDE = "La date de début doit être antérieure ou égale à la date de fin.";
     public static final String ERREUR_MOTIF_VIDE = "Le motif de la demande est obligatoire.";
+    public static final String ERREUR_TYPE_CONGE_INEXISTANT = "Type de congé non trouvé.";
     public static final String ERREUR_OPERATION_ECHOUEE = "L'opération a échoué. Veuillez réessayer.";
     public static final String ERREUR_TECHNIQUE = "Une erreur technique s'est produite. Contactez l'administrateur.";
+    public static final String ERREUR_VALIDATION_COMMENTAIRE_VIDE = "Le commentaire de validation est obligatoire.";
+    public static final String ERREUR_DEMANDE_DEJA_TRAITEE = "Cette demande a déjà été traitée.";
 
-    /** CATÉGORIE : MESSAGES DE LOG (pour Logger) */
+    /** CATÉGORIE : MESSAGES DE LOG */
 
     public static final String LOG_DEMANDE_SOUMISE = "Demande de congé soumise avec succès - ID: {}";
     public static final String LOG_DEMANDE_APPROUVEE = "Demande approuvée - ID: {} - Valideur: {}";
