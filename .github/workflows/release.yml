@@ -11,6 +11,8 @@ jobs:
     release:
         name: 📦 Créer la Release GitHub
         runs-on: ubuntu-latest
+        permissions:
+            contents: write # ← nécessaire pour créer une release et uploader des fichiers
 
         steps:
             - name: 📥 Checkout du code
