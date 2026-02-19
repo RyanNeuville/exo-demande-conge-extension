@@ -14,13 +14,75 @@ public final class Constants {
     /** CATÉGORIE : ENDPOINTS API (REST) */
 
     public static final String API_BASE = "/api";
+
+    /** 1. GESTION DES DEMANDES (Base & Employé) */
+    /** POST : Soumettre une demande ("Soumettre une demande") */
+    /**
+     * GET : Consulter l'historique de SES demandes ("Consulter l'historique de ses
+     * demandes")
+     */
     public static final String API_DEMANDES = API_BASE + "/demandes";
+    /** GET : Lire une demande spécifique */
+    /**
+     * PUT : Modifier une demande en attente ou un brouillon ("Modifier ses demandes
+     * en attente")
+     */
+    /**
+     * DELETE : Supprimer une demande (Réservé Administrateur : "Supprimer une
+     * demande")
+     */
     public static final String API_DEMANDES_BY_ID = API_DEMANDES + "/{id}";
-    public static final String API_DEMANDES_UTILISATEUR = API_DEMANDES + "/utilisateur";
-    public static final String API_DEMANDES_EN_ATTENTE = API_DEMANDES + "/en-attente";
-    public static final String API_DEMANDES_APPROUVER = API_DEMANDES + "/{id}/approuver";
-    public static final String API_DEMANDES_REFUSER = API_DEMANDES + "/{id}/refuser";
-    public static final String API_DEMANDES_ANNULER = API_DEMANDES + "/{id}/annuler";
+    /** PUT : Annuler une demande en attente ("Annuler ses demandes en attente") */
+    public static final String API_DEMANDES_ANNULER = API_DEMANDES_BY_ID + "/annuler";
+    /**
+     * GET : Consulter l'historique des états d'une demande (Classe
+     * "HistoriqueEtat")
+     */
+    public static final String API_DEMANDES_HISTORIQUE = API_DEMANDES_BY_ID + "/historique";
+
+
+    /** 2. GESTION MANAGÉRIALE (Responsable) */
+    /**
+     * GET : Consulter les demandes de son équipe ("Consulter demandes à traiter")
+     */
+    public static final String API_DEMANDES_A_TRAITER = API_DEMANDES + "/a-traiter";
+    /**
+     * PUT : Valider une demande ("Valider une demande" + "Ajouter commentaire de
+     * validation")
+     */
+    public static final String API_DEMANDES_VALIDER = API_DEMANDES_BY_ID + "/valider";
+    /** PUT : Refuser une demande ("Refuser une demande") */
+    public static final String API_DEMANDES_REFUSER = API_DEMANDES_BY_ID + "/refuser";
+
+
+    /** 3. GESTION ADMINISTRATIVE (Administrateur) */
+    /**
+     * GET : Consulter absolument toutes les demandes du système ("Consulter toutes
+     * les demandes")
+     */
+    public static final String API_DEMANDES_TOUTES = API_DEMANDES + "/toutes";
+    /** GET : Exporter les rapports ("Exporter les rapports") */
+    public static final String API_DEMANDES_EXPORTER = API_DEMANDES + "/exporter";
+
+    /** 4. GESTION DES UTILISATEURS / SOLDES (Employé) */
+
+    /**
+     * GET : Consulter le solde de l'utilisateur connecté ("Consulter solde congés")
+     */
+    public static final String API_UTILISATEUR_ME_SOLDE = API_BASE + "/utilisateurs/me/solde";
+    /** GET : Consulter les informations personnelles de l'utilisateur connecté */
+    public static final String API_UTILISATEUR_ME = API_BASE + "/utilisateurs/me";
+
+    /** 5. GESTION DES TYPES DE CONGÉS (Administrateur & Employé) */
+
+    /** GET : Lister les types de congés (Pour formulaire) */
+    /**
+     * POST : Créer un nouveau type de congé (Admin : "Gérer les types de congés")
+     */
+    public static final String API_TYPES_CONGES = API_BASE + "/types-conges";
+    /** PUT : Modifier un type de congé */
+    /** DELETE : Supprimer un type de congé */
+    public static final String API_TYPES_CONGES_BY_ID = API_TYPES_CONGES + "/{id}";
 
     /** CATÉGORIE : MESSAGES DE SUCCÈS (français, clairs et réutilisables) */
 
