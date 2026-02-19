@@ -1,0 +1,80 @@
+# .github/workflows/ci.yml
+name: CI – Build & Tests
+
+on:
+    push:
+        branches: ["**"]
+    pull_request:
+        branches: [main, dev]
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    # ─────────────────────────────────────────
+    # JOB 1 : Compilation + Tests Java
+    # ─────────────────────────────────────────
+    build-services:
+        name: 🔨 Build Java (services)
+        runs-on: ubuntu-latest
+        steps:
+            - name: 📥 Checkout
+              uses: actions/checkout@v4
+
+            - name: ☕ Setup Java 21
+              uses: actions/setup-java@v4
+              with:
+                  java-version: "21"
+                  distribution: "temurin"
+                  cache: "maven"
+
+            - name: 🧪 Compilation & Tests
+              run: mvn clean verify --no-transfer-progress
+
+            - name: 📦 Upload JAR
+              uses: actions/upload-artifact@v4
+              with:
+                  name: services-jar
+                  path: services/target/demande-conge-extension-services.jar
+                  retention-days: 7
+
+    # ─────────────────────────────────────────
+    # JOB 2 : Build Frontend (Vue.js + WAR)
+    # ─────────────────────────────────────────
+    build-webapp:
+        name: 🌐 Build Vue.js & WAR (webapp)
+        runs-on: ubuntu-latest
+        steps:
+            - name: 📥 Checkout
+              uses: actions/checkout@v4
+
+            - name: 🟢 Setup Node.js 20
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+
+            - name: ☕ Setup Java 21
+              uses: actions/setup-java@v4
+              with:
+                  java-version: "21"
+                  distribution: "temurin"
+                  cache: "maven"
+
+            - name: 📦 Installation NPM
+              run: npm install --legacy-peer-deps
+              working-directory: webapp
+
+            - name: 🏗️ Build Vue.js
+              run: npm run build
+              working-directory: webapp
+
+            - name: 🏗️ Package WAR
+              run: mvn package -pl webapp -am --no-transfer-progress -DskipTests
+
+            - name: 📦 Upload WAR
+              uses: actions/upload-artifact@v4
+              with:
+                  name: webapp-war
+                  path: webapp/target/demande-conge-extension-webapp.war
+                  retention-days: 7

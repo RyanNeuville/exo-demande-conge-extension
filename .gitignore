@@ -5,8 +5,9 @@ target/
 */target/
 !.mvn/wrapper/maven-wrapper.jar
 !.mvn/wrapper/maven-wrapper.properties
-.jar
-.war
+*.jar
+*.war
+*CI-CD-GUIDE.md
 
 # Maven logs & local builds
 build.log
@@ -130,6 +131,8 @@ docker-compose.override.yml
 .docker/
 *.pid
 *.sock
+# Fichier de variables d'environnement – NE JAMAIS COMMITTER
+docker/.env
 
 # CI/CD
 /target/sonar/
