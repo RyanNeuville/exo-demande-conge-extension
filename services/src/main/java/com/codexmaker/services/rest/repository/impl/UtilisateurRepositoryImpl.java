@@ -1,8 +1,8 @@
 package com.codexmaker.services.rest.repository.impl;
 
 import com.codexmaker.services.rest.config.DatabaseConnection;
+import com.codexmaker.services.rest.mapper.UtilisateurMapper;
 import com.codexmaker.services.rest.model.entity.Utilisateur;
-import com.codexmaker.services.rest.model.enums.Role;
 import com.codexmaker.services.rest.repository.UtilisateurRepository;
 import com.codexmaker.services.rest.utils.Constants;
 import com.codexmaker.services.rest.utils.SqlQueries;
@@ -78,7 +78,7 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    Utilisateur utilisateur = mapResultSetToUtilisateur(rs);
+                    Utilisateur utilisateur = UtilisateurMapper.fromResultSet(rs);
                     LOG.debug(Constants.LOG_UTILISATEUR_RECUPERE, id);
                     return utilisateur;
                 }
@@ -167,7 +167,7 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
                 ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
-                utilisateurs.add(mapResultSetToUtilisateur(rs));
+                utilisateurs.add(UtilisateurMapper.fromResultSet(rs));
             }
             LOG.debug(Constants.LOG_UTILISATEURS_RECUPERES, utilisateurs.size());
             return utilisateurs;
@@ -195,7 +195,7 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
                 ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
-                responsables.add(mapResultSetToUtilisateur(rs));
+                responsables.add(UtilisateurMapper.fromResultSet(rs));
             }
             LOG.debug(Constants.LOG_RESPONSABLES_RECUPERES, responsables.size());
             return responsables;
@@ -265,35 +265,5 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
             LOG.error(Constants.LOG_ERREUR_EMAIL_EXISTENCE, email, e.getMessage(), e);
             throw new RuntimeException(Constants.EXCEPTION_EMAIL_EXISTENCE_ECHOUEE, e);
         }
-    }
-
-    /** Méthode utilitaire privée : mapping ResultSet → Utilisateur */
-
-    /**
-     * Mappe une ligne de ResultSet vers une instance de Utilisateur.
-     * Méthode utilitaire partagée par findById, findAll et findAllResponsables
-     * pour éviter la duplication de code.
-     *
-     * @param rs le ResultSet positionné sur la ligne à mapper
-     * @return une instance d'Utilisateur (sous-type anonyme concret)
-     * @throws SQLException en cas d'erreur de lecture du ResultSet
-     */
-    private Utilisateur mapResultSetToUtilisateur(ResultSet rs) throws SQLException {
-        /**
-         * Utilisateur est abstract → on utilise une classe anonyme concrète
-         * Le sous-type réel (Employe, Responsable, Administrateur) sera déterminé
-         * par la couche service selon le Role.
-         */
-        return new Utilisateur() {
-            {
-                setId(rs.getString("id"));
-                setNom(rs.getString("nom"));
-                setPrenom(rs.getString("prenom"));
-                setUsername(rs.getString("username"));
-                setEmail(rs.getString("email"));
-                setRole(Role.valueOf(rs.getString("role")));
-                setSoldeConges(rs.getInt("solde_conges"));
-            }
-        };
     }
 }
