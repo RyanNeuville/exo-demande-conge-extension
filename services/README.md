@@ -1,76 +1,74 @@
-# Rapport Technique : Module `Services` (exo-demande-conge-extension)
+# Documentation Technique : Module `services`
 
-Ce document présente une analyse détaillée du sous-module `services` de l'extension de demande de congé. Il se concentre sur l'implémentation de l'API REST, la gestion des données et l'intégration avec eXo Platform.
+Ce document detaille l'architecture et le fonctionnement du module `services`, qui constitue le cœur backend Java de l'extension de gestion des demandes de conges pour eXo Platform.
 
-## 1. Vue d'Ensemble & Architecture
+## 1. Role et Structure
 
-Le module `services` est un projet Maven produisant un `.jar` (ou potentiellement inclus dans un WAR global) qui expose des **services REST JAX-RS**.
+Le module `services` est un projet Maven produisant un executable `.jar`. Son role est triple :
 
-- **Nature** : Backend Java pur exposant une API REST.
-- **Framework** : JAX-RS (standard Java EE), intégré via le conteneur eXo.
-- **Rôle** : Fournir les endpoints pour créer, lire et gérer les demandes de congés.
+- Assurer l'integralite de la logique metier (regles de validation, calculs de soldes, workflows d'approbation).
+- Exposer des endpoints API REST (via JAX-RS) pour le frontend Vue.js.
+- Garantir la persistance native et isolee des donnees via SQLite.
 
-## 2. Analyse des Dépendances (`pom.xml`)
+Il est decoupe en plusieurs sous-repertories (packages) respectant la separation des responsabilites :
 
-- **eXo Platform Stack** : Dépend de `exo.ws.rest.core`, `social-component-core`, `exo.kernel.commons`. Cela confirme une intégration native.
-- **Base de Données** : La dépendance `mysql-connector-j` (v8.4.0) est présente mais **INUTILISÉE** dans le code actuel (voir section 3).
-- **Tests** : JUnit 5 et Mockito sont déclarés, ainsi que Allure pour le reporting, mais aucun test n'est implémenté.
+### 1.1 Couches Applicatives Principal
 
-## 3. Analyse du Code Source (Java)
+1.  **`api` & `service`** : Ce triptyque (Service, Interface, Implementation) encapsule la logique d'exposition. `DemandeCongeRestService.java` orchestre les endpoints exposes pour le client, tandis que les services associes determinent le traitement profond des regles de l'entreprise.
+2.  **`repository`** : Il s'agit de la couche d'Acces aux Donnees (DAO). Les interfaces (ex: `UtilisateurRepository`, `TypeCongeRepository`) declarent les contrats d'operation CRUD. Les implementations (ex: `UtilisateurRepositoryImpl`) effectuent les requetes concretes.
+3.  **`mapper`** : Ce package (ex: `UtilisateurMapper`, `TypeCongeMapper`) a la responsabiliet exclusive de convertir les reponses de la base de donnees (`ResultSet` JDBC) en objets Java de la couche modele.
 
-L'implémentation réside dans le package `com.codexmaker.services.rest`.
+### 1.2 Couches Modeles et Transit
 
-### 3.1 Service REST (`DemandeCongeRestService.java`)
+- **`model.entity`** : Contient le paradigme POJO. L'architecture utilise l'heritage objet avec une classe generique `Utilisateur` etendue en `Employe`, `Responsable`, `Administrateur`. S'y trouvent egalement `DemandeConge` et `TypeConge`.
+- **`model.enums`** : Type fort des metadonnees critiques (ex: `Role`, `StatutDemande`).
+- **`dto`** : Data Transfer Objects. Ces objets evitent l'exposition directe du domaine entity a la couche presentation Web.
 
-C'est le cœur du système. Il définit les endpoints suivants sous `/conges` :
+### 1.3 Utilitaires, Configuration et Exceptions
 
-- `POST /submit` : Soumettre une demande.
-- `GET /all` : (Admin) Lister toutes les demandes.
-- `GET /my` : Lister mes demandes.
-- `GET /relations` : Lister les demandes de mes connexions sociales (utilise `RelationshipManager`).
-- `GET /enattente` : (Admin) Lister les demandes en attente.
-- `PUT /update` : (Admin) Mettre à jour une demande.
-- `POST /approve` / `/reject` / `/cancel` : Workflow de validation.
+- **`config`** : Abrite `DatabaseConnection.java`, le gestionnaire de cycle de vie et d'optimisations de la connexion `SQLite`.
+- **`utils`** : Integre `Constants.java` (regroupement de toutes les cles statiques, logs, formats) et `SqlQueries.java` (isolation complete de la grammaire SQL native en variables constantes).
+- **`exception`** : Hierarchie d'exceptions specifiques au metier (ex: `InsufficientLeaveBalanceException` pour capturer un solde insuffisant lors de la soumission).
 
-### 3.2 Modèle de Données
+## 2. Infrastructure de Persistance (SQLite)
 
-- **`DemandeConge`** : POJO simple (ID, dates, type, motif, statut).
-- **`UserDemandes`** : Conteneur regroupant l'utilisateur et sa liste de demandes.
+Contrairement l'historique de developpement ou a la configuration coeur d'eXo Platform (qui tourne sous MySQL), le cycle de vie **des demandes de conges seules** (ce module ci present) repose exclusivement sur **SQLite**.
 
-### 3.3 Gestion des Données (CRITIQUE)
+### 2.1 Configuration
 
-Le système de persistance est **très problématique** pour un environnement de production :
+Toute la logique est chargee dans `DatabaseConnection.java` en utilisant le driver standart JDBC org.sqlite.JDBC.
 
-1.  **Stockage Fichier JSON** : Les données sont stockées dans un fichier JSON (`demandes.json`).
-2.  **Localisation** : Le code cherche ce fichier via `DemandeCongeRestService.class.getResource("/com/codexmaker/services/rest/data/demandes.json")`.
-3.  **Problème Majeur** :
-    - Le fichier `demandes.json` est **ABSENT** des sources (`src/main/resources/...` n'existe pas). L'application risque de **planter au démarrage** (NullPointerException dans l'initialiseur statique).
-    - L'écriture (`writeDemandesFile`) tente de modifier ce fichier **dans le classpath** (probablement à l'intérieur du WAR explosé ou du JAR). Ces modifications sont **volatiles** (perdues au redéploiement) et non thread-safe (malgré le mot-clé `synchronized`, cela ne fonctionne pas en cluster).
+- La base de production locale generee ou visee s'apelle : `demande_conge.db`.
+- Afin de maximiser les debits parallelistes ou l'usage en RAM, la connection force les configurations PRAGMA `journal_mode = WAL`, `synchronous = NORMAL`, `temp_store = MEMORY`.
 
-## 4. Sécurité
+### 2.2 Gestion des Requetes (JDBC Natif)
 
-- **Authentification** : Utilise `ConversationState.getCurrent()` pour identifier l'utilisateur (standard eXo).
-- **Autorisation** : Hérite de la sécurité JAX-RS (`@RolesAllowed`), mais implémente aussi une vérification manuelle du groupe `/platform/administrators` via `OrganizationService`.
+Le projet n'utilise volontairement pas d'ORM lourds (pas d'Hibernate/JPA presentement employe pour le code). Le code ecrit et instancie des `PreparedStatement` purs.
+_Avantage_ : Controle absolu sur le temps de cycle CPU/RAM sans surcharge.
 
-## 5. Tests
+## 3. Trajectoire d'Execution Normale (Flow Exemple)
 
-- **État** : Une classe de test existe (`DemandeCongeServiceImplTest.java`) mais elle est **VIDE**.
-- **Couverture** : 0%. Aucune validation automatique n'est possible actuellement.
+Voici le deroulement architectural standard suite a une requete API (ex: chercher un Utilsateur) :
 
-## 6. Résumé des Points Techniques
+1.  **Exposition** : L'URL REST repond et delegue l'operation a l'implementation metier.
+2.  **DAO Call** : Le service interroge `UtilisateurRepository`.
+3.  **SQL Exe** : `UtilisateurRepositoryImpl` va chercher l'ordre SQL pre-compile dans `SqlQueries.SELECT_UTILISATEUR_BY_ID`.
+4.  **Transaction** : L'execution se fait via la connection `DatabaseConnection`.
+5.  **Mapping** : Le `ResultSet` est transfere a `UtilisateurMapper.fromResultSet(rs)`.
+6.  **Domaine** : Le mapper identifie l'utilisateur comme de sous-type `Employe`, il peuple et retourne l'entite Java associee.
 
-| Aspect            | Détail                               | État                           |
-| :---------------- | :----------------------------------- | :----------------------------- |
-| **Framework**     | JAX-RS / eXo Kernel                  | Standard                    |
-| **Persistance**   | Fichier JSON dans le Classpath       | **CRITIQUE** (Non viable)   |
-| **Date Handling** | `SimpleDateFormat` (Non Thread-Safe) | À remplacer par `java.time` |
-| **Concurrence**   | `synchronized` sur méthodes fichier  | Goulot d'étranglement       |
-| **Tests**         | Exists mais vide                     | Manquant                    |
-| **Dépendances**   | MySQL Connecteur inutile             | À nettoyer                  |
+## 4. Compilation Methodologique Maven
 
-## 7. Recommandations Prioritaires
+Le `services/pom.xml` instruit les dependances suivantes :
 
-1.  **Implémenter une Vraie Persistance** : Utiliser JPA/Hibernate ou JCR (Java Content Repository) pour stocker les demandes. Supprimer la gestion par fichier JSON.
-2.  **Créer le fichier ressource manquant** : Si la persistance fichier est maintenue temporairement, il faut impérativement créer `src/main/resources/com/codexmaker/services/rest/data/demandes.json` avec un contenu vide `[]`.
-3.  **Sécuriser l'Accès Concurrent** : Si fichier maintenu, utiliser un verrouillage plus robuste ou passer à une base de données.
-4.  **Nettoyage** : Supprimer le connecteur MySQL s'il n'est pas utilisé, ou l'utiliser vraiment.
+- Le moteur `SQLite JDBC`.
+- L'integration runtime de conteneurs tiers `exo.ws.rest.core`.
+- Les supports de test `JUnit 5`.
+
+Compilez le module individuellement via la racine du sous-dossier `services` avec :
+
+```bash
+mvn clean install
+```
+
+Le JAR binaire et compilé sera généré dans `/target/demande-conge-extension-services.jar`.
