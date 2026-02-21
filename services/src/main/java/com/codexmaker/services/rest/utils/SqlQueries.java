@@ -43,6 +43,8 @@ public final class SqlQueries {
             "code = ?, libelle = ?, description = ?, jours_max_par_an = ?, deduction_solde = ? " +
             "WHERE id = ?";
 
+    public static final String SELECT_TYPE_CONGE_USED = "SELECT COUNT(*) FROM demande_conge WHERE type_conge_id = ?";
+
     public static final String DELETE_TYPE_CONGE = "DELETE FROM type_conge WHERE id = ?";
 
     /** DEMANDE_CONGE */
