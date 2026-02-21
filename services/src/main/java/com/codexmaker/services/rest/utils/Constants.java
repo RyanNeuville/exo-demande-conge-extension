@@ -155,7 +155,21 @@ public final class Constants {
     public static final String LOG_ERREUR_TYPE_CONGE_CREATION = "Erreur lors de la création du type de congé : {}";
     public static final String LOG_ERREUR_TYPE_CONGE_MODIFICATION = "Erreur lors de la modification du type de congé ID={} : {}";
     public static final String LOG_ERREUR_TYPE_CONGE_UTILISATION = "Erreur lors de la vérification d'utilisation du type de congé ID={} : {}";
-    public static final String LOG_ERREUR_UTILISATEUR_CREATION = "Echec creation utilisateur";
+    public static final String LOG_ERREUR_UTILISATEUR_CREATION = "Erreur lors de la création de l'utilisateur ID={} : {}";
+    public static final String LOG_UTILISATEUR_RECUPERE = "Utilisateur récupéré avec succès - ID: {}";
+    public static final String LOG_UTILISATEUR_NON_TROUVE = "Aucun utilisateur trouvé pour l'ID: {}";
+    public static final String LOG_SOLDE_RECUPERE = "Solde récupéré pour l'utilisateur ID: {} - Solde: {}";
+    public static final String LOG_UTILISATEURS_RECUPERES = "Récupérés {} utilisateurs";
+    public static final String LOG_RESPONSABLES_RECUPERES = "Récupérés {} responsables";
+    public static final String LOG_UTILISATEUR_EXISTE = "Vérification existence utilisateur ID={} : {}";
+    public static final String LOG_EMAIL_EXISTE = "Vérification existence email={} : {}";
+    public static final String LOG_ERREUR_UTILISATEUR_RECUPERATION = "Erreur lors de la récupération de l'utilisateur ID={} : {}";
+    public static final String LOG_ERREUR_UTILISATEUR_SOLDE = "Erreur lors de la mise à jour du solde utilisateur ID={} : {}";
+    public static final String LOG_ERREUR_UTILISATEUR_SOLDE_LECTURE = "Erreur lors de la lecture du solde utilisateur ID={} : {}";
+    public static final String LOG_ERREUR_UTILISATEURS_RECUPERATION = "Erreur lors de la récupération de tous les utilisateurs : {}";
+    public static final String LOG_ERREUR_RESPONSABLES_RECUPERATION = "Erreur lors de la récupération des responsables : {}";
+    public static final String LOG_ERREUR_UTILISATEUR_EXISTENCE = "Erreur lors de la vérification d'existence de l'utilisateur ID={} : {}";
+    public static final String LOG_ERREUR_EMAIL_EXISTENCE = "Erreur lors de la vérification d'existence de l'email={} : {}";
     /** LOG pour le Debug */
     public static final String LOG_TYPE_CONGE_RECUPERER = "Récupérés {} types de congé";
 
@@ -164,6 +178,13 @@ public final class Constants {
     public static final String EXCEPTION_TYPE_CONGE_NON_TROUVE = "Type de congé non trouvé : ";
     public static final String EXCEPTION_TYPE_CONGE_UTILISATION_ECHOUEE = "Échec vérification d'utilisation du type de congé";
     public static final String EXCEPTION_UTILISATEUR_INSERTION_ECHOUEE = "Échec insertion utilisateur";
+    public static final String EXCEPTION_UTILISATEUR_RECUPERATION_ECHOUEE = "Échec récupération utilisateur";
+    public static final String EXCEPTION_UTILISATEUR_SOLDE_ECHOUE = "Échec mise à jour du solde utilisateur";
+    public static final String EXCEPTION_UTILISATEUR_SOLDE_LECTURE_ECHOUEE = "Échec lecture du solde utilisateur";
+    public static final String EXCEPTION_UTILISATEURS_RECUPERATION_ECHOUEE = "Échec récupération de la liste des utilisateurs";
+    public static final String EXCEPTION_RESPONSABLES_RECUPERATION_ECHOUEE = "Échec récupération de la liste des responsables";
+    public static final String EXCEPTION_UTILISATEUR_EXISTENCE_ECHOUEE = "Échec vérification d'existence utilisateur";
+    public static final String EXCEPTION_EMAIL_EXISTENCE_ECHOUEE = "Échec vérification d'existence email";
 
     /** CATÉGORIE : VARIABLES STATIQUES / VALEURS FIXES */
 
