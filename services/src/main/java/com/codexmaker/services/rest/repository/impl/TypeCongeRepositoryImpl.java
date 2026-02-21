@@ -3,6 +3,7 @@ package com.codexmaker.services.rest.repository.impl;
 import com.codexmaker.services.rest.config.DatabaseConnection;
 import com.codexmaker.services.rest.model.entity.TypeConge;
 import com.codexmaker.services.rest.repository.TypeCongeRepository;
+import com.codexmaker.services.rest.utils.Constants;
 import com.codexmaker.services.rest.utils.SqlQueries;
 
 import java.sql.Connection;
@@ -43,14 +44,14 @@ public class TypeCongeRepositoryImpl implements TypeCongeRepository {
 
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected == 0) {
-                throw new SQLException("Échec insertion type congé");
+                throw new SQLException(Constants.ERREUR_TYPE_CONGE_INSERTION_ECHOUEE);
             }
-            LOG.info("Type de congé créé : ID={}, Libellé={}", typeConge.getId(), typeConge.getLibelle());
+            LOG.info(Constants.LOG_TYPE_CONGE_CREE, typeConge.getId(), typeConge.getLibelle());
             return typeConge;
 
         } catch (SQLException e) {
-            LOG.error("Erreur lors de la création du type de congé : {}", e.getMessage(), e);
-            throw new RuntimeException("Échec création type congé", e);
+            LOG.error(Constants.LOG_ERREUR_TYPE_CONGE_CREATION, e.getMessage(), e);
+            throw new RuntimeException(Constants.ERREUR_TYPE_CONGE_CREATION_ECHOUEE, e);
         }
     }
 
@@ -74,13 +75,13 @@ public class TypeCongeRepositoryImpl implements TypeCongeRepository {
 
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected == 0) {
-                throw new SQLException("Type de congé non trouvé ou mise à jour impossible");
+                throw new SQLException(Constants.ERREUR_TYPE_CONGE_INEXISTANT);
             }
-            LOG.info("Type de congé mis à jour : ID={}, Libellé={}", typeConge.getId(), typeConge.getLibelle());
+            LOG.info(Constants.LOG_TYPE_CONGE_MODIFIE, typeConge.getId(), typeConge.getLibelle());
 
         } catch (SQLException e) {
-            LOG.error("Erreur mise à jour type congé ID={} : {}", typeConge.getId(), e.getMessage(), e);
-            throw new RuntimeException("Échec mise à jour type congé", e);
+            LOG.error(Constants.LOG_ERREUR_TYPE_CONGE_MODIFICATION, typeConge.getId(), e.getMessage(), e);
+            throw new RuntimeException(Constants.ERREUR_TYPE_CONGE_MODIFICATION_ECHOUEE, e);
         }
     }
 
@@ -111,8 +112,8 @@ public class TypeCongeRepositoryImpl implements TypeCongeRepository {
             }
             return null;
         } catch (SQLException e) {
-            LOG.error("Erreur récupération type congé ID={} : {}", id, e.getMessage(), e);
-            throw new RuntimeException("Échec récupération type congé", e);
+            LOG.error(Constants.LOG_ERREUR_TYPE_CONGE_RECUPERATION, id, e.getMessage(), e);
+            throw new RuntimeException(Constants.ERREUR_TYPE_CONGE_RECUPERATION_ECHOUEE, e);
         }
     }
 
@@ -141,11 +142,11 @@ public class TypeCongeRepositoryImpl implements TypeCongeRepository {
                 typeConges.add(typeConge);
             }
 
-            LOG.debug("Récupérés {} types de congé", typeConges.size());
+            LOG.debug(Constants.LOG_TYPE_CONGE_RECUPERER, typeConges.size());
             return typeConges;
         } catch (Exception e) {
-            LOG.error("Erreur récupération tous types congé : {}", e.getMessage(), e);
-            throw new RuntimeException("Échec récupération types congé", e);
+            LOG.error(Constants.LOG_ERREUR_TYPE_CONGE_RECUPERATION_TOUS, e.getMessage(), e);
+            throw new RuntimeException(Constants.ERREUR_TYPE_CONGE_RECUPERATION_ECHOUEE, e);
         }
     }
 
@@ -159,7 +160,7 @@ public class TypeCongeRepositoryImpl implements TypeCongeRepository {
     public void deleteById(String id) {
         if (isTypeUsed(id)) {
             throw new IllegalStateException(
-                    "Impossible de supprimer : type de congé utilisé dans au moins une demande");
+                    Constants.EXCEPTION_TYPE_CONGE_SUPPRESSION_IMPOSSIBLE);
         }
 
         String sql = SqlQueries.DELETE_TYPE_CONGE;
@@ -168,12 +169,12 @@ public class TypeCongeRepositoryImpl implements TypeCongeRepository {
             pstmt.setString(1, id);
             int rows = pstmt.executeUpdate();
             if (rows == 0) {
-                throw new IllegalArgumentException("Type de congé non trouvé : " + id);
+                throw new IllegalArgumentException(Constants.EXCEPTION_TYPE_CONGE_NON_TROUVE + id);
             }
-            LOG.info("Type de congé supprimé : ID={}", id);
+            LOG.info(Constants.LOG_TYPE_CONGE_SUPPRIME, id);
         } catch (SQLException e) {
-            LOG.error("Erreur suppression type congé ID={} : {}", id, e.getMessage(), e);
-            throw new RuntimeException("Échec suppression type congé", e);
+            LOG.error(Constants.LOG_ERREUR_TYPE_CONGE_SUPPRESSION, id, e.getMessage(), e);
+            throw new RuntimeException(Constants.ERREUR_TYPE_CONGE_SUPPRESSION_ECHOUEE, e);
         }
     }
 
@@ -196,8 +197,8 @@ public class TypeCongeRepositoryImpl implements TypeCongeRepository {
             }
             return false;
         } catch (SQLException e) {
-            LOG.error("Erreur vérification usage type congé ID={} : {}", typeCongeId, e.getMessage(), e);
-            throw new RuntimeException("Échec vérification usage type congé", e);
+            LOG.error(Constants.LOG_ERREUR_TYPE_CONGE_UTILISATION, typeCongeId, e.getMessage(), e);
+            throw new RuntimeException(Constants.EXCEPTION_TYPE_CONGE_UTILISATION_ECHOUEE, e);
         }
     }
 }
