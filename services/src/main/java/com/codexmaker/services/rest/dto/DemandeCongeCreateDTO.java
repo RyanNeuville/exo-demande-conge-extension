@@ -1,4 +1,4 @@
-package com.codexmaker.services.rest.model.dto;
+package com.codexmaker.services.rest.dto;
 
 import java.time.LocalDate;
 
