@@ -1,190 +1,133 @@
-# 🚀 Projet de Gestion des Congés – Extension (Java, Maven, eXo SDK)
+# 🚀 Projet de Gestion des Congés – Extension eXo Platform
+
+[![Java](https://img.shields.io/badge/Java-17%2F21-orange.svg)](https://www.oracle.com/java/)
+[![Maven](https://img.shields.io/badge/Maven-3.6+-blue.svg)](https://maven.apache.org/)
+[![eXo Platform](https://img.shields.io/badge/eXo%20Platform-7.0-blue)](https://www.exoplatform.com/)
+[![License](https://img.shields.io/badge/License-Internal-red.svg)](#)
 
 ## 📌 Description du projet
 
-Ce projet est une **extension pour eXo Platform** permettant de gérer les demandes de congés au sein d’une organisation.
-Il fournit des fonctionnalités pour :
+Cette extension pour **eXo Platform** offre une solution complète et intégrée pour la gestion du cycle de vie des congés au sein d’une organisation. Elle permet une séparation stricte des rôles et une automatisation du flux de validation.
 
-* 📥 Soumettre une demande de congé
-* ✔️ Valider ou rejeter une demande (workflow)
-* 📊 Suivre l’historique des congés des employés
-* 🔗 Intégration avec eXo Platform (services, UI, déploiement dans le container eXo)
+### 🌟 Fonctionnalités clés par rôle
 
-Ce projet est structuré en **modules Maven** (services, webapp) afin de séparer clairement les responsabilités et un dossier docker pour la contenerisation et le deploiement. 
+- **👤 Employé** :
+  - Soumission de demandes avec gestion des demi-journées.
+  - Consultation en temps réel du solde de congés.
+  - Suivi de l'historique personnel et des états des demandes (`BROUILLON`, `EN_ATTENTE`, `VALIDEE`, etc.).
+- **👥 Responsable** :
+  - Tableau de bord des demandes à traiter pour son équipe.
+  - Validation ou refus avec commentaires obligatoires.
+- **🛡️ Administrateur** :
+  - Gestion globale des types de congés (plafonds, règles de déduction).
+  - Vue d'ensemble de toutes les demandes du système.
+  - Exportation de rapports consolidés.
 
 ---
 
-## ⚙️ Prérequis
+## 🏗️ Architecture Technique
 
-Avant de commencer, assurez-vous d’avoir installé :
+Le projet suit une architecture multicouche robuste pour assurer la maintenabilité et l'extensibilité.
 
-* **Java JDK 17 ou 21**
-* **Maven 3.6+**
-* **IDE Eclipce ou IntelliJ-(preference)**
-* **Docker & Docker Compose** (pour déploiement sur eXo)
-* **exo platform commutity:7.0.0 (via docker)**
-* **SQBD (mysql)**
-* **Git**
+### 🛠️ Patterns & Organisation
+
+- **Repository Pattern** : Abstraction totale de l'accès aux données.
+- **Mapper Pattern** : Centralisation de la logique de transformation `ResultSet ↔ Entity` (ex: `UtilisateurMapper`, `TypeCongeMapper`).
+- **Centralized Constants & Queries** : Utilisation de `Constants.java` pour les messages/logs et `SqlQueries.java` pour le SQL, évitant les chaînes "en dur".
+- **Modules Maven** :
+  - `services/` : Cœur métier (Logique, DAO, API REST).
+  - `webapp/` : Interface utilisateur moderne (Vue.js) intégrée au portail eXo.
+
+---
+
+## ⚙️ Environnement & Prérequis
+
+- **Runtime** : Java JDK 17 ou 21.
+- **Build** : Maven 3.6+.
+- **Containers** : Docker & Docker Compose.
+- **Platform** : eXo Platform Community 7.0.0.
+- **Database** :
+  - **Développement** : SQLite (via JDBC).
+  - **Production** : MySQL (déployé via Docker).
 
 ---
 
 ## 📂 Structure du projet
 
-```
+```text
 exo-demande-conge-extension/
-│── pom.xml                  # Parent Maven
-│
-├── services/                # Couche service (logique métier, DAO, mapping, services, controller)
-│   ├── src/main/java/       # Code source Java
-│   ├── src/test/java/       # Tests unitaires (Junit 5)
-│   └── pom.xml
-│
-├── webapp/                  # Module web (UI, intégration eXo, REST)
-│   ├── src/main/java/
-│   ├── src/main/webapp/     # Ressources front (Vue.js)
-│   └── pom.xml
-│
-└── docker/        # Fichier de configurartion d'installation d'exo platform
-    ├── sql   # init database
-    ├── .env         # variables d'environnement (port, etc..)
-    ├── docker-compose.yml   # exécution des services (exo, mysql, elasticsearch, onlyoffice)
-    └── Dockerfile    # pour personnaliser exo
+├── services/               # Backend : Logique métier & Persistence
+│   ├── src/main/java/.../api/          # Contrôleurs REST
+│   ├── src/main/java/.../mapper/       # Logique de mapping JDBC
+│   ├── src/main/java/.../repository/   # Abstraction des données
+│   └── src/main/java/.../utils/        # Constants & SQL Queries
+├── webapp/                 # Frontend : UI Vue.js & Intégration eXo
+│   └── src/main/webapp/    # Assets, Composants Vue, Webpack
+└── docker/                 # Infrastructure & Déploiement
+    ├── sql/                # Scripts d'initialisation DB
+    └── docker-compose.yml  # Stack complète (eXo, MySQL, ES)
 ```
 
 ---
 
-## 🛠️ Installation de l’environnement de développement
+## 🛠️ Installation & Configuration
 
-1. **Cloner le dépôt**
+### 1. Clonage et Build
 
-   ```bash
-   git clone https://github.com/RyanNeuville/exo-demande-conge-extension.git
-   cd exo-demande-conge-extension
-   ```
+```bash
+git clone https://github.com/RyanNeuville/exo-demande-conge-extension.git
+cd exo-demande-conge-extension
+mvn clean install
+```
 
-2. **Configurer les variables d’environnement (Linux)**
-   Ajouter dans `~/.bashrc` ou `~/.zshrc` :
+### 2. Configuration Base de Données
 
-   ```bash
-   export JAVA_HOME=/usr/lib/jvm/java-8-openjdk
-   export MAVEN_HOME=/usr/share/maven
-   export PATH=$JAVA_HOME/bin:$MAVEN_HOME/bin:$PATH
-   ```
+Modifiez les paramètres dans `Constants.java` (ou via variables d'environnement dans le futur) :
 
-3. **Vérifier les versions**
+```java
+public static final String DB_URL = "jdbc:mysql://localhost:3306/exo_demande_conges";
+public static final String DB_USER = "root";
+public static final String DB_PASSWORD = "VOTRE_MOT_DE_PASSE";
+```
 
-   ```bash
-   java -version
-   mvn -v
-   ```
-   
-4. **Configurer la base de donnees local**
-
-    - allez dans la classe Constants du package utils dans le module services et modifier les constatnte de connexion a la base de donnees
-   
-   ```java
-    /** constantes pour la connexion à la base de donnees */
-    public static final String DB_URL = "jdbc:mysql://localhost:3306/exo_demande_conges";
-    public static final String DB_USER = "root";
-    public static final String DB_PASSWORD = "NOUVEAU_MOT_DE_PASSE";
-    public static final String DB_DRIVER = "com.mysql.cj.jdbc.Driver";
-   ```
-   - importer fichier database.sql du sous dossier sql du dossier docker. (contient la base de donnees initial du projet)
----
-
-## 📦 Installation & Compilation
-
-1. **Nettoyer et compiler le projet**
-
-   ```bash
-   mvn clean install
-   ```
-
-2. **Générer les artefacts (JAR/WAR)**
-
-    * Le **module services** produit un JAR
-    * Le **module webapp** produit un WAR déployable dans eXo
+_Note : Importez `docker/sql/database.sql` pour initialiser le schéma._
 
 ---
 
-## ✅ Tests
+## 🚢 Déploiement
 
-Pour exécuter les tests unitaires :
+Le déploiement s'appuie sur Docker pour garantir la parité entre les environnements.
+
+1.  **Build du Frontend** (dans `webapp/`) : `npm run build`
+2.  **Packaging Maven** : `mvn package`
+3.  **Docker** :
+    ```bash
+    cd docker
+    docker-compose up -d
+    ```
+    _L'application est ensuite accessible sur [http://localhost:9099/portal](http://localhost:9099/portal)._
+
+---
+
+## 🧪 Tests & Maintenance
+
+Exécutez la suite de tests unitaires (JUnit 5) :
 
 ```bash
 mvn test
 ```
 
-Les rapports de tests sont disponibles dans :
-
-```
-services/target/surefire-reports/
-```
+_Les rapports sont générés dans `services/target/surefire-reports/`._
 
 ---
 
-## 🏗️ Build & Packaging
+## 👨‍💻 Équipe
 
-Créer le package complet :
-- dans le wepapp
-```bash
-npm run build
-```
-- dans la racine du projet
-```bash
-mvn package
-```
-
-📦 Les artefacts seront générés dans :
-
-```
-services/target/*.jar
-webapp/target/*.war
-```
-
----
-
-## 🚢 Déploiement (Docker + eXo)
-
-1. **Ajouter les artefacts generer comme volume dans le contenair d'exo**
-
-   ```yaml
-   volumes:
-      - exo_data:/srv/exo
-      - exo_logs:/var/log/exo
-      - ./demande-conge-extension-services.jar:/opt/exo/lib/demande-conge-extension-services.jar
-      - ./demande-conge-extension-webapp.war:/opt/exo/webapps/demande-conge-extension-webapp.war
-   ```
-    - ajuster le chemin d'acces à l'artefact .war et .jar en fonction de pour vous il est recommander de les copier dans le dossier docker
-2. **Exécuter le container**
-
-   ```bash
-   docker compose docker-compose.yml restart exo
-   ```
-
-3. **Accéder à l’application**
-   👉 [http://localhost:9099/portal](http://localhost:9099/portal)
-
----
-
-## 🔧 Maintenance & Bonnes pratiques
-
-* Utiliser `mvn clean install -DskipTests` pour gagner du temps lors du build.
-* Toujours lancer les tests avant un push (`mvn test`).
-* Respecter la convention de code Java et la structure Maven.
-* Documenter les services et DTO avec JavaDoc.
-
----
-
-## 👨‍💻 Contributeurs
-
-* **\[Ryan Feussi]** – Développeur Java
-* **Équipe Code X Maker** – Support et contributions
+- **Ryan Feussi** – Lead Java Developer
+- **Code X Maker** – Engineering Support
 
 ---
 
 ## 📄 Licence
 
-Projet interne – non destiné à un usage public.
-
----
+Projet interne - Propriété exclusive.
