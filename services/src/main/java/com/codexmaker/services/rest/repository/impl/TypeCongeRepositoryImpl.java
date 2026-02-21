@@ -1,6 +1,7 @@
 package com.codexmaker.services.rest.repository.impl;
 
 import com.codexmaker.services.rest.config.DatabaseConnection;
+import com.codexmaker.services.rest.mapper.TypeCongeMapper;
 import com.codexmaker.services.rest.model.entity.TypeConge;
 import com.codexmaker.services.rest.repository.TypeCongeRepository;
 import com.codexmaker.services.rest.utils.Constants;
@@ -100,14 +101,7 @@ public class TypeCongeRepositoryImpl implements TypeCongeRepository {
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    TypeConge typeConge = new TypeConge();
-                    typeConge.setId(rs.getString("id"));
-                    typeConge.setCode(rs.getString("code"));
-                    typeConge.setLibelle(rs.getString("libelle"));
-                    typeConge.setDescription(rs.getString("description"));
-                    typeConge.setJoursMaxParAn(rs.getInt("jours_max_par_an"));
-                    typeConge.setDeductionSolde(rs.getBoolean("deduction_solde"));
-                    return typeConge;
+                    return TypeCongeMapper.fromResultSet(rs);
                 }
             }
             return null;
@@ -132,14 +126,7 @@ public class TypeCongeRepositoryImpl implements TypeCongeRepository {
                 ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
-                TypeConge typeConge = new TypeConge();
-                typeConge.setId(rs.getString("id"));
-                typeConge.setCode(rs.getString("code"));
-                typeConge.setLibelle(rs.getString("libelle"));
-                typeConge.setDescription(rs.getString("description"));
-                typeConge.setJoursMaxParAn(rs.getInt("jours_max_par_an"));
-                typeConge.setDeductionSolde(rs.getBoolean("deduction_solde"));
-                typeConges.add(typeConge);
+                typeConges.add(TypeCongeMapper.fromResultSet(rs));
             }
 
             LOG.debug(Constants.LOG_TYPE_CONGE_RECUPERER, typeConges.size());
