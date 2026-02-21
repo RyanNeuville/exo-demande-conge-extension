@@ -38,7 +38,7 @@ public class TypeCongeRepositoryImpl implements TypeCongeRepository {
             pstmt.setString(1, typeConge.getId());
             pstmt.setString(2, typeConge.getCode());
             pstmt.setString(3, typeConge.getLibelle());
-            pstmt.setString(3, typeConge.getDescription());
+            pstmt.setString(4, typeConge.getDescription());
             pstmt.setInt(5, typeConge.getJoursMaxParAn());
             pstmt.setBoolean(6, typeConge.isDeductionSolde());
 

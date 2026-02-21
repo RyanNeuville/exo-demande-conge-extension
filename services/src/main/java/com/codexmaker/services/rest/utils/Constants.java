@@ -118,7 +118,7 @@ public final class Constants {
     public static final String ERREUR_TECHNIQUE = "Une erreur technique s'est produite. Contactez l'administrateur.";
     public static final String ERREUR_VALIDATION_COMMENTAIRE_VIDE = "Le commentaire de validation est obligatoire.";
     public static final String ERREUR_DEMANDE_DEJA_TRAITEE = "Cette demande a déjà été traitée.";
-    public static final String ERREUR_TYPE_CONGE_INSERTION_ECHOUEE = "Échec insertion type congé" ;
+    public static final String ERREUR_TYPE_CONGE_INSERTION_ECHOUEE = "Échec insertion type congé";
     public static final String ERREUR_TYPE_CONGE_CREATION_ECHOUEE = "Échec création type congé";
     public static final String ERREUR_TYPE_CONGE_MODIFICATION_ECHOUEE = "Échec mise à jour type congé";
     public static final String ERREUR_TYPE_CONGE_RECUPERATION_ECHOUEE = "Échec récupération type congé";
@@ -140,9 +140,10 @@ public final class Constants {
     public static final String LOG_TYPE_CONGE_SUPPRIME = "Type de congé supprimé - ID: {}";
     public static final String LOG_SOLDE_MIS_A_JOUR = "Solde congés mis à jour - Utilisateur: {} - Nouveau solde: {}";
     public static final String LOG_RAPPORT_EXPORT = "Rapport des congés exporté - Par: {} (Administrateur)";
-    public static final String LOG_ERREUR_TYPE_CONGE_RECUPERATION = "Erreur lors de la récupération des types de congés ID={} : {}"; 
-    public static final String LOG_ERREUR_TYPE_CONGE_RECUPERATION_TOUS = "Erreur lors de la récupération des types de congés : {}"; 
+    public static final String LOG_ERREUR_TYPE_CONGE_RECUPERATION = "Erreur lors de la récupération des types de congés ID={} : {}";
+    public static final String LOG_ERREUR_TYPE_CONGE_RECUPERATION_TOUS = "Erreur lors de la récupération des types de congés : {}";
     public static final String LOG_ERREUR_TYPE_CONGE_SUPPRESSION = "Erreur lors de la suppression du type de congé ID={} : {}";
+    public static final String LOG_UTILISATEUR_CREE = "Utilisateur créé avec succès - ID: {} - Email: {}";
 
     /** Logs de vérification et erreurs métier */
     public static final String LOG_SOLDE_INSUFFISANT = "Solde insuffisant pour soumission - Utilisateur: {} - Solde: {} - Demandé: {}";
@@ -151,17 +152,18 @@ public final class Constants {
     public static final String LOG_NON_AUTORISE = "Action non autorisée - Utilisateur: {} - Rôle: {} - Action: {}";
     public static final String LOG_DATE_INVALIDE = "Dates invalides - Début: {} - Fin: {} - Utilisateur: {}";
     public static final String LOG_ERREUR_TECHNIQUE = "Erreur technique lors de {} - Utilisateur: {} - Détail: {}";
-    public static final String LOG_ERREUR_TYPE_CONGE_CREATION =  "Erreur lors de la création du type de congé : {}";
-    public static final String LOG_ERREUR_TYPE_CONGE_MODIFICATION =  "Erreur lors de la modification du type de congé ID={} : {}";
-    public static final String LOG_ERREUR_TYPE_CONGE_UTILISATION =  "Erreur lors de la vérification d'utilisation du type de congé ID={} : {}";
-
+    public static final String LOG_ERREUR_TYPE_CONGE_CREATION = "Erreur lors de la création du type de congé : {}";
+    public static final String LOG_ERREUR_TYPE_CONGE_MODIFICATION = "Erreur lors de la modification du type de congé ID={} : {}";
+    public static final String LOG_ERREUR_TYPE_CONGE_UTILISATION = "Erreur lors de la vérification d'utilisation du type de congé ID={} : {}";
+    public static final String LOG_ERREUR_UTILISATEUR_CREATION = "Echec creation utilisateur";
     /** LOG pour le Debug */
-    public static final String LOG_TYPE_CONGE_RECUPERER =  "Récupérés {} types de congé";
+    public static final String LOG_TYPE_CONGE_RECUPERER = "Récupérés {} types de congé";
 
     /** Constatnts pour les exceptions */
     public static final String EXCEPTION_TYPE_CONGE_SUPPRESSION_IMPOSSIBLE = "Impossible de supprimer : type de congé utilisé dans au moins une demande";
     public static final String EXCEPTION_TYPE_CONGE_NON_TROUVE = "Type de congé non trouvé : ";
     public static final String EXCEPTION_TYPE_CONGE_UTILISATION_ECHOUEE = "Échec vérification d'utilisation du type de congé";
+    public static final String EXCEPTION_UTILISATEUR_INSERTION_ECHOUEE = "Échec insertion utilisateur";
 
     /** CATÉGORIE : VARIABLES STATIQUES / VALEURS FIXES */
 
