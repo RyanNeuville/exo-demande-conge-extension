@@ -56,6 +56,26 @@
             <version>2.2.15</version>            <!-- Utilise la dernière version stable -->
         </dependency>
 
+        <!-- Swagger UI + OpenAPI v3 -->
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>swagger-ui</artifactId>
+            <version>5.17.14</version>            <!-- dernière stable 2025 -->
+        </dependency>
+
+        <!-- Optionnel mais utile : validation + parsing YAML -->
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-core</artifactId>
+            <version>2.2.25</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger.parser.v3</groupId>
+            <artifactId>swagger-parser</artifactId>
+            <version>2.1.22</version>
+        </dependency>
+
+
         <dependency>
             <groupId>org.exoplatform.kernel</groupId>
             <artifactId>exo.kernel.container</artifactId>
