@@ -57,41 +57,41 @@ public final class SqlQueries {
 
         /** DEMANDE_CONGE */
         public static final String INSERT_DEMANDE_CONGE = "INSERT INTO demande_conge (" +
-                        "id, numero, user_id, nom, prenom, date_debut, demi_journee_debut, " +
+                        "id, numero, user_id, date_debut, demi_journee_debut, " +
                         "date_fin, demi_journee_fin, type_conge_id, statut, motif, commentaire_employe, " +
                         "commentaire_valideur, valideur_id, date_soumission, date_modification, " +
                         "date_validation, solde_conges_avant, duree_jours_ouvres) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         public static final String UPDATE_DEMANDE_CONGE = "UPDATE demande_conge SET " +
-                        "user_id = ?, nom = ?, prenom = ?, date_debut = ?, demi_journee_debut = ?, " +
+                        "user_id = ?, date_debut = ?, demi_journee_debut = ?, " +
                         "date_fin = ?, demi_journee_fin = ?, type_conge_id = ?, statut = ?, motif = ?, " +
                         "commentaire_employe = ?, commentaire_valideur = ?, valideur_id = ?, " +
                         "date_modification = ?, solde_conges_avant = ?, duree_jours_ouvres = ? " +
                         "WHERE id = ?";
 
-        public static final String SELECT_DEMANDE_BY_ID = "SELECT id, numero, user_id, nom, prenom, date_debut, demi_journee_debut, "
+        public static final String SELECT_DEMANDE_BY_ID = "SELECT id, numero, user_id, date_debut, demi_journee_debut, "
                         +
                         "date_fin, demi_journee_fin, type_conge_id, statut, motif, commentaire_employe, " +
                         "commentaire_valideur, valideur_id, date_soumission, date_modification, " +
                         "date_validation, solde_conges_avant, duree_jours_ouvres " +
                         "FROM demande_conge WHERE id = ?";
 
-        public static final String SELECT_DEMANDES_BY_USER_ID = "SELECT id, numero, user_id, nom, prenom, date_debut, demi_journee_debut, "
+        public static final String SELECT_DEMANDES_BY_USER_ID = "SELECT id, numero, user_id, date_debut, demi_journee_debut, "
                         +
                         "date_fin, demi_journee_fin, type_conge_id, statut, motif, commentaire_employe, " +
                         "commentaire_valideur, valideur_id, date_soumission, date_modification, " +
                         "date_validation, solde_conges_avant, duree_jours_ouvres " +
                         "FROM demande_conge WHERE user_id = ? ORDER BY date_soumission DESC";
 
-        public static final String SELECT_ALL_DEMANDES = "SELECT id, numero, user_id, nom, prenom, date_debut, demi_journee_debut, "
+        public static final String SELECT_ALL_DEMANDES = "SELECT id, numero, user_id, date_debut, demi_journee_debut, "
                         +
                         "date_fin, demi_journee_fin, type_conge_id, statut, motif, commentaire_employe, " +
                         "commentaire_valideur, valideur_id, date_soumission, date_modification, " +
                         "date_validation, solde_conges_avant, duree_jours_ouvres " +
                         "FROM demande_conge ORDER BY date_soumission DESC";
 
-        public static final String SELECT_DEMANDES_EN_ATTENTE = "SELECT id, numero, user_id, nom, prenom, date_debut, demi_journee_debut, "
+        public static final String SELECT_DEMANDES_EN_ATTENTE = "SELECT id, numero, user_id, date_debut, demi_journee_debut, "
                         +
                         "date_fin, demi_journee_fin, type_conge_id, statut, motif, commentaire_employe, " +
                         "commentaire_valideur, valideur_id, date_soumission, date_modification, " +
@@ -110,7 +110,7 @@ public final class SqlQueries {
                         "statut = 'EN_ATTENTE', date_modification = ?, date_validation = ? " +
                         "WHERE id = ?";
 
-        public static final String CONSULTER_DEMANDE_A_TRAITER = "SELECT id, numero, user_id, nom, prenom, date_debut, demi_journee_debut, "
+        public static final String CONSULTER_DEMANDE_A_TRAITER = "SELECT id, numero, user_id, date_debut, demi_journee_debut, "
                         +
                         "date_fin, demi_journee_fin, type_conge_id, statut, motif, commentaire_employe, " +
                         "commentaire_valideur, valideur_id, date_soumission, date_modification, " +
@@ -129,9 +129,9 @@ public final class SqlQueries {
                         "commentaire_valideur = ? " +
                         "WHERE id = ?" + " AND numero = ?";
 
-        public static final String SUPPRIMER_DEMANDE = "DELETE FROM demande_conge WHERE id = ? AND numero = ?";
+        public static final String SUPPRIMER_DEMANDE_BY_ID = "DELETE FROM demande_conge WHERE id = ?";
 
-        public static final String SELECT_DEMANDES_PAR_VALIDEUR = "SELECT * FROM demande_conge WHERE valideur_id = ? ORDER BY date_soumission DESC";
+        public static final String SELECT_DEMANDES_PAR_VALIDEUR = "SELECT id, numero, user_id, date_debut, demi_journee_debut, date_fin, demi_journee_fin, type_conge_id, statut, motif, commentaire_employe, commentaire_valideur, valideur_id, date_soumission, date_modification, date_validation, solde_conges_avant, duree_jours_ouvres FROM demande_conge WHERE valideur_id = ? ORDER BY date_soumission DESC";
 
         /** HISTORIQUE_ETAT */
         public static final String INSERT_HISTORIQUE_ETAT = "INSERT INTO historique_etat (" +
