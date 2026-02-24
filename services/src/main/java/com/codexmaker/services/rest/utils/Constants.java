@@ -185,6 +185,21 @@ public final class Constants {
     public static final String EXCEPTION_RESPONSABLES_RECUPERATION_ECHOUEE = "Échec récupération de la liste des responsables";
     public static final String EXCEPTION_UTILISATEUR_EXISTENCE_ECHOUEE = "Échec vérification d'existence utilisateur";
     public static final String EXCEPTION_EMAIL_EXISTENCE_ECHOUEE = "Échec vérification d'existence email";
+    public static final String EXCEPTION_DEMANDE_INSERTION_ECHOUEE = "Échec insertion de la demande de congé";
+    public static final String EXCEPTION_DEMANDE_MODIFICATION_ECHOUEE = "Échec modification de la demande de congé";
+    public static final String EXCEPTION_DEMANDE_RECUPERATION_ECHOUEE = "Échec récupération de la demande de congé";
+    public static final String EXCEPTION_DEMANDE_SUPPRESSION_ECHOUEE = "Échec suppression de la demande de congé";
+    public static final String EXCEPTION_DEMANDE_STATUT_ECHOUEE = "Échec mise à jour du statut de la demande";
+
+    public static final String LOG_ERREUR_DEMANDE_CREATION = "Erreur lors de la création de la demande: {}";
+    public static final String LOG_ERREUR_DEMANDE_MODIFICATION_BD = "Erreur lors de la modification de la demande ID={}: {}";
+    public static final String LOG_ERREUR_DEMANDE_RECUPERATION = "Erreur lors de la récupération de la demande ID={}: {}";
+    public static final String LOG_ERREUR_DEMANDES_RECUPERATION = "Erreur lors de la récupération des demandes: {}";
+    public static final String LOG_ERREUR_DEMANDE_STATUT = "Erreur lors de la mise à jour du statut ID={}: {}";
+    public static final String LOG_ERREUR_DEMANDE_SUPPRESSION = "Erreur lors de la suppression de la demande ID={}: {}";
+    public static final String LOG_ERREUR_DEMANDE_CHEVAUCHEMENT = "Erreur lors de la vérification du chevauchement: {}";
+    public static final String LOG_DEMANDES_RECUPEREES = "Récupérées {} demandes de congés";
+    public static final String LOG_STATUT_DEMANDE_MIS_A_JOUR = "Statut de la demande ID={} mis à jour avec succès statut={}";
 
     /** CATÉGORIE : VARIABLES STATIQUES / VALEURS FIXES */
 
