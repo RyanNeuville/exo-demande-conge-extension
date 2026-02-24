@@ -24,7 +24,6 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
 
     @Override
     public DemandeConge soumettreDemande(DemandeConge demande, String userId) {
-        // TODO: Vérifier le solde, vérifier les chevauchements, persister la demande
         return null;
     }
 
@@ -45,16 +44,13 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
 
     @Override
     public void validerDemande(String demandeId, String commentaire) {
-        // TODO: Mettre à jour statut + historiser + débiter le solde
     }
 
     @Override
     public void refuserDemande(String demandeId, String commentaire) {
-        // TODO: Mettre à jour statut + historiser
     }
 
     @Override
     public void annulerDemande(String demandeId) {
-        // TODO: Mettre à jour statut + historiser
     }
 }
