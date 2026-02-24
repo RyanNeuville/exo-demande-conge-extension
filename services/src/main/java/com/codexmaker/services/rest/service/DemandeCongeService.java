@@ -22,5 +22,9 @@ public interface DemandeCongeService {
 
     void refuserDemande(String demandeId, String commentaire);
 
+    void modifierDemandeEnAttente(DemandeConge demande, String userId);
+
     void annulerDemande(String demandeId);
+
+    void supprimerDemande(String demandeId);
 }
