@@ -53,4 +53,14 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
     @Override
     public void annulerDemande(String demandeId) {
     }
+
+    @Override
+    public void modifierDemandeEnAttente(DemandeConge demande, String userId) {
+        throw new UnsupportedOperationException("Unimplemented method 'modifierDemandeEnAttente'");
+    }
+
+    @Override
+    public void supprimerDemande(String demandeId) {
+        throw new UnsupportedOperationException("Unimplemented method 'supprimerDemande'");
+    }
 }
