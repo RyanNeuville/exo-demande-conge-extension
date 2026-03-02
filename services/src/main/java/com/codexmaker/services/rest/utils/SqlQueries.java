@@ -221,4 +221,6 @@ public final class SqlQueries {
                         "AND id != ? " +
                         "AND (date_debut <= ? AND date_fin >= ?) " +
                         "LIMIT 1";
+
+        public static final String GET_HISTORIQUE_ETAT_BY_DEMANDE_ID = "SELECT id, demande_id, statut_avant, statut_apres, date_changement, utilisateur_change, commentaire FROM historique_etat WHERE demande_id = ? ORDER BY date_changement ASC";
 }

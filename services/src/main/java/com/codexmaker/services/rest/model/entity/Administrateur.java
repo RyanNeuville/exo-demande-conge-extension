@@ -18,9 +18,11 @@ public class Administrateur extends Utilisateur {
     }
 
     public void gererTypesConges() {
-        // Cette méthode peut être un point d'entrée pour la logique de gestion des
-        // types
-        // Pour l'instant on expose le service via le contexte si besoin ailleurs
+        /**
+         * Cette méthode peut être un point d'entrée pour la logique de gestion des
+         * types
+         * Pour l'instant on expose le service via le contexte si besoin ailleurs
+         */
         ExoContainerContext.getService(TypeCongeService.class).getTousLesTypesConges();
     }
 }

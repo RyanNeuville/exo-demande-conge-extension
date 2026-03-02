@@ -21,9 +21,9 @@ public class Responsable extends Utilisateur {
     }
 
     public void ajouterCommentaireValidation(String demandeId, String commentaire) {
-        // Dans notre service actuel, valider/refuser prend le commentaire.
-        // Si on veut juste ajouter un commentaire sans changer le statut :
-        // On pourrait ajouter une méthode au service si besoin.
+        /**
+         * Dans notre service actuel, valider/refuser prend le commentaire.
+         */
     }
 
 }

@@ -4,6 +4,7 @@ import com.codexmaker.services.rest.config.DatabaseConnection;
 import com.codexmaker.services.rest.mapper.HistoriqueEtatMapper;
 import com.codexmaker.services.rest.model.entity.HistoriqueEtat;
 import com.codexmaker.services.rest.repository.HistoriqueEtatRepository;
+import com.codexmaker.services.rest.utils.Constants;
 import com.codexmaker.services.rest.utils.SqlQueries;
 
 import java.sql.Connection;
@@ -46,13 +47,13 @@ public class HistoriqueEtatRepositoryImpl implements HistoriqueEtatRepository {
             pstmt.executeUpdate();
 
         } catch (SQLException e) {
-            LOG.error("Erreur lors de l'enregistrement de l'historique : " + e.getMessage(), e);
+            LOG.error(Constants.ERROR_SAVE_HISTORIQUE_ETAT + e.getMessage(), e);
         }
     }
 
     @Override
     public List<HistoriqueEtat> findByDemandeId(String demandeId) {
-        String sql = "SELECT id, demande_id, statut_avant, statut_apres, date_changement, utilisateur_change, commentaire FROM historique_etat WHERE demande_id = ? ORDER BY date_changement ASC";
+        String sql = SqlQueries.GET_HISTORIQUE_ETAT_BY_DEMANDE_ID;
         List<HistoriqueEtat> list = new ArrayList<>();
         try (Connection conn = DatabaseConnection.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -66,7 +67,7 @@ public class HistoriqueEtatRepositoryImpl implements HistoriqueEtatRepository {
             return list;
 
         } catch (SQLException e) {
-            LOG.error("Erreur lors de la récupération de l'historique : " + e.getMessage(), e);
+            LOG.error(Constants.ERROR_GET_HISTORIQUE_ETAT + e.getMessage(), e);
             return list;
         }
     }
