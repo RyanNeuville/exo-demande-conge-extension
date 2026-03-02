@@ -37,6 +37,11 @@ public final class DemandeCongeMapper {
         demande.setNumero(rs.getString("numero"));
         demande.setUserId(rs.getString("user_id"));
 
+        String dateCreationStr = rs.getString("date_creation");
+        if (dateCreationStr != null) {
+            demande.setDateCreation(LocalDate.parse(dateCreationStr));
+        }
+
         String dateSoumissionStr = rs.getString("date_soumission");
         if (dateSoumissionStr != null) {
             demande.setDateSoumission(LocalDate.parse(dateSoumissionStr, dateFormatter));

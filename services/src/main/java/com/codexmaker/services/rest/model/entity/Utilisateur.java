@@ -15,13 +15,15 @@ public abstract class Utilisateur {
     private Role role;
     private int soldeConges;
 
-    /** Liste des demandes soumises par cet utilisateur */
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private List<DemandeConge> demandes = new ArrayList<>();
 
     /** Constructeur */
     public Utilisateur() {
     }
-    public Utilisateur(String id, String username, String nom, String prenom, String email, Role role, int soldeConges, List<DemandeConge> demandes) {
+
+    public Utilisateur(String id, String username, String nom, String prenom, String email, Role role, int soldeConges,
+            List<DemandeConge> demandes) {
         this.id = id;
         this.username = username;
         this.nom = nom;

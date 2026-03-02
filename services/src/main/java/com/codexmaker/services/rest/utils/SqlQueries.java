@@ -181,10 +181,12 @@ public final class SqlQueries {
                         "AND strftime('%Y-%m', date_validation) = strftime('%Y-%m', 'now') " +
                         "GROUP BY statut";
 
-        public static final String DASH_RESP_LAST_5_A_TRAITER = "SELECT id, numero, user_id, nom, prenom, date_soumission, motif, duree_jours_ouvres "
+        public static final String DASH_RESP_LAST_5_A_TRAITER = "SELECT dc.id, dc.numero, dc.user_id, u.nom, u.prenom, dc.date_soumission, dc.motif, dc.duree_jours_ouvres "
                         +
-                        "FROM demande_conge WHERE valideur_id = ? AND statut = 'EN_ATTENTE' " +
-                        "ORDER BY date_soumission ASC LIMIT 5";
+                        "FROM demande_conge dc " +
+                        "JOIN utilisateur u ON dc.user_id = u.id " +
+                        "WHERE dc.valideur_id = ? AND dc.statut = 'EN_ATTENTE' " +
+                        "ORDER BY dc.date_soumission ASC LIMIT 5";
 
         public static final String DASH_RESP_NB_EMPLOYES = "SELECT COUNT(DISTINCT user_id) AS nb_employes FROM demande_conge WHERE valideur_id = ?";
 
@@ -203,10 +205,12 @@ public final class SqlQueries {
                         "AND strftime('%Y', date_debut) = strftime('%Y', 'now') " +
                         "GROUP BY mois ORDER BY mois";
 
-        public static final String DASH_ADMIN_TOP_5_USERS = "SELECT user_id, nom, prenom, SUM(duree_jours_ouvres) AS total_jours "
+        public static final String DASH_ADMIN_TOP_5_USERS = "SELECT dc.user_id, u.nom, u.prenom, SUM(dc.duree_jours_ouvres) AS total_jours "
                         +
-                        "FROM demande_conge WHERE statut = 'VALIDEE' " +
-                        "GROUP BY user_id, nom, prenom ORDER BY total_jours DESC LIMIT 5";
+                        "FROM demande_conge dc " +
+                        "JOIN utilisateur u ON dc.user_id = u.id " +
+                        "WHERE dc.statut = 'VALIDEE' " +
+                        "GROUP BY dc.user_id, u.nom, u.prenom ORDER BY total_jours DESC LIMIT 5";
 
         public static final String DASH_ADMIN_SOLDE_MOYEN_PAR_ROLE = "SELECT role, AVG(solde_conges) AS solde_moyen FROM utilisateur GROUP BY role";
 

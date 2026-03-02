@@ -1,28 +1,31 @@
 package com.codexmaker.services.rest.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.codexmaker.services.rest.model.enums.StatutDemande;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class HistoriqueEtat {
     private String id;
+    @JsonBackReference
     private DemandeConge demande;
     private StatutDemande statutAvant;
     private StatutDemande statutAPres;
-    private LocalDate dateChangement;
-    private String utilisateursCange;
+    private LocalDateTime dateChangement;
+    private String utilisateurChange;
     private String commentaire;
 
-    public HistoriqueEtat(){
+    public HistoriqueEtat() {
     }
 
-    public HistoriqueEtat(String id, DemandeConge demande, StatutDemande statutAvant, StatutDemande statutAPres, LocalDate dateChangement, String utilisateursCange, String commentaire) {
+    public HistoriqueEtat(String id, DemandeConge demande, StatutDemande statutAvant, StatutDemande statutAPres,
+            LocalDateTime dateChangement, String utilisateurChange, String commentaire) {
         this.id = id;
         this.demande = demande;
         this.statutAvant = statutAvant;
         this.statutAPres = statutAPres;
         this.dateChangement = dateChangement;
-        this.utilisateursCange = utilisateursCange;
+        this.utilisateurChange = utilisateurChange;
         this.commentaire = commentaire;
     }
 
@@ -58,20 +61,20 @@ public class HistoriqueEtat {
         this.statutAPres = statutAPres;
     }
 
-    public LocalDate getDateChangement() {
+    public LocalDateTime getDateChangement() {
         return dateChangement;
     }
 
-    public void setDateChangement(LocalDate dateChangement) {
+    public void setDateChangement(LocalDateTime dateChangement) {
         this.dateChangement = dateChangement;
     }
 
-    public String getUtilisateursCange() {
-        return utilisateursCange;
+    public String getUtilisateurChange() {
+        return utilisateurChange;
     }
 
-    public void setUtilisateursCange(String utilisateursCange) {
-        this.utilisateursCange = utilisateursCange;
+    public void setUtilisateurChange(String utilisateurChange) {
+        this.utilisateurChange = utilisateurChange;
     }
 
     public String getCommentaire() {

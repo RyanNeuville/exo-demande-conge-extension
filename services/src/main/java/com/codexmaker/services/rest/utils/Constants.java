@@ -14,6 +14,7 @@ public final class Constants {
     /** CATÉGORIE : ENDPOINTS API (REST) */
 
     public static final String API_BASE = "/api";
+    public static final String MAIN_END_POINT = API_BASE + "/conges";
 
     /** 1. GESTION DES DEMANDES (Base & Employé) */
     /** POST : Soumettre une demande ("Soumettre une demande") */
