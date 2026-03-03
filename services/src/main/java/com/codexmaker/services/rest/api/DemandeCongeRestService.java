@@ -34,9 +34,11 @@ public class DemandeCongeRestService implements ResourceContainer {
     public DemandeCongeRestService() {
         this.demandeCongeService = ExoContainerContext.getService(DemandeCongeService.class);
         this.typeCongeService = ExoContainerContext.getService(TypeCongeService.class);
-        // UtilisateurService might not be an eXo Service if not registered in
-        // configuration.xml,
-        // using impl directly if not available in context.
+        /**
+         * UtilisateurService might not be an eXo Service if not registered in
+         * configuration.xml,
+         * using impl directly if not available in context.
+         */
         UtilisateurService us = ExoContainerContext.getService(UtilisateurService.class);
         this.utilisateurService = (us != null) ? us : new UtilisateurServiceImpl();
     }
@@ -46,7 +48,9 @@ public class DemandeCongeRestService implements ResourceContainer {
         return (state != null && state.getIdentity() != null) ? state.getIdentity().getUserId() : "anonymous";
     }
 
-    // --- GESTION DES DEMANDES (Base & Employé) ---
+    /**
+     * GESTION DES DEMANDES (Base & Employé)
+     */
 
     @GET
     @Path(Constants.API_DEMANDES_ME)
@@ -109,14 +113,18 @@ public class DemandeCongeRestService implements ResourceContainer {
     @Path(Constants.API_DEMANDES_HISTORIQUE)
     @RolesAllowed("users")
     public Response getHistoriqueDemande(@PathParam("id") String id) {
-        // Logique déléguée au service (qui récupère l'historique depuis le repo)
+        /**
+         * Logique déléguée au service (qui récupère l'historique depuis le repo)
+         */
         DemandeConge demande = demandeCongeService.getDemande(id);
         if (demande == null)
             return Response.status(Response.Status.NOT_FOUND).build();
         return Response.ok(demande.getHistorique()).build();
     }
 
-    // --- GESTION MANAGÉRIALE (Responsable) ---
+    /**
+     * GESTION MANAGÉRIALE (Responsable)
+     */
 
     @GET
     @Path(Constants.API_DEMANDES_A_TRAITER)
@@ -150,7 +158,9 @@ public class DemandeCongeRestService implements ResourceContainer {
         }
     }
 
-    // --- GESTION ADMINISTRATIVE (Admin) ---
+    /**
+     * GESTION ADMINISTRATIVE (Admin)
+     */
 
     @GET
     @Path(Constants.API_DEMANDES_TOUTES)
@@ -173,7 +183,9 @@ public class DemandeCongeRestService implements ResourceContainer {
                 .build();
     }
 
-    // --- GESTION DES UTILISATEURS / SOLDES ---
+    /**
+     * GESTION DES UTILISATEURS / SOLDES
+     */
 
     @GET
     @Path(Constants.API_UTILISATEUR_ME)
@@ -200,7 +212,9 @@ public class DemandeCongeRestService implements ResourceContainer {
         return Response.ok(utilisateurService.getTousLesResponsables()).build();
     }
 
-    // --- GESTION DES TYPES DE CONGÉS ---
+    /**
+     * GESTION DES TYPES DE CONGÉS
+     */
 
     @GET
     @Path(Constants.API_TYPES_CONGES)
