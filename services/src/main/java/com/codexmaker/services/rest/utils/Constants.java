@@ -23,6 +23,7 @@ public final class Constants {
      * demandes")
      */
     public static final String API_DEMANDES = API_BASE + "/demandes";
+    public static final String API_DEMANDES_ME = API_DEMANDES + "/me";
     /** GET : Lire une demande spécifique */
     /**
      * PUT : Modifier une demande en attente ou un brouillon ("Modifier ses demandes

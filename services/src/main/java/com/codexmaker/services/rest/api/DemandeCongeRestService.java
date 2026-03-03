@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * Service REST pour la gestion des demandes de congés.
  */
-@Path(Constants.MAIN_END_POINT)
+@Path("/")
 @Produces(MediaType.APPLICATION_JSON)
 public class DemandeCongeRestService implements ResourceContainer {
 
@@ -37,7 +37,7 @@ public class DemandeCongeRestService implements ResourceContainer {
     }
 
     @GET
-    @Path("/demandes/me")
+    @Path(Constants.API_DEMANDES_ME)
     @RolesAllowed("users")
     public Response getMyDemandes() {
         List<DemandeConge> demandes = demandeCongeService.getDemandesParUtilisateur(getAuthenticatedUserId());
@@ -45,7 +45,7 @@ public class DemandeCongeRestService implements ResourceContainer {
     }
 
     @POST
-    @Path("/demandes")
+    @Path(Constants.API_DEMANDES)
     @Consumes(MediaType.APPLICATION_JSON)
     @RolesAllowed("users")
     public Response submitDemande(DemandeConge demande) {
@@ -58,7 +58,7 @@ public class DemandeCongeRestService implements ResourceContainer {
     }
 
     @GET
-    @Path("/demandes/a-traiter")
+    @Path(Constants.API_DEMANDES_A_TRAITER)
     @RolesAllowed("users")
     public Response getDemandesATraiter() {
         List<DemandeConge> demandes = demandeCongeService.getDemandesATraiter(getAuthenticatedUserId());
@@ -66,7 +66,7 @@ public class DemandeCongeRestService implements ResourceContainer {
     }
 
     @POST
-    @Path("/demandes/{id}/valider")
+    @Path(Constants.API_DEMANDES_VALIDER)
     @RolesAllowed("users")
     public Response validerDemande(@PathParam("id") String id, @QueryParam("commentaire") String commentaire) {
         demandeCongeService.validerDemande(id, commentaire);
@@ -74,7 +74,7 @@ public class DemandeCongeRestService implements ResourceContainer {
     }
 
     @POST
-    @Path("/demandes/{id}/refuser")
+    @Path(Constants.API_DEMANDES_REFUSER)
     @RolesAllowed("users")
     public Response refuserDemande(@PathParam("id") String id, @QueryParam("commentaire") String commentaire) {
         demandeCongeService.refuserDemande(id, commentaire);
@@ -82,7 +82,7 @@ public class DemandeCongeRestService implements ResourceContainer {
     }
 
     @DELETE
-    @Path("/demandes/{id}")
+    @Path(Constants.API_DEMANDES_BY_ID)
     @RolesAllowed("users")
     public Response annulerDemande(@PathParam("id") String id) {
         demandeCongeService.annulerDemande(id);
@@ -90,7 +90,7 @@ public class DemandeCongeRestService implements ResourceContainer {
     }
 
     @GET
-    @Path("/demandes/export")
+    @Path(Constants.API_DEMANDES_EXPORTER)
     @RolesAllowed("administrators")
     public Response exportRapports(@QueryParam("format") String format,
             @QueryParam("debut") String debut,
@@ -104,7 +104,7 @@ public class DemandeCongeRestService implements ResourceContainer {
     }
 
     @GET
-    @Path("/types-conges")
+    @Path(Constants.API_TYPES_CONGES)
     public Response getTypesConges() {
         List<TypeConge> types = typeCongeService.getTousLesTypesConges();
         return Response.ok(types).build();
