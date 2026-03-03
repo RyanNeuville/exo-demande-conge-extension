@@ -232,4 +232,6 @@ public final class Constants {
     public static final String MESSAGE_REFUS_OK = "Demande refusée avec succès.";
     public static final String ERROR_SAVE_HISTORIQUE_ETAT = "Erreur lors de l'enregistrement de l'historique :";
     public static final String ERROR_GET_HISTORIQUE_ETAT = "Erreur lors de la récupération de l'historique :";
+    public static final String SUCCES_DB_INITIALIZED = "Base SQLite initialisée avec succès";
+    public static final String ERROR_DB_INITIALIZATION = "Échec initialisation DB : ";
 }

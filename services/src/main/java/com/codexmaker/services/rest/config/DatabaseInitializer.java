@@ -6,6 +6,8 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.util.logging.Logger;
 
+import com.codexmaker.services.rest.utils.Constants;
+
 public class DatabaseInitializer {
 
     private static final Logger LOGGER = Logger.getLogger(DatabaseInitializer.class.getName());
@@ -39,13 +41,13 @@ public class DatabaseInitializer {
                     }
                 }
 
-                LOGGER.info("Base SQLite initialisée avec succès");
+                LOGGER.info(Constants.SUCCES_DB_INITIALIZED);
             }
         } catch (Exception e) {
-            LOGGER.severe("Échec initialisation DB : " + e.getMessage());
+            LOGGER.severe(Constants.ERROR_DB_INITIALIZATION + e.getMessage());
             /** Gardez la trace pour le débogage */
             e.printStackTrace(); 
-            throw new RuntimeException("Initialisation DB échouée: " + e.getMessage());
+            throw new RuntimeException(Constants.ERROR_DB_INITIALIZATION + e.getMessage());
         }
     }
 

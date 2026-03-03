@@ -33,18 +33,18 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
 
     @Override
     public DemandeConge soumettreDemande(DemandeConge demande, String userId) {
-        // 1. Vérification de chevauchement
+        /** 1. Vérification de chevauchement */
         if (demandeCongeRepository.hasChevauchement(userId, null, demande.getDateDebut(), demande.getDateFin())) {
             throw new RuntimeException("Une demande existe déjà pour cette période.");
         }
 
-        // 2. Calculer le solde
+        /** 2. Calculer le solde */
         int soldeActuel = utilisateurRepository.getSoldeById(userId);
         if (soldeActuel < demande.getDureeJoursOuvres()) {
             throw new RuntimeException("Solde insuffisant pour cette demande.");
         }
 
-        // 3. Initialisation des champs
+        /** 3. Initialisation des champs */
         if (demande.getId() == null)
             demande.setId(UUID.randomUUID().toString());
         if (demande.getNumero() == null)
@@ -55,13 +55,13 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
         demande.setDateSoumission(LocalDate.now());
         demande.setSoldeCongesAvant(soldeActuel);
 
-        // 4. Réserver le solde immédiatement (Logique de soumission)
+        /** 4. Réserver le solde immédiatement (Logique de soumission) */
         utilisateurRepository.updateSolde(userId, soldeActuel - demande.getDureeJoursOuvres());
 
-        // 5. Sauvegarde de la demande
+        /** 5. Sauvegarde de la demande */
         DemandeConge saved = demandeCongeRepository.save(demande);
 
-        // 6. Historisation
+        /** 6. Historisation */
         logHistorique(saved, null, StatutDemande.EN_ATTENTE, userId, "Soumission initiale");
 
         return saved;
@@ -90,8 +90,8 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
     public void validerDemande(String demandeId, String commentaire) {
         DemandeConge demande = demandeCongeRepository.findById(demandeId);
         if (demande != null && demande.getStatut() == StatutDemande.EN_ATTENTE) {
-            // Le solde est déjà déduit à la soumission.
-            // On confirme juste la validation.
+            /** Le solde est déjà déduit à la soumission. */
+            /** On confirme juste la validation. */
             demandeCongeRepository.updateStatus(demandeId, StatutDemande.VALIDEE, commentaire,
                     LocalDate.now(), LocalDate.now());
 
@@ -103,7 +103,7 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
     public void refuserDemande(String demandeId, String commentaire) {
         DemandeConge demande = demandeCongeRepository.findById(demandeId);
         if (demande != null && demande.getStatut() == StatutDemande.EN_ATTENTE) {
-            // Recréditer le solde car la demande est refusée
+            /** Recréditer le solde car la demande est refusée */
             int soldeActuel = utilisateurRepository.getSoldeById(demande.getUserId());
             utilisateurRepository.updateSolde(demande.getUserId(), soldeActuel + demande.getDureeJoursOuvres());
 
@@ -121,7 +121,7 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
             throw new RuntimeException("Seulement les demandes en attente peuvent être modifiées.");
         }
 
-        // Si la durée change, il faut ajuster le solde réservé
+        /** Si la durée change, il faut ajuster le solde réservé */
         int diff = demande.getDureeJoursOuvres() - existante.getDureeJoursOuvres();
         if (diff != 0) {
             int soldeActuel = utilisateurRepository.getSoldeById(userId);
@@ -142,7 +142,9 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
         DemandeConge demande = demandeCongeRepository.findById(demandeId);
         if (demande != null
                 && (demande.getStatut() == StatutDemande.EN_ATTENTE || demande.getStatut() == StatutDemande.VALIDEE)) {
-            // Recréditer le solde dans tous les cas d'annulation (En attente ou Validée)
+            /**
+             * Recréditer le solde dans tous les cas d'annulation (En attente ou Validée)
+             */
             int soldeActuel = utilisateurRepository.getSoldeById(demande.getUserId());
             utilisateurRepository.updateSolde(demande.getUserId(), soldeActuel + demande.getDureeJoursOuvres());
 

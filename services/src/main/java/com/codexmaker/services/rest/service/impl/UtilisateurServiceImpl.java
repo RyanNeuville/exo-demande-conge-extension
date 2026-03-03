@@ -21,8 +21,10 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     @Override
     public Utilisateur synchroniserUtilisateur(Utilisateur utilisateur) {
         if (utilisateurRepository.existsById(utilisateur.getId())) {
-            // Dans un cas réel, on pourrait plutôt mettre à jour certains champs (nom,
-            // email)
+            /**
+             * Dans un cas réel, on pourrait plutôt mettre à jour certains champs (nom,
+             * email)
+             */
             return utilisateurRepository.findById(utilisateur.getId());
         }
         return utilisateurRepository.save(utilisateur);

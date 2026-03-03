@@ -2,7 +2,6 @@ package com.codexmaker.services.rest.api;
 
 import com.codexmaker.services.rest.model.entity.DemandeConge;
 import com.codexmaker.services.rest.model.entity.TypeConge;
-import com.codexmaker.services.rest.model.enums.StatutDemande;
 import com.codexmaker.services.rest.service.DemandeCongeService;
 import com.codexmaker.services.rest.service.TypeCongeService;
 import com.codexmaker.services.rest.utils.Constants;
