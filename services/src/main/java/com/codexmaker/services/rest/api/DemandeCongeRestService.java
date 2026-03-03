@@ -23,7 +23,7 @@ import java.util.List;
  * Service REST pour la gestion complète des demandes de congés, types et
  * utilisateurs.
  */
-@Path("/")
+@Path(Constants.API_BASE)
 @Produces(MediaType.APPLICATION_JSON)
 public class DemandeCongeRestService implements ResourceContainer {
 
