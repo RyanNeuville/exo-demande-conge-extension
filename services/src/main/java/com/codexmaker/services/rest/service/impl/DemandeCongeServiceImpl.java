@@ -68,6 +68,11 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
     }
 
     @Override
+    public DemandeConge getDemande(String demandeId) {
+        return demandeCongeRepository.findById(demandeId);
+    }
+
+    @Override
     public List<DemandeConge> getDemandesParUtilisateur(String userId) {
         List<DemandeConge> demandes = demandeCongeRepository.findByUserId(userId);
         for (DemandeConge d : demandes) {

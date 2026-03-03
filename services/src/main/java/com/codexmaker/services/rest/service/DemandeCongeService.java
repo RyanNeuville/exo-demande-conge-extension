@@ -13,6 +13,8 @@ public interface DemandeCongeService {
 
     DemandeConge soumettreDemande(DemandeConge demande, String userId);
 
+    DemandeConge getDemande(String demandeId);
+
     List<DemandeConge> getDemandesParUtilisateur(String userId);
 
     List<DemandeConge> getToutesLesDemandes();

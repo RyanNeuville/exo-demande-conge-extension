@@ -62,7 +62,7 @@ public final class Constants {
      */
     public static final String API_DEMANDES_TOUTES = API_DEMANDES + "/toutes";
     /** GET : Exporter les rapports ("Exporter les rapports") */
-    public static final String API_DEMANDES_EXPORTER = API_DEMANDES + "/exporter";
+    public static final String API_DEMANDES_EXPORTER = API_DEMANDES + "/export";
 
     /** 4. GESTION DES UTILISATEURS / SOLDES (Employé) */
 
@@ -72,6 +72,8 @@ public final class Constants {
     public static final String API_UTILISATEUR_ME_SOLDE = API_BASE + "/utilisateurs/me/solde";
     /** GET : Consulter les informations personnelles de l'utilisateur connecté */
     public static final String API_UTILISATEUR_ME = API_BASE + "/utilisateurs/me";
+    /** GET : Lister les responsables */
+    public static final String API_UTILISATEURS_RESPONSABLES = API_BASE + "/utilisateurs/responsables";
 
     /** 5. GESTION DES TYPES DE CONGÉS (Administrateur & Employé) */
 
