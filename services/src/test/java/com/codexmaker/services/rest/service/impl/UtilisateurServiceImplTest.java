@@ -15,6 +15,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Tests unitaires pour {@link UtilisateurServiceImpl}.
+ * Utilise Mockito pour simuler le dépôt des utilisateurs.
+ */
 @ExtendWith(MockitoExtension.class)
 public class UtilisateurServiceImplTest {
 
@@ -28,6 +32,9 @@ public class UtilisateurServiceImplTest {
         utilisateurService = new UtilisateurServiceImpl(utilisateurRepository);
     }
 
+    /**
+     * Teste la consultation du solde d'un utilisateur.
+     */
     @Test
     void consulterSolde_Success() {
         // Given

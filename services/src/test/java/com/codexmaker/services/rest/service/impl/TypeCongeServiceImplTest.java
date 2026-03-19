@@ -13,6 +13,10 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Tests unitaires pour {@link TypeCongeServiceImpl}.
+ * Vérifie la gestion des types de congés et les contraintes de suppression.
+ */
 @ExtendWith(MockitoExtension.class)
 public class TypeCongeServiceImplTest {
 
@@ -26,6 +30,9 @@ public class TypeCongeServiceImplTest {
         typeCongeService = new TypeCongeServiceImpl(typeCongeRepository);
     }
 
+    /**
+     * Teste la création d'un nouveau type de congé.
+     */
     @Test
     void creerTypeConge_Success() {
         // Given

@@ -19,6 +19,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+/**
+ * Tests unitaires pour {@link DemandeCongeServiceImpl}.
+ * Utilise Mockito pour simuler les dépendances du dépôt.
+ */
 @ExtendWith(MockitoExtension.class)
 public class DemandeCongeServiceImplTest {
 
@@ -38,6 +42,9 @@ public class DemandeCongeServiceImplTest {
         demandeCongeService = new DemandeCongeServiceImpl(demandeCongeRepository, utilisateurRepository, historiqueEtatRepository);
     }
 
+    /**
+     * Teste la soumission réussie d'une demande.
+     */
     @Test
     void soumettreDemande_Success() {
         // Given
@@ -118,6 +125,9 @@ public class DemandeCongeServiceImplTest {
         verify(historiqueEtatRepository).save(any());
     }
 
+    /**
+     * Teste le refus d'une demande avec recrédit du solde.
+     */
     @Test
     void refuserDemande_Success() {
         // Given

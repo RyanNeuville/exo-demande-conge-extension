@@ -14,10 +14,18 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
     private final UtilisateurRepository utilisateurRepository;
 
+    /**
+     * Constructeur par défaut initialisant le dépôt par défaut.
+     */
     public UtilisateurServiceImpl() {
         this(new UtilisateurRepositoryImpl());
     }
 
+    /**
+     * Constructeur permettant l'injection de dépendances pour les tests.
+     *
+     * @param utilisateurRepository le dépôt des utilisateurs
+     */
     public UtilisateurServiceImpl(UtilisateurRepository utilisateurRepository) {
         this.utilisateurRepository = utilisateurRepository;
     }

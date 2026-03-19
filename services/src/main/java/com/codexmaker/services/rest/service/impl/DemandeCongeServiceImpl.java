@@ -25,10 +25,20 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
     private final UtilisateurRepository utilisateurRepository;
     private final HistoriqueEtatRepository historiqueEtatRepository;
 
+    /**
+     * Constructeur par défaut initialisant les dépôts par défaut.
+     */
     public DemandeCongeServiceImpl() {
         this(new DemandeCongeRepositoryImpl(), new UtilisateurRepositoryImpl(), new HistoriqueEtatRepositoryImpl());
     }
 
+    /**
+     * Constructeur permettant l'injection de dépendances pour les tests.
+     *
+     * @param demandeCongeRepository   le dépôt des demandes
+     * @param utilisateurRepository    le dépôt des utilisateurs
+     * @param historiqueEtatRepository le dépôt des historiques
+     */
     public DemandeCongeServiceImpl(DemandeCongeRepository demandeCongeRepository,
                                    UtilisateurRepository utilisateurRepository,
                                    HistoriqueEtatRepository historiqueEtatRepository) {
@@ -188,6 +198,15 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
         return sb.toString();
     }
 
+    /**
+     * Enregistre une entrée dans l'historique des changements d'état.
+     *
+     * @param demande la demande concernée
+     * @param avant   l'état avant le changement
+     * @param apres   l'état après le changement
+     * @param user    l'utilisateur ayant effectué l'action
+     * @param comment le commentaire associé
+     */
     private void logHistorique(DemandeConge demande, StatutDemande avant, StatutDemande apres, String user,
             String comment) {
         HistoriqueEtat hist = new HistoriqueEtat();
