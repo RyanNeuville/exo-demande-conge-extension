@@ -35,17 +35,17 @@ public class TypeCongeServiceImplTest {
      */
     @Test
     void creerTypeConge_Success() {
-        // Given
+        /** Given */
         TypeConge tc = new TypeConge();
         tc.setCode("CP");
         tc.setLibelle("Congés Payés");
 
         when(typeCongeRepository.save(any(TypeConge.class))).thenAnswer(i -> i.getArgument(0));
 
-        // When
+        /** When */
         TypeConge result = typeCongeService.creerTypeConge(tc);
 
-        // Then
+        /** Then */
         assertNotNull(result.getId());
         assertEquals("CP", result.getCode());
         verify(typeCongeRepository).save(tc);
@@ -53,11 +53,11 @@ public class TypeCongeServiceImplTest {
 
     @Test
     void supprimerTypeConge_Fail_Used() {
-        // Given
+        /** Given */
         String typeId = UUID.randomUUID().toString();
         when(typeCongeRepository.isTypeUsed(typeId)).thenReturn(true);
 
-        // When & Then
+        /** When & Then */
         RuntimeException ex = assertThrows(RuntimeException.class, () -> {
             typeCongeService.supprimerTypeConge(typeId);
         });
@@ -68,14 +68,14 @@ public class TypeCongeServiceImplTest {
 
     @Test
     void supprimerTypeConge_Success() {
-        // Given
+        /** Given */
         String typeId = UUID.randomUUID().toString();
         when(typeCongeRepository.isTypeUsed(typeId)).thenReturn(false);
 
-        // When
+        /** When */
         typeCongeService.supprimerTypeConge(typeId);
 
-        // Then
+        /** Then */
         verify(typeCongeRepository).deleteById(typeId);
     }
 }

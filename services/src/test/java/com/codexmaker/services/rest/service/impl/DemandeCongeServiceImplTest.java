@@ -47,7 +47,7 @@ public class DemandeCongeServiceImplTest {
      */
     @Test
     void soumettreDemande_Success() {
-        // Given
+        /** Given  */
         String userId = "user123";
         DemandeConge demande = new DemandeConge();
         demande.setDateDebut(LocalDate.now().plusDays(1));
@@ -58,10 +58,10 @@ public class DemandeCongeServiceImplTest {
         when(utilisateurRepository.getSoldeById(userId)).thenReturn(10);
         when(demandeCongeRepository.save(any(DemandeConge.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // When
+        /** When */
         DemandeConge result = demandeCongeService.soumettreDemande(demande, userId);
 
-        // Then
+        /** Then */
         assertNotNull(result);
         assertEquals(StatutDemande.EN_ATTENTE, result.getStatut());
         assertEquals(userId, result.getUserId());
@@ -72,7 +72,7 @@ public class DemandeCongeServiceImplTest {
 
     @Test
     void soumettreDemande_Fail_Overlap() {
-        // Given
+        /** Given */
         String userId = "user123";
         DemandeConge demande = new DemandeConge();
         demande.setDateDebut(LocalDate.now().plusDays(1));
@@ -80,7 +80,7 @@ public class DemandeCongeServiceImplTest {
 
         when(demandeCongeRepository.hasChevauchement(eq(userId), isNull(), any(), any())).thenReturn(true);
 
-        // When & Then
+        /** When & Then */
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             demandeCongeService.soumettreDemande(demande, userId);
         });
@@ -91,7 +91,7 @@ public class DemandeCongeServiceImplTest {
 
     @Test
     void soumettreDemande_Fail_InsufficientBalance() {
-        // Given
+        /** Given */
         String userId = "user123";
         DemandeConge demande = new DemandeConge();
         demande.setDureeJoursOuvres(5);
@@ -99,7 +99,7 @@ public class DemandeCongeServiceImplTest {
         when(demandeCongeRepository.hasChevauchement(anyString(), isNull(), any(), any())).thenReturn(false);
         when(utilisateurRepository.getSoldeById(userId)).thenReturn(3);
 
-        // When & Then
+        /** When & Then */
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             demandeCongeService.soumettreDemande(demande, userId);
         });
@@ -109,7 +109,7 @@ public class DemandeCongeServiceImplTest {
 
     @Test
     void validerDemande_Success() {
-        // Given
+        /** Given */
         String demandeId = "req1";
         DemandeConge demande = new DemandeConge();
         demande.setId(demandeId);
@@ -117,10 +117,10 @@ public class DemandeCongeServiceImplTest {
 
         when(demandeCongeRepository.findById(demandeId)).thenReturn(demande);
 
-        // When
+        /** When */
         demandeCongeService.validerDemande(demandeId, "Approuvé");
 
-        // Then
+        /** Then */
         verify(demandeCongeRepository).updateStatus(eq(demandeId), eq(StatutDemande.VALIDEE), eq("Approuvé"), any(), any());
         verify(historiqueEtatRepository).save(any());
     }
@@ -130,7 +130,7 @@ public class DemandeCongeServiceImplTest {
      */
     @Test
     void refuserDemande_Success() {
-        // Given
+        /** Given */    
         String demandeId = "req1";
         String userId = "user123";
         DemandeConge demande = new DemandeConge();
@@ -142,10 +142,10 @@ public class DemandeCongeServiceImplTest {
         when(demandeCongeRepository.findById(demandeId)).thenReturn(demande);
         when(utilisateurRepository.getSoldeById(userId)).thenReturn(10);
 
-        // When
+        /** When */
         demandeCongeService.refuserDemande(demandeId, "Budget insuffisant");
 
-        // Then
+        /** Then */
         verify(utilisateurRepository).updateSolde(userId, 13); // Restored
         verify(demandeCongeRepository).updateStatus(eq(demandeId), eq(StatutDemande.REFUSEE), eq("Budget insuffisant"), any(), any());
         verify(historiqueEtatRepository).save(any());

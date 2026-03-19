@@ -37,30 +37,30 @@ public class UtilisateurServiceImplTest {
      */
     @Test
     void consulterSolde_Success() {
-        // Given
+        /** Given */
         String userId = "user1";
         when(utilisateurRepository.getSoldeById(userId)).thenReturn(25);
 
-        // When
+        /** When */
         int solde = utilisateurService.consulterSolde(userId);
 
-        // Then
+        /** Then */
         assertEquals(25, solde);
         verify(utilisateurRepository).getSoldeById(userId);
     }
 
     @Test
     void getTousLesResponsables_Success() {
-        // Given
+        /** Given */
         Employe r1 = new Employe();
         r1.setId("r1");
         List<Utilisateur> list = Arrays.asList(r1);
         when(utilisateurRepository.findAllResponsables()).thenReturn(list);
 
-        // When
+        /** When */
         List<Utilisateur> result = utilisateurService.getTousLesResponsables();
 
-        // Then
+        /** Then */
         assertEquals(1, result.size());
         assertEquals("r1", result.get(0).getId());
     }
