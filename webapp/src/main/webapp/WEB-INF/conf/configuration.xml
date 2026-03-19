@@ -2,27 +2,25 @@
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                xsi:schemaLocation="http://www.exoplatform.org/xml/ns/kernel_1_2.xsd http://www.exoplatform.org/xml/ns/kernel_1_2.xsd"
                xmlns="http://www.exoplatform.org/xml/ns/kernel_1_2.xsd">
+    <!-- Services Métier -->
     <component>
-        <key>com.codexmaker.services.service.DemandeCongeService</key>
-        <type>com.codexmaker.services.service.impl.DemandeCongeServiceImpl</type>
+        <key>com.codexmaker.services.rest.service.DemandeCongeService</key>
+        <type>com.codexmaker.services.rest.service.impl.DemandeCongeServiceImpl</type>
+    </component>
+    
+    <component>
+        <key>com.codexmaker.services.rest.service.UtilisateurService</key>
+        <type>com.codexmaker.services.rest.service.impl.UtilisateurServiceImpl</type>
+    </component>
+    
+    <component>
+        <key>com.codexmaker.services.rest.service.TypeCongeService</key>
+        <type>com.codexmaker.services.rest.service.impl.TypeCongeServiceImpl</type>
     </component>
 
+    <!-- Ressource REST (JAX-RS) -->
     <component>
-        <type>com.codexmaker.services.controller.DemandeCongeController</type>
-    </component>
-    <component>
-        <key>com.codexmaker.services.api.DemandeCongeDAO</key>
-        <type>com.codexmaker.services.api.DemandeCongeDAO</type>
-    </component>
-
-    <component>
-        <key>com.codexmaker.services.rest.service.DemandeCongeRestService</key>
-        <type>com.codexmaker.services.rest.service.DemandeCongeRestService</type>
-    </component>
-
-    <component>
-        <key>com.codexmaker.services.rest.DemandeCongeRESTService</key>
-        <type>com.codexmaker.services.rest.DemandeCongeRESTService</type>
+        <type>com.codexmaker.services.rest.api.DemandeCongeRestService</type>
     </component>
     <import>war:/conf/custom-extension/bundle-configuration.xml</import>
     <import>war:/conf/custom-extension/portal-configuration.xml</import>
