@@ -36,22 +36,23 @@ public class DemandeCongeRepositoryImpl implements DemandeCongeRepository {
             pstmt.setString(1, demande.getId());
             pstmt.setString(2, demande.getNumero());
             pstmt.setString(3, demande.getUserId());
-            pstmt.setString(4, demande.getDateDebut() != null ? demande.getDateDebut().toString() : null);
-            pstmt.setBoolean(5, demande.isDemiJourneeDebut());
-            pstmt.setString(6, demande.getDateFin() != null ? demande.getDateFin().toString() : null);
-            pstmt.setBoolean(7, demande.isDemiJourneeFin());
-            pstmt.setString(8, demande.getTypeConge() != null ? demande.getTypeConge().getId() : null);
-            pstmt.setString(9, demande.getStatut() != null ? demande.getStatut().name() : null);
-            pstmt.setString(10, demande.getMotif());
-            pstmt.setString(11, demande.getCommentaireEmploye());
-            pstmt.setString(12, demande.getCommentaireValideur());
-            pstmt.setString(13, demande.getValideurId());
-            pstmt.setString(14, demande.getDateSoumission() != null ? demande.getDateSoumission().toString() : null);
-            pstmt.setString(15,
+            pstmt.setString(4, demande.getDateCreation() != null ? demande.getDateCreation().toString() : null);
+            pstmt.setString(5, demande.getDateDebut() != null ? demande.getDateDebut().toString() : null);
+            pstmt.setBoolean(6, demande.isDemiJourneeDebut());
+            pstmt.setString(7, demande.getDateFin() != null ? demande.getDateFin().toString() : null);
+            pstmt.setBoolean(8, demande.isDemiJourneeFin());
+            pstmt.setString(9, demande.getTypeConge() != null ? demande.getTypeConge().getId() : null);
+            pstmt.setString(10, demande.getStatut() != null ? demande.getStatut().name() : null);
+            pstmt.setString(11, demande.getMotif());
+            pstmt.setString(12, demande.getCommentaireEmploye());
+            pstmt.setString(13, demande.getCommentaireValideur());
+            pstmt.setString(14, demande.getValideurId());
+            pstmt.setString(15, demande.getDateSoumission() != null ? demande.getDateSoumission().toString() : null);
+            pstmt.setString(16,
                     demande.getDateModification() != null ? demande.getDateModification().toString() : null);
-            pstmt.setString(16, demande.getDateValidation() != null ? demande.getDateValidation().toString() : null);
-            pstmt.setInt(17, demande.getSoldeCongesAvant());
-            pstmt.setInt(18, demande.getDureeJoursOuvres());
+            pstmt.setString(17, demande.getDateValidation() != null ? demande.getDateValidation().toString() : null);
+            pstmt.setInt(18, demande.getSoldeCongesAvant());
+            pstmt.setInt(19, demande.getDureeJoursOuvres());
 
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected == 0) {

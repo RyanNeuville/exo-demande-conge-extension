@@ -14,6 +14,7 @@ public final class Constants {
     /** CATÉGORIE : ENDPOINTS API (REST) */
 
     public static final String API_BASE = "/api";
+    public static final String MAIN_END_POINT = API_BASE + "/conges";
 
     /** 1. GESTION DES DEMANDES (Base & Employé) */
     /** POST : Soumettre une demande ("Soumettre une demande") */
@@ -22,6 +23,7 @@ public final class Constants {
      * demandes")
      */
     public static final String API_DEMANDES = API_BASE + "/demandes";
+    public static final String API_DEMANDES_ME = API_DEMANDES + "/me";
     /** GET : Lire une demande spécifique */
     /**
      * PUT : Modifier une demande en attente ou un brouillon ("Modifier ses demandes
@@ -60,7 +62,7 @@ public final class Constants {
      */
     public static final String API_DEMANDES_TOUTES = API_DEMANDES + "/toutes";
     /** GET : Exporter les rapports ("Exporter les rapports") */
-    public static final String API_DEMANDES_EXPORTER = API_DEMANDES + "/exporter";
+    public static final String API_DEMANDES_EXPORTER = API_DEMANDES + "/export";
 
     /** 4. GESTION DES UTILISATEURS / SOLDES (Employé) */
 
@@ -70,6 +72,8 @@ public final class Constants {
     public static final String API_UTILISATEUR_ME_SOLDE = API_BASE + "/utilisateurs/me/solde";
     /** GET : Consulter les informations personnelles de l'utilisateur connecté */
     public static final String API_UTILISATEUR_ME = API_BASE + "/utilisateurs/me";
+    /** GET : Lister les responsables */
+    public static final String API_UTILISATEURS_RESPONSABLES = API_BASE + "/utilisateurs/responsables";
 
     /** 5. GESTION DES TYPES DE CONGÉS (Administrateur & Employé) */
 
@@ -229,4 +233,8 @@ public final class Constants {
 
     public static final String MESSAGE_VALIDATION_OK = "Demande validée avec succès.";
     public static final String MESSAGE_REFUS_OK = "Demande refusée avec succès.";
+    public static final String ERROR_SAVE_HISTORIQUE_ETAT = "Erreur lors de l'enregistrement de l'historique :";
+    public static final String ERROR_GET_HISTORIQUE_ETAT = "Erreur lors de la récupération de l'historique :";
+    public static final String SUCCES_DB_INITIALIZED = "Base SQLite initialisée avec succès";
+    public static final String ERROR_DB_INITIALIZATION = "Échec initialisation DB : ";
 }

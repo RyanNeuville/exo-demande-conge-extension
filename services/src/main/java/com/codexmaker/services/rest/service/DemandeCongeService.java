@@ -1,6 +1,7 @@
 package com.codexmaker.services.rest.service;
 
 import com.codexmaker.services.rest.model.entity.DemandeConge;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -11,6 +12,8 @@ import java.util.List;
 public interface DemandeCongeService {
 
     DemandeConge soumettreDemande(DemandeConge demande, String userId);
+
+    DemandeConge getDemande(String demandeId);
 
     List<DemandeConge> getDemandesParUtilisateur(String userId);
 
@@ -27,4 +30,6 @@ public interface DemandeCongeService {
     void annulerDemande(String demandeId);
 
     void supprimerDemande(String demandeId);
+
+    String exporterRapports(String format, LocalDate debut, LocalDate fin);
 }

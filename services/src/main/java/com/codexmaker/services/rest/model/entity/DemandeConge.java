@@ -26,12 +26,17 @@ public class DemandeConge {
     private LocalDate dateModification;
     private int soldeCongesAvant;
     private int dureeJoursOuvres;
+    @com.fasterxml.jackson.annotation.JsonManagedReference
     private List<HistoriqueEtat> historique = new ArrayList<>();
 
     public DemandeConge() {
     }
 
-    public DemandeConge(String id, String numero, String userId, LocalDate dateCreation, LocalDate dateSoumission, LocalDate dateDebut, LocalDate dateFin, boolean demiJourneeDebut, boolean demiJourneeFin, TypeConge typeConge, StatutDemande statut, String motif, String commentaireEmploye, String commentaireValideur, String valideurId, LocalDate dateValidation, LocalDate dateModification, int soldeCongesAvant, int dureeJoursOuvres, List<HistoriqueEtat> historique) {
+    public DemandeConge(String id, String numero, String userId, LocalDate dateCreation, LocalDate dateSoumission,
+            LocalDate dateDebut, LocalDate dateFin, boolean demiJourneeDebut, boolean demiJourneeFin,
+            TypeConge typeConge, StatutDemande statut, String motif, String commentaireEmploye,
+            String commentaireValideur, String valideurId, LocalDate dateValidation, LocalDate dateModification,
+            int soldeCongesAvant, int dureeJoursOuvres, List<HistoriqueEtat> historique) {
         this.id = id;
         this.numero = numero;
         this.userId = userId;
@@ -214,15 +219,15 @@ public class DemandeConge {
         this.historique = historique;
     }
 
-    public int calculerDureeJoursOuvres(){
+    public int calculerDureeJoursOuvres() {
         return 0;
     }
 
-    public boolean estModifiable(){
+    public boolean estModifiable() {
         return statut == StatutDemande.EN_ATTENTE;
     }
 
-    public boolean estAnnulable(){
+    public boolean estAnnulable() {
         return statut == StatutDemande.EN_ATTENTE;
     }
 }

@@ -18,8 +18,20 @@ public class TypeCongeServiceImpl implements TypeCongeService {
     private static final Log LOG = ExoLogger.getLogger(TypeCongeServiceImpl.class);
     private final TypeCongeRepository typeCongeRepository;
 
+    /**
+     * Constructeur par défaut initialisant le dépôt par défaut.
+     */
     public TypeCongeServiceImpl() {
-        this.typeCongeRepository = new TypeCongeRepositoryImpl();
+        this(new TypeCongeRepositoryImpl());
+    }
+
+    /**
+     * Constructeur permettant l'injection de dépendances pour les tests.
+     *
+     * @param typeCongeRepository le dépôt des types de congés
+     */
+    public TypeCongeServiceImpl(TypeCongeRepository typeCongeRepository) {
+        this.typeCongeRepository = typeCongeRepository;
     }
 
     @Override

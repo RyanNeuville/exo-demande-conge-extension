@@ -14,15 +14,29 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
     private final UtilisateurRepository utilisateurRepository;
 
+    /**
+     * Constructeur par défaut initialisant le dépôt par défaut.
+     */
     public UtilisateurServiceImpl() {
-        this.utilisateurRepository = new UtilisateurRepositoryImpl();
+        this(new UtilisateurRepositoryImpl());
+    }
+
+    /**
+     * Constructeur permettant l'injection de dépendances pour les tests.
+     *
+     * @param utilisateurRepository le dépôt des utilisateurs
+     */
+    public UtilisateurServiceImpl(UtilisateurRepository utilisateurRepository) {
+        this.utilisateurRepository = utilisateurRepository;
     }
 
     @Override
     public Utilisateur synchroniserUtilisateur(Utilisateur utilisateur) {
         if (utilisateurRepository.existsById(utilisateur.getId())) {
-            // Dans un cas réel, on pourrait plutôt mettre à jour certains champs (nom,
-            // email)
+            /**
+             * Dans un cas réel, on pourrait plutôt mettre à jour certains champs (nom,
+             * email)
+             */
             return utilisateurRepository.findById(utilisateur.getId());
         }
         return utilisateurRepository.save(utilisateur);

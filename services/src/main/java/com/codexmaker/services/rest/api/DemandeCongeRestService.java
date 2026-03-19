@@ -1,469 +1,256 @@
-// package com.codexmaker.services.rest.api;
+package com.codexmaker.services.rest.api;
 
-// import com.codexmaker.services.rest.model.DemandeConge;
-// import com.codexmaker.services.rest.model.UserDemandes;
-// import com.codexmaker.services.rest.utils.Constants;
-// import com.fasterxml.jackson.databind.ObjectMapper;
-// import org.exoplatform.commons.utils.ListAccess;
-// import org.exoplatform.container.ExoContainerContext;
-// import org.exoplatform.services.log.ExoLogger;
-// import org.exoplatform.services.log.Log;
-// import org.exoplatform.services.organization.OrganizationService;
-// import org.exoplatform.services.organization.User;
-// import org.exoplatform.services.rest.resource.ResourceContainer;
-// import org.exoplatform.services.security.ConversationState;
-// import org.exoplatform.services.security.Identity;
-// import org.exoplatform.social.core.manager.IdentityManager;
-// import org.exoplatform.social.core.manager.RelationshipManager;
+import com.codexmaker.services.rest.model.entity.DemandeConge;
+import com.codexmaker.services.rest.model.entity.TypeConge;
+import com.codexmaker.services.rest.model.entity.Utilisateur;
+import com.codexmaker.services.rest.service.DemandeCongeService;
+import com.codexmaker.services.rest.service.TypeCongeService;
+import com.codexmaker.services.rest.service.UtilisateurService;
+import com.codexmaker.services.rest.service.impl.UtilisateurServiceImpl;
+import com.codexmaker.services.rest.utils.Constants;
+import org.exoplatform.container.ExoContainerContext;
+import org.exoplatform.services.rest.resource.ResourceContainer;
+import org.exoplatform.services.security.ConversationState;
 
-// import javax.annotation.security.RolesAllowed;
-// import javax.ws.rs.*;
-// import javax.ws.rs.core.MediaType;
-// import javax.ws.rs.core.Response;
-// import java.io.File;
-// import java.text.SimpleDateFormat;
-// import java.util.ArrayList;
-// import java.util.Date;
-// import java.util.List;
-// import java.util.Objects;
-// import java.util.concurrent.atomic.AtomicLong;
-// import java.util.stream.Collectors;
+import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.time.LocalDate;
+import java.util.List;
 
-// @Path(Constants.MAIN_END_POINT)
-// @Produces(MediaType.APPLICATION_JSON)
-// public class DemandeCongeRestService implements ResourceContainer {
+/**
+ * Service REST pour la gestion complète des demandes de congés, types et
+ * utilisateurs.
+ */
+@Path(Constants.API_BASE)
+@Produces(MediaType.APPLICATION_JSON)
+public class DemandeCongeRestService implements ResourceContainer {
 
-// private static final Log LOG =
-// ExoLogger.getLogger(DemandeCongeRestService.class);
-// private static final String DEMANDES_FILE =
-// Objects.requireNonNull(DemandeCongeRestService.class.getResource(Constants.DEMANDES_FILE_PATH)).getPath();
-// private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-// private static final AtomicLong ID_GENERATOR = new AtomicLong(1);
-// private static final SimpleDateFormat DATE_FORMAT = new
-// SimpleDateFormat(Constants.DATE_FORMAT_PATERN);
+    private final DemandeCongeService demandeCongeService;
+    private final TypeCongeService typeCongeService;
+    private final UtilisateurService utilisateurService;
 
-// private final IdentityManager identityManager;
-// private final RelationshipManager relationshipManager;
-// private final OrganizationService organizationService;
+    public DemandeCongeRestService() {
+        this.demandeCongeService = ExoContainerContext.getService(DemandeCongeService.class);
+        this.typeCongeService = ExoContainerContext.getService(TypeCongeService.class);
+        /**
+         * UtilisateurService might not be an eXo Service if not registered in
+         * configuration.xml,
+         * using impl directly if not available in context.
+         */
+        UtilisateurService us = ExoContainerContext.getService(UtilisateurService.class);
+        this.utilisateurService = (us != null) ? us : new UtilisateurServiceImpl();
+    }
 
-// public DemandeCongeRestService() {
-// this.identityManager = ExoContainerContext.getService(IdentityManager.class);
-// this.relationshipManager =
-// ExoContainerContext.getService(RelationshipManager.class);
-// this.organizationService =
-// ExoContainerContext.getService(OrganizationService.class);
-// DATE_FORMAT.setLenient(false);
-// }
+    private String getAuthenticatedUserId() {
+        ConversationState state = ConversationState.getCurrent();
+        return (state != null && state.getIdentity() != null) ? state.getIdentity().getUserId() : "anonymous";
+    }
 
-// private String getAuthenticatedUserName() {
-// ConversationState state = ConversationState.getCurrent();
-// return state != null && state.getIdentity() != null ?
-// state.getIdentity().getUserId() : null;
-// }
+    /**
+     * GESTION DES DEMANDES (Base & Employé)
+     */
 
-// private boolean isAdmin() {
-// try {
-// Identity identity = ConversationState.getCurrent().getIdentity();
-// return
-// organizationService.getMembershipHandler().findMembershipsByUserAndGroup(getAuthenticatedUserName(),
-// "/platform/administrators").isEmpty();
-// } catch (Exception e) {
-// LOG.error(Constants.CHECKING_ROLE_ERROR, e);
-// return true;
-// }
-// }
+    @GET
+    @Path(Constants.API_DEMANDES_ME)
+    @RolesAllowed("users")
+    public Response getMyDemandes() {
+        List<DemandeConge> demandes = demandeCongeService.getDemandesParUtilisateur(getAuthenticatedUserId());
+        return Response.ok(demandes).build();
+    }
 
-// private synchronized List<UserDemandes> readDemandesFile() {
-// try {
-// File file = new File(DEMANDES_FILE);
-// if (!file.exists()) {
-// return new ArrayList<>();
-// }
-// return OBJECT_MAPPER.readValue(file,
-// OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class,
-// UserDemandes.class));
-// } catch (Exception e) {
-// LOG.error(Constants.LOG_ERROR_READING_FILE, e);
-// return new ArrayList<>();
-// }
-// }
+    @POST
+    @Path(Constants.API_DEMANDES)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @RolesAllowed("users")
+    public Response submitDemande(DemandeConge demande) {
+        try {
+            DemandeConge saved = demandeCongeService.soumettreDemande(demande, getAuthenticatedUserId());
+            return Response.status(Response.Status.CREATED).entity(saved).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
 
-// private synchronized void writeDemandesFile(List<UserDemandes> userDemandes)
-// {
-// try {
-// File file = new File(DEMANDES_FILE);
-// file.getParentFile().mkdirs();
-// if (!file.exists()) {
-// file.createNewFile();
-// OBJECT_MAPPER.writeValue(file, new ArrayList<>());
-// LOG.info(Constants.LOG_INFO_DEMANDE_FILE_CREATED, DEMANDES_FILE);
-// }
-// OBJECT_MAPPER.writeValue(file, userDemandes);
-// LOG.info(Constants.LOG_INFO_DEMANDE_FILE_CREATED_SUCCESS);
-// } catch (Exception e) {
-// LOG.error(Constants.LOG_ERROR_CREATED_DEMANDE, DEMANDES_FILE, e);
-// }
-// }
+    @GET
+    @Path(Constants.API_DEMANDES_BY_ID)
+    @RolesAllowed("users")
+    public Response getDemandeById(@PathParam("id") String id) {
+        DemandeConge demande = demandeCongeService.getDemande(id);
+        if (demande == null)
+            return Response.status(Response.Status.NOT_FOUND).build();
+        return Response.ok(demande).build();
+    }
 
-// @POST
-// @Path(Constants.SUBMIT_END_POINT)
-// @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-// @RolesAllowed("users")
-// public Response submitDemande(@FormParam("dateDebut") String dateDebut,
-// @FormParam("dateFin") String dateFin,
-// @FormParam("typeConge") String typeConge,
-// @FormParam("motif") String motif) {
-// try {
-// String userName = getAuthenticatedUserName();
-// if (userName == null) {
-// return Response.status(Response.Status.UNAUTHORIZED).build();
-// }
+    @PUT
+    @Path(Constants.API_DEMANDES_BY_ID)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @RolesAllowed("users")
+    public Response updateDemande(@PathParam("id") String id, DemandeConge demande) {
+        try {
+            demande.setId(id);
+            demandeCongeService.modifierDemandeEnAttente(demande, getAuthenticatedUserId());
+            return Response.ok().build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
 
-// if (dateDebut == null || dateFin == null || typeConge == null ||
-// !typeConge.matches("VACANCES|MALADIE|AUTRE")) {
-// return Response.status(Response.Status.BAD_REQUEST).entity("Invalid
-// input").build();
-// }
+    @DELETE
+    @Path(Constants.API_DEMANDES_BY_ID)
+    @RolesAllowed("users")
+    public Response annulerDemande(@PathParam("id") String id) {
+        try {
+            demandeCongeService.annulerDemande(id);
+            return Response.ok().build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
 
-// List<UserDemandes> allDemandes = readDemandesFile();
-// UserDemandes userDemandes = allDemandes.stream()
-// .filter(ud -> userName.equals(ud.getUserName()))
-// .findFirst()
-// .orElseGet(() -> {
-// User user = null;
-// try {
-// user = organizationService.getUserHandler().findUserByName(userName);
-// } catch (Exception e) {
-// throw new RuntimeException(e);
-// }
-// String fullName = user != null ? user.getFirstName() + " " +
-// user.getLastName() : userName;
-// UserDemandes ud = new UserDemandes(userName, fullName, new ArrayList<>());
-// allDemandes.add(ud);
-// return ud;
-// });
+    @GET
+    @Path(Constants.API_DEMANDES_HISTORIQUE)
+    @RolesAllowed("users")
+    public Response getHistoriqueDemande(@PathParam("id") String id) {
+        /**
+         * Logique déléguée au service (qui récupère l'historique depuis le repo)
+         */
+        DemandeConge demande = demandeCongeService.getDemande(id);
+        if (demande == null)
+            return Response.status(Response.Status.NOT_FOUND).build();
+        return Response.ok(demande.getHistorique()).build();
+    }
 
-// DemandeConge demande = new DemandeConge(
-// ID_GENERATOR.getAndIncrement(),
-// dateDebut,
-// dateFin,
-// typeConge,
-// motif,
-// Constants.STATUT_EN_ATTENTE,
-// new SimpleDateFormat("yyyy-MM-dd").format(new Date())
-// );
+    /**
+     * GESTION MANAGÉRIALE (Responsable)
+     */
 
-// userDemandes.getDemandes().add(demande);
-// writeDemandesFile(allDemandes);
+    @GET
+    @Path(Constants.API_DEMANDES_A_TRAITER)
+    @RolesAllowed("users")
+    public Response getDemandesATraiter() {
+        List<DemandeConge> demandes = demandeCongeService.getDemandesATraiter(getAuthenticatedUserId());
+        return Response.ok(demandes).build();
+    }
 
-// LOG.info("Demande submitted by {}: {}", userName, demande);
-// return Response.ok().build();
-// } catch (Exception e) {
-// LOG.error("Error submitting demande", e);
-// return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error
-// submitting demande").build();
-// }
-// }
+    @POST
+    @Path(Constants.API_DEMANDES_VALIDER)
+    @RolesAllowed("users")
+    public Response validerDemande(@PathParam("id") String id, @QueryParam("commentaire") String commentaire) {
+        try {
+            demandeCongeService.validerDemande(id, commentaire);
+            return Response.ok().build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
 
-// @GET
-// @Path(Constants.ALL_DEMANDES_END_POINT)
-// @RolesAllowed("administrators")
-// public Response getAllDemandes() {
-// try {
-// if (isAdmin()) {
-// LOG.warn("Non-admin user {} attempted to access all demandes",
-// getAuthenticatedUserName());
-// return Response.status(Response.Status.FORBIDDEN).entity("Admin access
-// required").build();
-// }
+    @POST
+    @Path(Constants.API_DEMANDES_REFUSER)
+    @RolesAllowed("users")
+    public Response refuserDemande(@PathParam("id") String id, @QueryParam("commentaire") String commentaire) {
+        try {
+            demandeCongeService.refuserDemande(id, commentaire);
+            return Response.ok().build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
 
-// List<UserDemandes> allDemandes = readDemandesFile();
-// LOG.info("Fetched all demandes for {} users", allDemandes.size());
-// return Response.ok(allDemandes).build();
-// } catch (Exception e) {
-// LOG.error("Error fetching all demandes", e);
-// return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error
-// fetching all demandes").build();
-// }
-// }
+    /**
+     * GESTION ADMINISTRATIVE (Admin)
+     */
 
-// @GET
-// @Path(Constants.MY_DEMANDE_END_POINT)
-// @RolesAllowed("users")
-// public Response getMyDemandes() {
-// try {
-// String userName = getAuthenticatedUserName();
-// if (userName == null) {
-// return Response.status(Response.Status.UNAUTHORIZED).build();
-// }
+    @GET
+    @Path(Constants.API_DEMANDES_TOUTES)
+    @RolesAllowed("administrators")
+    public Response getToutesLesDemandes() {
+        return Response.ok(demandeCongeService.getToutesLesDemandes()).build();
+    }
 
-// List<UserDemandes> allDemandes = readDemandesFile();
-// UserDemandes userDemandes = allDemandes.stream()
-// .filter(ud -> userName.equals(ud.getUserName()))
-// .findFirst()
-// .orElseGet(() -> new UserDemandes(userName, userName, new ArrayList<>()));
+    @GET
+    @Path(Constants.API_DEMANDES_EXPORTER)
+    @RolesAllowed("administrators")
+    public Response exportRapports(@QueryParam("format") String format,
+            @QueryParam("debut") String debut,
+            @QueryParam("fin") String fin) {
+        LocalDate start = (debut != null) ? LocalDate.parse(debut) : null;
+        LocalDate end = (fin != null) ? LocalDate.parse(fin) : null;
+        String csv = demandeCongeService.exporterRapports(format, start, end);
+        return Response.ok(csv, "text/csv")
+                .header("Content-Disposition", "attachment; filename=\"rapport_conges.csv\"")
+                .build();
+    }
 
-// return Response.ok(userDemandes).build();
-// } catch (Exception e) {
-// LOG.error("Error fetching my demandes", e);
-// return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error
-// fetching my demandes").build();
-// }
-// }
+    /**
+     * GESTION DES UTILISATEURS / SOLDES
+     */
 
-// @GET
-// @Path(Constants.MY_RELATIONS_DEMANDE_END_POINT)
-// @RolesAllowed("users")
-// public Response getRelationsDemandes() {
-// String userName = null;
-// try {
-// userName = getAuthenticatedUserName();
-// if (userName == null) {
-// LOG.warn("Unauthorized access attempt to get relations demandes");
-// return Response.status(Response.Status.UNAUTHORIZED).entity("User not
-// authenticated").build();
-// }
+    @GET
+    @Path(Constants.API_UTILISATEUR_ME)
+    @RolesAllowed("users")
+    public Response getMe() {
+        Utilisateur u = utilisateurService.getUtilisateur(getAuthenticatedUserId());
+        if (u == null)
+            return Response.status(Response.Status.NOT_FOUND).build();
+        return Response.ok(u).build();
+    }
 
-// org.exoplatform.social.core.identity.model.Identity userIdentity =
-// identityManager.getOrCreateUserIdentity(userName);
-// if (userIdentity == null) {
-// LOG.warn("Identity not found for user {}", userName);
-// return Response.status(Response.Status.NOT_FOUND).entity("User identity not
-// found").build();
-// }
+    @GET
+    @Path(Constants.API_UTILISATEUR_ME_SOLDE)
+    @RolesAllowed("users")
+    public Response getMySolde() {
+        int solde = utilisateurService.consulterSolde(getAuthenticatedUserId());
+        return Response.ok(solde).build();
+    }
 
-// ListAccess<org.exoplatform.social.core.identity.model.Identity> connections =
-// relationshipManager.getConnections(userIdentity);
-// org.exoplatform.social.core.identity.model.Identity[] connectionsIdentities =
-// connections.load(0, connections.getSize());
+    @GET
+    @Path(Constants.API_UTILISATEURS_RESPONSABLES)
+    @RolesAllowed("users")
+    public Response getResponsables() {
+        return Response.ok(utilisateurService.getTousLesResponsables()).build();
+    }
 
-// List<String> relationUserNames = new ArrayList<>();
-// for (org.exoplatform.social.core.identity.model.Identity connection :
-// connectionsIdentities) {
-// if (!userName.equals(connection.getRemoteId())) {
-// relationUserNames.add(connection.getRemoteId());
-// }
-// }
+    /**
+     * GESTION DES TYPES DE CONGÉS
+     */
 
-// List<UserDemandes> allDemandes = readDemandesFile();
-// List<UserDemandes> relationsDemandes = allDemandes.stream()
-// .filter(ud -> relationUserNames.contains(ud.getUserName()))
-// .collect(Collectors.toList());
+    @GET
+    @Path(Constants.API_TYPES_CONGES)
+    public Response getTypesConges() {
+        List<TypeConge> types = typeCongeService.getTousLesTypesConges();
+        return Response.ok(types).build();
+    }
 
-// LOG.info("Fetched {} relations with {} demandes for user {}",
-// relationUserNames.size(), relationsDemandes.size(), userName);
-// return Response.ok(relationsDemandes).build();
-// } catch (Exception e) {
-// LOG.error("Error fetching relations demandes for user {}", userName, e);
-// return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error
-// fetching relations demandes").build();
-// }
-// }
+    @POST
+    @Path(Constants.API_TYPES_CONGES)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @RolesAllowed("administrators")
+    public Response createTypeConge(TypeConge type) {
+        TypeConge created = typeCongeService.creerTypeConge(type);
+        return Response.status(Response.Status.CREATED).entity(created).build();
+    }
 
-// @GET
-// @Path(Constants.DEMANDE_EN_ATTANTE_END_POINT)
-// @RolesAllowed("administrators")
-// public Response getEnAttenteDemandes() {
-// try {
-// if (isAdmin()) {
-// return Response.status(Response.Status.FORBIDDEN).entity("Admin access
-// required").build();
-// }
+    @PUT
+    @Path(Constants.API_TYPES_CONGES_BY_ID)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @RolesAllowed("administrators")
+    public Response updateTypeConge(@PathParam("id") String id, TypeConge type) {
+        type.setId(id);
+        typeCongeService.modifierTypeConge(type);
+        return Response.ok().build();
+    }
 
-// List<UserDemandes> allDemandes = readDemandesFile();
-// List<UserDemandes> enAttenteDemandes = allDemandes.stream()
-// .map(ud -> {
-// List<DemandeConge> enAttente = ud.getDemandes().stream()
-// .filter(d -> Constants.STATUT_EN_ATTENTE.equals(d.getStatus()))
-// .collect(Collectors.toList());
-// return new UserDemandes(ud.getUserName(), ud.getFullName(), enAttente);
-// })
-// .filter(ud -> !ud.getDemandes().isEmpty())
-// .collect(Collectors.toList());
-
-// return Response.ok(enAttenteDemandes).build();
-// } catch (Exception e) {
-// LOG.error("Error fetching en attente demandes", e);
-// return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error
-// fetching en attente demandes").build();
-// }
-// }
-
-// @PUT
-// @Path(Constants.UPDATE_DEMANDE_END_POINT)
-// @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-// @RolesAllowed("administrators")
-// public Response updateDemande(@FormParam("userName") String userName,
-// @FormParam("index") int index,
-// @FormParam("dateDebut") String dateDebut,
-// @FormParam("dateFin") String dateFin,
-// @FormParam("typeConge") String typeConge,
-// @FormParam("motif") String motif) {
-// try {
-// if (isAdmin()) {
-// return Response.status(Response.Status.FORBIDDEN).entity("Admin access
-// required").build();
-// }
-
-// if (dateDebut == null || dateFin == null || typeConge == null ||
-// !typeConge.matches("VACANCES|MALADIE|AUTRE")) {
-// return Response.status(Response.Status.BAD_REQUEST).entity("Invalid
-// input").build();
-// }
-
-// List<UserDemandes> allDemandes = readDemandesFile();
-// UserDemandes userDemandes = allDemandes.stream()
-// .filter(ud -> userName.equals(ud.getUserName()))
-// .findFirst()
-// .orElse(null);
-
-// if (userDemandes == null || index < 0 || index >=
-// userDemandes.getDemandes().size()) {
-// return Response.status(Response.Status.NOT_FOUND).entity("Demande not
-// found").build();
-// }
-
-// DemandeConge demande = userDemandes.getDemandes().get(index);
-// if (!Constants.STATUT_EN_ATTENTE.equals(demande.getStatus())) {
-// return Response.status(Response.Status.BAD_REQUEST).entity("Only EN_ATTENTE
-// demandes can be updated").build();
-// }
-
-// demande.setDateDebut(dateDebut);
-// demande.setDateFin(dateFin);
-// demande.setTypeConge(typeConge);
-// demande.setMotif(motif);
-
-// writeDemandesFile(allDemandes);
-// LOG.info("Demande updated for user {} at index {}", userName, index);
-// return Response.ok().build();
-// } catch (Exception e) {
-// LOG.error("Error updating demande", e);
-// return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error
-// updating demande").build();
-// }
-// }
-
-// @POST
-// @Path(Constants.APPROUVER_DEMANDE_END_POINT )
-// @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-// @RolesAllowed("administrators")
-// public Response approveDemande(@FormParam("userName") String userName,
-// @FormParam("index") int index) {
-// try {
-// if (isAdmin()) {
-// return Response.status(Response.Status.FORBIDDEN).entity("Admin access
-// required").build();
-// }
-
-// List<UserDemandes> allDemandes = readDemandesFile();
-// UserDemandes userDemandes = allDemandes.stream()
-// .filter(ud -> userName.equals(ud.getUserName()))
-// .findFirst()
-// .orElse(null);
-
-// if (userDemandes == null || index < 0 || index >=
-// userDemandes.getDemandes().size()) {
-// return Response.status(Response.Status.NOT_FOUND).entity("Demande not
-// found").build();
-// }
-
-// DemandeConge demande = userDemandes.getDemandes().get(index);
-// if (!Constants.STATUT_EN_ATTENTE.equals(demande.getStatus())) {
-// return Response.status(Response.Status.BAD_REQUEST).entity("Only EN_ATTENTE
-// demandes can be approved").build();
-// }
-
-// demande.setStatus(Constants.STATUT_APPROUVEE);
-// writeDemandesFile(allDemandes);
-// LOG.info("Demande approved for user {} at index {}", userName, index);
-// return Response.ok().build();
-// } catch (Exception e) {
-// LOG.error("Error approving demande", e);
-// return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error
-// approving demande").build();
-// }
-// }
-
-// @POST
-// @Path(Constants.REJETER_DEMANDE_END_POINT)
-// @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-// @RolesAllowed("administrators")
-// public Response rejectDemande(@FormParam("userName") String userName,
-// @FormParam("index") int index) {
-// try {
-// if (isAdmin()) {
-// return Response.status(Response.Status.FORBIDDEN).entity("Admin access
-// required").build();
-// }
-
-// List<UserDemandes> allDemandes = readDemandesFile();
-// UserDemandes userDemandes = allDemandes.stream()
-// .filter(ud -> userName.equals(ud.getUserName()))
-// .findFirst()
-// .orElse(null);
-
-// if (userDemandes == null || index < 0 || index >=
-// userDemandes.getDemandes().size()) {
-// return Response.status(Response.Status.NOT_FOUND).entity("Demande not
-// found").build();
-// }
-
-// DemandeConge demande = userDemandes.getDemandes().get(index);
-// if (!Constants.STATUT_EN_ATTENTE.equals(demande.getStatus())) {
-// return Response.status(Response.Status.BAD_REQUEST).entity("Only EN_ATTENTE
-// demandes can be rejected").build();
-// }
-
-// demande.setStatus(Constants.STATUT_REJETEE);
-// writeDemandesFile(allDemandes);
-// LOG.info("Demande rejected for user {} at index {}", userName, index);
-// return Response.ok().build();
-// } catch (Exception e) {
-// LOG.error("Error rejecting demande", e);
-// return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error
-// rejecting demande").build();
-// }
-// }
-
-// @POST
-// @Path(Constants.CANCEL_DEMANDE_END_POINT)
-// @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-// @RolesAllowed("administrators")
-// public Response cancelDemande(@FormParam("userName") String userName,
-// @FormParam("index") int index) {
-// try {
-// if (isAdmin()) {
-// return Response.status(Response.Status.FORBIDDEN).entity("Admin access
-// required").build();
-// }
-
-// List<UserDemandes> allDemandes = readDemandesFile();
-// UserDemandes userDemandes = allDemandes.stream()
-// .filter(ud -> userName.equals(ud.getUserName()))
-// .findFirst()
-// .orElse(null);
-
-// if (userDemandes == null || index < 0 || index >=
-// userDemandes.getDemandes().size()) {
-// return Response.status(Response.Status.NOT_FOUND).entity("Demande not
-// found").build();
-// }
-
-// DemandeConge demande = userDemandes.getDemandes().get(index);
-// if (!Constants.STATUT_EN_ATTENTE.equals(demande.getStatus())) {
-// return Response.status(Response.Status.BAD_REQUEST).entity("Only EN_ATTENTE
-// demandes can be canceled").build();
-// }
-
-// userDemandes.getDemandes().remove(index);
-// writeDemandesFile(allDemandes);
-// LOG.info("Demande canceled for user {} at index {}", userName, index);
-// return Response.ok().build();
-// } catch (Exception e) {
-// LOG.error("Error canceling demande", e);
-// return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error
-// canceling demande").build();
-// }
-// }
-// }
+    @DELETE
+    @Path(Constants.API_TYPES_CONGES_BY_ID)
+    @RolesAllowed("administrators")
+    public Response deleteTypeConge(@PathParam("id") String id) {
+        try {
+            typeCongeService.supprimerTypeConge(id);
+            return Response.ok().build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+}

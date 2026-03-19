@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter;
 public final class DemandeCongeMapper {
 
     private DemandeCongeMapper() {
-        // Constructeur privé pour empêcher l'instanciation
+        /** Constructeur privé pour empêcher l'instanciation */
     }
 
     /**
@@ -37,6 +37,11 @@ public final class DemandeCongeMapper {
         demande.setNumero(rs.getString("numero"));
         demande.setUserId(rs.getString("user_id"));
 
+        String dateCreationStr = rs.getString("date_creation");
+        if (dateCreationStr != null) {
+            demande.setDateCreation(LocalDate.parse(dateCreationStr));
+        }
+
         String dateSoumissionStr = rs.getString("date_soumission");
         if (dateSoumissionStr != null) {
             demande.setDateSoumission(LocalDate.parse(dateSoumissionStr, dateFormatter));
@@ -55,9 +60,11 @@ public final class DemandeCongeMapper {
         demande.setDemiJourneeDebut(rs.getBoolean("demi_journee_debut"));
         demande.setDemiJourneeFin(rs.getBoolean("demi_journee_fin"));
 
-        // Instanciation du sous-objet TypeConge avec son ID uniquement.
-        // La charge complète de l'objet TypeConge peut être gérée par le composant
-        // appelant si nécessaire.
+        /**
+         * Instanciation du sous-objet TypeConge avec son ID uniquement.
+         * La charge complète de l'objet TypeConge peut être gérée par le composant
+         * appelant si nécessaire.
+         */
         TypeConge typeConge = new TypeConge();
         typeConge.setId(rs.getString("type_conge_id"));
         demande.setTypeConge(typeConge);

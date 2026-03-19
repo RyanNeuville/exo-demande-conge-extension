@@ -57,8 +57,6 @@ CREATE TABLE IF NOT EXISTS demande_conge (
     ),
     numero TEXT NOT NULL UNIQUE,
     user_id TEXT NOT NULL,
-    nom TEXT NOT NULL,
-    prenom TEXT NOT NULL,
     date_debut DATE NOT NULL,
     demi_journee_debut BOOLEAN NOT NULL DEFAULT 0,
     date_fin DATE NOT NULL,

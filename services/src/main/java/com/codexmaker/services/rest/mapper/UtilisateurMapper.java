@@ -16,7 +16,7 @@ import java.sql.SQLException;
 public class UtilisateurMapper {
 
     private UtilisateurMapper() {
-        // Constructeur privé pour empêcher l'instanciation
+        /** Constructeur privé pour empêcher l'instanciation */
     }
 
     /**
