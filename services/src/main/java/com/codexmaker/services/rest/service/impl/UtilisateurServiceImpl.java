@@ -15,7 +15,11 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     private final UtilisateurRepository utilisateurRepository;
 
     public UtilisateurServiceImpl() {
-        this.utilisateurRepository = new UtilisateurRepositoryImpl();
+        this(new UtilisateurRepositoryImpl());
+    }
+
+    public UtilisateurServiceImpl(UtilisateurRepository utilisateurRepository) {
+        this.utilisateurRepository = utilisateurRepository;
     }
 
     @Override

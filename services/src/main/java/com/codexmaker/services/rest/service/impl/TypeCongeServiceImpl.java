@@ -19,7 +19,11 @@ public class TypeCongeServiceImpl implements TypeCongeService {
     private final TypeCongeRepository typeCongeRepository;
 
     public TypeCongeServiceImpl() {
-        this.typeCongeRepository = new TypeCongeRepositoryImpl();
+        this(new TypeCongeRepositoryImpl());
+    }
+
+    public TypeCongeServiceImpl(TypeCongeRepository typeCongeRepository) {
+        this.typeCongeRepository = typeCongeRepository;
     }
 
     @Override

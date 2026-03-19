@@ -26,9 +26,15 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
     private final HistoriqueEtatRepository historiqueEtatRepository;
 
     public DemandeCongeServiceImpl() {
-        this.demandeCongeRepository = new DemandeCongeRepositoryImpl();
-        this.utilisateurRepository = new UtilisateurRepositoryImpl();
-        this.historiqueEtatRepository = new HistoriqueEtatRepositoryImpl();
+        this(new DemandeCongeRepositoryImpl(), new UtilisateurRepositoryImpl(), new HistoriqueEtatRepositoryImpl());
+    }
+
+    public DemandeCongeServiceImpl(DemandeCongeRepository demandeCongeRepository,
+                                   UtilisateurRepository utilisateurRepository,
+                                   HistoriqueEtatRepository historiqueEtatRepository) {
+        this.demandeCongeRepository = demandeCongeRepository;
+        this.utilisateurRepository = utilisateurRepository;
+        this.historiqueEtatRepository = historiqueEtatRepository;
     }
 
     @Override
