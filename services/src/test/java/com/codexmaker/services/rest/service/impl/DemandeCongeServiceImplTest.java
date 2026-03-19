@@ -1,5 +1,8 @@
 package com.codexmaker.services.rest.service.impl;
 
+import com.codexmaker.services.rest.exception.BusinessException;
+import com.codexmaker.services.rest.exception.InsufficientLeaveBalanceException;
+import com.codexmaker.services.rest.exception.UnauthorizedActionException;
 import com.codexmaker.services.rest.model.entity.DemandeConge;
 import com.codexmaker.services.rest.model.enums.StatutDemande;
 import com.codexmaker.services.rest.repository.DemandeCongeRepository;
@@ -81,7 +84,7 @@ public class DemandeCongeServiceImplTest {
         when(demandeCongeRepository.hasChevauchement(eq(userId), isNull(), any(), any())).thenReturn(true);
 
         /** When & Then */
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
             demandeCongeService.soumettreDemande(demande, userId);
         });
 
@@ -100,7 +103,7 @@ public class DemandeCongeServiceImplTest {
         when(utilisateurRepository.getSoldeById(userId)).thenReturn(3);
 
         /** When & Then */
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        InsufficientLeaveBalanceException exception = assertThrows(InsufficientLeaveBalanceException.class, () -> {
             demandeCongeService.soumettreDemande(demande, userId);
         });
 

@@ -1,5 +1,6 @@
 package com.codexmaker.services.rest.service.impl;
 
+import com.codexmaker.services.rest.exception.BusinessException;
 import com.codexmaker.services.rest.model.entity.TypeConge;
 import com.codexmaker.services.rest.repository.TypeCongeRepository;
 import com.codexmaker.services.rest.repository.impl.TypeCongeRepositoryImpl;
@@ -64,7 +65,7 @@ public class TypeCongeServiceImpl implements TypeCongeService {
     public void supprimerTypeConge(String id) {
         if (typeCongeRepository.isTypeUsed(id)) {
             LOG.warn("Impossible de supprimer le type de congé ID={} car il est lié à des demandes", id);
-            throw new RuntimeException(
+            throw new BusinessException(
                     "Ce type de congé ne peut pas être supprimé car il est utilisé dans des demandes existantes.");
         }
         typeCongeRepository.deleteById(id);

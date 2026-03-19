@@ -1,5 +1,8 @@
 package com.codexmaker.services.rest.service.impl;
 
+import com.codexmaker.services.rest.exception.BusinessException;
+import com.codexmaker.services.rest.exception.InsufficientLeaveBalanceException;
+import com.codexmaker.services.rest.exception.UnauthorizedActionException;
 import com.codexmaker.services.rest.model.entity.DemandeConge;
 import com.codexmaker.services.rest.model.entity.HistoriqueEtat;
 import com.codexmaker.services.rest.model.enums.StatutDemande;
@@ -51,13 +54,13 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
     public DemandeConge soumettreDemande(DemandeConge demande, String userId) {
         /** 1. Vérification de chevauchement */
         if (demandeCongeRepository.hasChevauchement(userId, null, demande.getDateDebut(), demande.getDateFin())) {
-            throw new RuntimeException("Une demande existe déjà pour cette période.");
+            throw new BusinessException("Une demande existe déjà pour cette période.");
         }
 
         /** 2. Calculer le solde */
         int soldeActuel = utilisateurRepository.getSoldeById(userId);
         if (soldeActuel < demande.getDureeJoursOuvres()) {
-            throw new RuntimeException("Solde insuffisant pour cette demande.");
+            throw new InsufficientLeaveBalanceException("Solde insuffisant pour cette demande.");
         }
 
         /** 3. Initialisation des champs */
@@ -139,7 +142,7 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
     public void modifierDemandeEnAttente(DemandeConge demande, String userId) {
         DemandeConge existante = demandeCongeRepository.findById(demande.getId());
         if (existante == null || existante.getStatut() != StatutDemande.EN_ATTENTE) {
-            throw new RuntimeException("Seulement les demandes en attente peuvent être modifiées.");
+            throw new UnauthorizedActionException("Seulement les demandes en attente peuvent être modifiées.");
         }
 
         /** Si la durée change, il faut ajuster le solde réservé */
@@ -147,7 +150,7 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
         if (diff != 0) {
             int soldeActuel = utilisateurRepository.getSoldeById(userId);
             if (soldeActuel < diff)
-                throw new RuntimeException("Solde insuffisant pour la modification.");
+                throw new InsufficientLeaveBalanceException("Solde insuffisant pour la modification.");
             utilisateurRepository.updateSolde(userId, soldeActuel - diff);
         }
 
