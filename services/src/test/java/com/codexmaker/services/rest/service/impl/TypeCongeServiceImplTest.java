@@ -1,5 +1,6 @@
 package com.codexmaker.services.rest.service.impl;
 
+import com.codexmaker.services.rest.exception.BusinessException;
 import com.codexmaker.services.rest.model.entity.TypeConge;
 import com.codexmaker.services.rest.repository.TypeCongeRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,7 +59,7 @@ public class TypeCongeServiceImplTest {
         when(typeCongeRepository.isTypeUsed(typeId)).thenReturn(true);
 
         /** When & Then */
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+        BusinessException ex = assertThrows(BusinessException.class, () -> {
             typeCongeService.supprimerTypeConge(typeId);
         });
 
