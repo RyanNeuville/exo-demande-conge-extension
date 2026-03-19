@@ -65,12 +65,8 @@ public class DemandeCongeRestService implements ResourceContainer {
     @Consumes(MediaType.APPLICATION_JSON)
     @RolesAllowed("users")
     public Response submitDemande(DemandeConge demande) {
-        try {
-            DemandeConge saved = demandeCongeService.soumettreDemande(demande, getAuthenticatedUserId());
-            return Response.status(Response.Status.CREATED).entity(saved).build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-        }
+        DemandeConge saved = demandeCongeService.soumettreDemande(demande, getAuthenticatedUserId());
+        return Response.status(Response.Status.CREATED).entity(saved).build();
     }
 
     @GET
@@ -88,25 +84,17 @@ public class DemandeCongeRestService implements ResourceContainer {
     @Consumes(MediaType.APPLICATION_JSON)
     @RolesAllowed("users")
     public Response updateDemande(@PathParam("id") String id, DemandeConge demande) {
-        try {
-            demande.setId(id);
-            demandeCongeService.modifierDemandeEnAttente(demande, getAuthenticatedUserId());
-            return Response.ok().build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-        }
+        demande.setId(id);
+        demandeCongeService.modifierDemandeEnAttente(demande, getAuthenticatedUserId());
+        return Response.ok().build();
     }
 
     @DELETE
     @Path(Constants.API_DEMANDES_BY_ID)
     @RolesAllowed("users")
     public Response annulerDemande(@PathParam("id") String id) {
-        try {
-            demandeCongeService.annulerDemande(id);
-            return Response.ok().build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-        }
+        demandeCongeService.annulerDemande(id);
+        return Response.ok().build();
     }
 
     @GET
@@ -138,24 +126,16 @@ public class DemandeCongeRestService implements ResourceContainer {
     @Path(Constants.API_DEMANDES_VALIDER)
     @RolesAllowed("users")
     public Response validerDemande(@PathParam("id") String id, @QueryParam("commentaire") String commentaire) {
-        try {
-            demandeCongeService.validerDemande(id, commentaire);
-            return Response.ok().build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-        }
+        demandeCongeService.validerDemande(id, commentaire);
+        return Response.ok().build();
     }
 
     @POST
     @Path(Constants.API_DEMANDES_REFUSER)
     @RolesAllowed("users")
     public Response refuserDemande(@PathParam("id") String id, @QueryParam("commentaire") String commentaire) {
-        try {
-            demandeCongeService.refuserDemande(id, commentaire);
-            return Response.ok().build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-        }
+        demandeCongeService.refuserDemande(id, commentaire);
+        return Response.ok().build();
     }
 
     /**
@@ -246,11 +226,7 @@ public class DemandeCongeRestService implements ResourceContainer {
     @Path(Constants.API_TYPES_CONGES_BY_ID)
     @RolesAllowed("administrators")
     public Response deleteTypeConge(@PathParam("id") String id) {
-        try {
-            typeCongeService.supprimerTypeConge(id);
-            return Response.ok().build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-        }
+        typeCongeService.supprimerTypeConge(id);
+        return Response.ok().build();
     }
 }

@@ -22,6 +22,11 @@
     <component>
         <type>com.codexmaker.services.rest.api.DemandeCongeRestService</type>
     </component>
+
+    <!-- Provider d'Exceptions -->
+    <component>
+        <type>com.codexmaker.services.rest.provider.GlobalExceptionMapper</type>
+    </component>
     <import>war:/conf/custom-extension/bundle-configuration.xml</import>
     <import>war:/conf/custom-extension/portal-configuration.xml</import>
 </configuration>
