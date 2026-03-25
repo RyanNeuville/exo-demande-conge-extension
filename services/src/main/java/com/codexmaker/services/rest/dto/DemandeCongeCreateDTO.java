@@ -1,14 +1,12 @@
 package com.codexmaker.services.rest.dto;
 
-import java.time.LocalDate;
-
 import com.codexmaker.services.rest.model.entity.TypeConge;
 
 public class DemandeCongeCreateDTO {
     private String userId;
-    private LocalDate dateDebut;
+    private String dateDebut;
     private boolean demiJourneeDebut;
-    private LocalDate dateFin;
+    private String dateFin;
     private boolean demiJourneeFin;
     private TypeConge typeConge;
     private String motif;
@@ -18,7 +16,7 @@ public class DemandeCongeCreateDTO {
     public DemandeCongeCreateDTO() {
     }
 
-    public DemandeCongeCreateDTO(String userId, LocalDate dateDebut, boolean demiJourneeDebut, LocalDate dateFin, boolean demiJourneeFin, TypeConge typeConge, String motif, String commentaireEmploye, int dureeJoursOuvres) {
+    public DemandeCongeCreateDTO(String userId, String dateDebut, boolean demiJourneeDebut, String dateFin, boolean demiJourneeFin, TypeConge typeConge, String motif, String commentaireEmploye, int dureeJoursOuvres) {
         this.userId = userId;
         this.dateDebut = dateDebut;
         this.demiJourneeDebut = demiJourneeDebut;
@@ -38,11 +36,11 @@ public class DemandeCongeCreateDTO {
         this.userId = userId;
     }
 
-    public LocalDate getDateDebut() {
+    public String getDateDebut() {
         return dateDebut;
     }
 
-    public void setDateDebut(LocalDate dateDebut) {
+    public void setDateDebut(String dateDebut) {
         this.dateDebut = dateDebut;
     }
 
@@ -54,11 +52,11 @@ public class DemandeCongeCreateDTO {
         this.demiJourneeDebut = demiJourneeDebut;
     }
 
-    public LocalDate getDateFin() {
+    public String getDateFin() {
         return dateFin;
     }
 
-    public void setDateFin(LocalDate dateFin) {
+    public void setDateFin(String dateFin) {
         this.dateFin = dateFin;
     }
 
