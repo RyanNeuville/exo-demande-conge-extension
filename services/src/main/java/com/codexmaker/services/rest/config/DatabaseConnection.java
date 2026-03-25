@@ -24,7 +24,6 @@ public final class DatabaseConnection {
         return path;
     }
 
-    private static final String DB_URL = "jdbc:sqlite:" + getEffectiveDbPath();
 
     private static Connection connection;
 
@@ -37,10 +36,12 @@ public final class DatabaseConnection {
         }
     }
 
-    public static Connection getConnection() throws SQLException {
+    public static synchronized Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
+            String dbPath = getEffectiveDbPath();
+            java.io.File dbFile = new java.io.File(dbPath);
+            
             // S'assurer que le dossier parent existe
-            java.io.File dbFile = new java.io.File(DB_URL.replace("jdbc:sqlite:", ""));
             java.io.File parentDir = dbFile.getParentFile();
             if (parentDir != null && !parentDir.exists()) {
                 if (parentDir.mkdirs()) {
@@ -50,7 +51,9 @@ public final class DatabaseConnection {
                 }
             }
 
-            connection = DriverManager.getConnection(DB_URL);
+            LOGGER.info("Tentative de connexion à : jdbc:sqlite:" + dbPath);
+            connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+            
             try (var stmt = connection.createStatement()) {
                 stmt.execute("PRAGMA journal_mode = WAL;");
                 stmt.execute("PRAGMA synchronous = NORMAL;");
@@ -58,7 +61,7 @@ public final class DatabaseConnection {
                 stmt.execute("PRAGMA temp_store = MEMORY;");
                 stmt.execute("PRAGMA mmap_size = 30000000;");
             }
-            LOGGER.info("Connexion SQLite ouverte sur : " + DB_URL);
+            LOGGER.info("✅ Connexion SQLite ouverte sur : " + dbPath);
         }
         return connection;
     }

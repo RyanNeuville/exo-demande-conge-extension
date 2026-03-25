@@ -11,6 +11,8 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import com.codexmaker.services.rest.dto.DemandeCongeResponseDTO;
+
 /**
  * Classe utilitaire responsable du mapping entre un ResultSet JDBC
  * et un objet du domaine DemandeConge.
@@ -118,5 +120,37 @@ public final class DemandeCongeMapper {
         }
         
         return entity;
+    }
+
+    public static DemandeCongeResponseDTO toResponseDTO(DemandeConge entity) {
+        if (entity == null) return null;
+
+        DemandeCongeResponseDTO dto = new DemandeCongeResponseDTO();
+        dto.setId(entity.getId());
+        dto.setNumero(entity.getNumero());
+        dto.setUserId(entity.getUserId());
+        
+        // Dates (Conversion LocalDate -> String)
+        if (entity.getDateDebut() != null) dto.setDateDebut(entity.getDateDebut().toString());
+        if (entity.getDateFin() != null) dto.setDateFin(entity.getDateFin().toString());
+        
+        dto.setDemiJourneeDebut(entity.isDemiJourneeDebut());
+        dto.setDemiJourneeFin(entity.isDemiJourneeFin());
+        dto.setTypeConge(entity.getTypeConge());
+        dto.setStatut(entity.getStatut());
+        dto.setMotif(entity.getMotif());
+        dto.setCommentaireEmploye(entity.getCommentaireEmploye());
+        dto.setCommentaireValideur(entity.getCommentaireValideur());
+        dto.setValideurId(entity.getValideurId());
+
+        // Date/Time (Conversion LocalDate -> String, simplification pour eXo)
+        if (entity.getDateSoumission() != null) dto.setDateSoumission(entity.getDateSoumission().toString());
+        if (entity.getDateValidation() != null) dto.setDateValidation(entity.getDateValidation().toString());
+        if (entity.getDateModification() != null) dto.setDateModification(entity.getDateModification().toString());
+
+        dto.setSoldeCongesAvant(entity.getSoldeCongesAvant());
+        dto.setDureeJoursOuvres(entity.getDureeJoursOuvres());
+
+        return dto;
     }
 }

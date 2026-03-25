@@ -1,7 +1,5 @@
 package com.codexmaker.services.rest.dto;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import com.codexmaker.services.rest.model.entity.TypeConge;
 import com.codexmaker.services.rest.model.enums.StatutDemande;
@@ -23,9 +21,9 @@ public class DemandeCongeResponseDTO {
     private String commentaireValideur;
     private String valideurId;
     private String nomValideur;
-    private LocalDateTime dateSoumission;
-    private LocalDateTime dateValidation;
-    private LocalDateTime dateModification;
+    private String dateSoumission;
+    private String dateValidation;
+    private String dateModification;
     private int soldeCongesAvant;
     private int dureeJoursOuvres;
 
@@ -35,8 +33,8 @@ public class DemandeCongeResponseDTO {
     public DemandeCongeResponseDTO(String id, String numero, String userId, String nomEmploye, String prenomEmploye,
             String dateDebut, boolean demiJourneeDebut, String dateFin, boolean demiJourneeFin,
             TypeConge typeConge, StatutDemande statut, String motif, String commentaireEmploye,
-            String commentaireValideur, String valideurId, String nomValideur, LocalDateTime dateSoumission,
-            LocalDateTime dateValidation, LocalDateTime dateModification, int soldeCongesAvant, int dureeJoursOuvres) {
+            String commentaireValideur, String valideurId, String nomValideur, String dateSoumission,
+            String dateValidation, String dateModification, int soldeCongesAvant, int dureeJoursOuvres) {
         this.id = id;
         this.numero = numero;
         this.userId = userId;
@@ -188,27 +186,27 @@ public class DemandeCongeResponseDTO {
         this.nomValideur = nomValideur;
     }
 
-    public LocalDateTime getDateSoumission() {
+    public String getDateSoumission() {
         return dateSoumission;
     }
 
-    public void setDateSoumission(LocalDateTime dateSoumission) {
+    public void setDateSoumission(String dateSoumission) {
         this.dateSoumission = dateSoumission;
     }
 
-    public LocalDateTime getDateValidation() {
+    public String getDateValidation() {
         return dateValidation;
     }
 
-    public void setDateValidation(LocalDateTime dateValidation) {
+    public void setDateValidation(String dateValidation) {
         this.dateValidation = dateValidation;
     }
 
-    public LocalDateTime getDateModification() {
+    public String getDateModification() {
         return dateModification;
     }
 
-    public void setDateModification(LocalDateTime dateModification) {
+    public void setDateModification(String dateModification) {
         this.dateModification = dateModification;
     }
 

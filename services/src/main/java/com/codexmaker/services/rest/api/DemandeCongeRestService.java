@@ -59,7 +59,9 @@ public class DemandeCongeRestService implements ResourceContainer {
     @RolesAllowed("users")
     public Response getMyDemandes() {
         List<DemandeConge> demandes = demandeCongeService.getDemandesParUtilisateur(getAuthenticatedUserId());
-        return Response.ok(demandes).build();
+        return Response.ok(demandes.stream()
+                .map(DemandeCongeMapper::toResponseDTO)
+                .toList()).build();
     }
 
     @POST
@@ -80,7 +82,7 @@ public class DemandeCongeRestService implements ResourceContainer {
         DemandeConge demande = demandeCongeService.getDemande(id);
         if (demande == null)
             return Response.status(Response.Status.NOT_FOUND).build();
-        return Response.ok(demande).build();
+        return Response.ok(DemandeCongeMapper.toResponseDTO(demande)).build();
     }
 
     @PUT
@@ -124,7 +126,9 @@ public class DemandeCongeRestService implements ResourceContainer {
     @RolesAllowed("users")
     public Response getDemandesATraiter() {
         List<DemandeConge> demandes = demandeCongeService.getDemandesATraiter(getAuthenticatedUserId());
-        return Response.ok(demandes).build();
+        return Response.ok(demandes.stream()
+                .map(DemandeCongeMapper::toResponseDTO)
+                .toList()).build();
     }
 
     @POST
@@ -151,7 +155,10 @@ public class DemandeCongeRestService implements ResourceContainer {
     @Path(Constants.API_DEMANDES_TOUTES)
     @RolesAllowed("administrators")
     public Response getToutesLesDemandes() {
-        return Response.ok(demandeCongeService.getToutesLesDemandes()).build();
+        List<DemandeConge> toutes = demandeCongeService.getToutesLesDemandes();
+        return Response.ok(toutes.stream()
+                .map(DemandeCongeMapper::toResponseDTO)
+                .toList()).build();
     }
 
     @GET
