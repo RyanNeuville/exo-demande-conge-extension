@@ -33,7 +33,7 @@ public class DemandeCongeResponseDTO {
     }
 
     public DemandeCongeResponseDTO(String id, String numero, String userId, String nomEmploye, String prenomEmploye,
-            LocalDate dateDebut, boolean demiJourneeDebut, LocalDate dateFin, boolean demiJourneeFin,
+            String dateDebut, boolean demiJourneeDebut, String dateFin, boolean demiJourneeFin,
             TypeConge typeConge, StatutDemande statut, String motif, String commentaireEmploye,
             String commentaireValideur, String valideurId, String nomValideur, LocalDateTime dateSoumission,
             LocalDateTime dateValidation, LocalDateTime dateModification, int soldeCongesAvant, int dureeJoursOuvres) {
@@ -100,11 +100,11 @@ public class DemandeCongeResponseDTO {
         this.prenomEmploye = prenomEmploye;
     }
 
-    public LocalDate getDateDebut() {
+    public String getDateDebut() {
         return dateDebut;
     }
 
-    public void setDateDebut(LocalDate dateDebut) {
+    public void setDateDebut(String dateDebut) {
         this.dateDebut = dateDebut;
     }
 
@@ -116,11 +116,11 @@ public class DemandeCongeResponseDTO {
         this.demiJourneeDebut = demiJourneeDebut;
     }
 
-    public LocalDate getDateFin() {
+    public String getDateFin() {
         return dateFin;
     }
 
-    public void setDateFin(LocalDate dateFin) {
+    public void setDateFin(String dateFin) {
         this.dateFin = dateFin;
     }
 
