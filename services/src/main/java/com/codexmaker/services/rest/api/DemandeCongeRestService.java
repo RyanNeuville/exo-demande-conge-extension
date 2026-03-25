@@ -87,7 +87,8 @@ public class DemandeCongeRestService implements ResourceContainer {
     @Path(Constants.API_DEMANDES_BY_ID)
     @Consumes(MediaType.APPLICATION_JSON)
     @RolesAllowed("users")
-    public Response updateDemande(@PathParam("id") String id, DemandeConge demande) {
+    public Response updateDemande(@PathParam("id") String id, DemandeCongeDTO dto) {
+        DemandeConge demande = DemandeCongeMapper.toEntity(dto);
         demande.setId(id);
         demandeCongeService.modifierDemandeEnAttente(demande, getAuthenticatedUserId());
         return Response.ok().build();

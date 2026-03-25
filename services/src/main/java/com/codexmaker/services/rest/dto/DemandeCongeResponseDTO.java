@@ -12,9 +12,9 @@ public class DemandeCongeResponseDTO {
     private String userId;
     private String nomEmploye;
     private String prenomEmploye;
-    private LocalDate dateDebut;
+    private String dateDebut;
     private boolean demiJourneeDebut;
-    private LocalDate dateFin;
+    private String dateFin;
     private boolean demiJourneeFin;
     private TypeConge typeConge;
     private StatutDemande statut;
