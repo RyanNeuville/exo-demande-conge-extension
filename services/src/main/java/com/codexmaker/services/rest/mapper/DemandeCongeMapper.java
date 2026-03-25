@@ -1,5 +1,6 @@
 package com.codexmaker.services.rest.mapper;
 
+import com.codexmaker.services.rest.dto.DemandeCongeDTO;
 import com.codexmaker.services.rest.model.entity.DemandeConge;
 import com.codexmaker.services.rest.model.entity.TypeConge;
 import com.codexmaker.services.rest.model.enums.StatutDemande;
@@ -15,6 +16,7 @@ import java.time.format.DateTimeFormatter;
  * et un objet du domaine DemandeConge.
  */
 public final class DemandeCongeMapper {
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
 
     private DemandeCongeMapper() {
         /** Constructeur privé pour empêcher l'instanciation */
@@ -93,5 +95,28 @@ public final class DemandeCongeMapper {
         demande.setDureeJoursOuvres(rs.getInt("duree_jours_ouvres"));
 
         return demande;
+    }
+
+    public static DemandeConge toEntity(DemandeCongeDTO dto) {
+        if (dto == null) return null;
+
+        DemandeConge entity = new DemandeConge();
+        entity.setId(dto.getId());
+        entity.setUserId(dto.getUserId());
+        entity.setDemiJourneeDebut(dto.isDemiJourneeDebut());
+        entity.setDemiJourneeFin(dto.isDemiJourneeFin());
+        entity.setMotif(dto.getMotif());
+        entity.setCommentaireEmploye(dto.getCommentaireEmploye());
+        entity.setDureeJoursOuvres(dto.getDureeJoursOuvres());
+
+        /** Cas specifiques pour les convertions des dates, statut en String */
+        if (dto.getDateDebut() != null) {
+            entity.setDateDebut(LocalDate.parse(dto.getDateDebut(), FORMATTER));
+        }
+        if (dto.getDateFin() != null) {
+            entity.setDateFin(LocalDate.parse(dto.getDateFin(), FORMATTER));
+        }
+        
+        return entity;
     }
 }

@@ -1,5 +1,7 @@
 package com.codexmaker.services.rest.api;
 
+import com.codexmaker.services.rest.dto.DemandeCongeDTO;
+import com.codexmaker.services.rest.mapper.DemandeCongeMapper;
 import com.codexmaker.services.rest.model.entity.DemandeConge;
 import com.codexmaker.services.rest.model.entity.TypeConge;
 import com.codexmaker.services.rest.model.entity.Utilisateur;
@@ -64,8 +66,10 @@ public class DemandeCongeRestService implements ResourceContainer {
     @Path(Constants.API_DEMANDES)
     @Consumes(MediaType.APPLICATION_JSON)
     @RolesAllowed("users")
-    public Response submitDemande(DemandeConge demande) {
+    public Response submitDemande(DemandeCongeDTO dto) {
+        DemandeConge demande = DemandeCongeMapper.toEntity(dto);
         DemandeConge saved = demandeCongeService.soumettreDemande(demande, getAuthenticatedUserId());
+
         return Response.status(Response.Status.CREATED).entity(saved).build();
     }
 
