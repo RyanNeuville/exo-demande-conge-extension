@@ -21,12 +21,21 @@ import org.exoplatform.services.log.Log;
 
 /**
  * Implémentation JDBC du repository pour l'entité DemandeConge.
- * Gère le cycle de vie des demandes en base de données.
+ * Cette classe assure la persistence des demandes de congés dans la base
+ * SQLite,
+ * en utilisant les requêtes SQL centralisées dans {@link SqlQueries}.
  */
 public class DemandeCongeRepositoryImpl implements DemandeCongeRepository {
 
     private static final Log LOG = ExoLogger.getLogger(DemandeCongeRepositoryImpl.class);
 
+    /**
+     * Persiste une nouvelle demande de congé dans la base de données.
+     *
+     * @param demande L'entité demande à sauvegarder.
+     * @return L'entité sauvegardée.
+     * @throws RuntimeException En cas d'erreur technique SQL.
+     */
     @Override
     public DemandeConge save(DemandeConge demande) {
         String sql = SqlQueries.INSERT_DEMANDE_CONGE;
@@ -50,8 +59,8 @@ public class DemandeCongeRepositoryImpl implements DemandeCongeRepository {
             pstmt.setString(15,
                     demande.getDateModification() != null ? demande.getDateModification().toString() : null);
             pstmt.setString(16, demande.getDateValidation() != null ? demande.getDateValidation().toString() : null);
-            pstmt.setInt(17, demande.getSoldeCongesAvant());
-            pstmt.setInt(18, demande.getDureeJoursOuvres());
+            pstmt.setDouble(17, demande.getSoldeCongesAvant());
+            pstmt.setDouble(18, demande.getDureeJoursOuvres());
 
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected == 0) {
@@ -66,6 +75,12 @@ public class DemandeCongeRepositoryImpl implements DemandeCongeRepository {
         }
     }
 
+    /**
+     * Met à jour les informations d'une demande existante.
+     *
+     * @param demande L'entité modifiée.
+     * @throws RuntimeException Si la demande n'existe pas ou en cas d'erreur SQL.
+     */
     @Override
     public void update(DemandeConge demande) {
         String sql = SqlQueries.UPDATE_DEMANDE_CONGE;
@@ -85,8 +100,8 @@ public class DemandeCongeRepositoryImpl implements DemandeCongeRepository {
             pstmt.setString(11, demande.getValideurId());
             pstmt.setString(12,
                     demande.getDateModification() != null ? demande.getDateModification().toString() : null);
-            pstmt.setInt(13, demande.getSoldeCongesAvant());
-            pstmt.setInt(14, demande.getDureeJoursOuvres());
+            pstmt.setDouble(13, demande.getSoldeCongesAvant());
+            pstmt.setDouble(14, demande.getDureeJoursOuvres());
             pstmt.setString(15, demande.getId());
 
             int rows = pstmt.executeUpdate();
@@ -101,6 +116,12 @@ public class DemandeCongeRepositoryImpl implements DemandeCongeRepository {
         }
     }
 
+    /**
+     * Rechercher une demande par son identifiant unique.
+     *
+     * @param id L'identifiant technique (UUID).
+     * @return La demande correspondante ou null.
+     */
     @Override
     public DemandeConge findById(String id) {
         String sql = SqlQueries.SELECT_DEMANDE_BY_ID;
@@ -121,6 +142,12 @@ public class DemandeCongeRepositoryImpl implements DemandeCongeRepository {
         }
     }
 
+    /**
+     * Récupère toutes les demandes liées à un utilisateur spécifique.
+     *
+     * @param userId L'identifiant de l'utilisateur.
+     * @return Une liste de demandes (éventuellement vide).
+     */
     @Override
     public List<DemandeConge> findByUserId(String userId) {
         String sql = SqlQueries.SELECT_DEMANDES_BY_USER_ID;
@@ -143,6 +170,11 @@ public class DemandeCongeRepositoryImpl implements DemandeCongeRepository {
         }
     }
 
+    /**
+     * Récupère l'intégralité des demandes présentes en base.
+     * 
+     * @return Liste de toutes les entités DemandeConge.
+     */
     @Override
     public List<DemandeConge> findAll() {
         String sql = SqlQueries.SELECT_ALL_DEMANDES;
@@ -163,6 +195,12 @@ public class DemandeCongeRepositoryImpl implements DemandeCongeRepository {
         }
     }
 
+    /**
+     * Récupère les demandes en attente de traitement pour un valideur donné.
+     *
+     * @param validatorId L'identifiant du responsable.
+     * @return Liste des demandes à traiter.
+     */
     @Override
     public List<DemandeConge> findPendingForValidator(String validatorId) {
         String sql = SqlQueries.CONSULTER_DEMANDE_A_TRAITER;
@@ -185,6 +223,15 @@ public class DemandeCongeRepositoryImpl implements DemandeCongeRepository {
         }
     }
 
+    /**
+     * Met à jour uniquement le statut d'une demande (Validation/Refus/Annulation).
+     *
+     * @param id          Identifiant de la demande.
+     * @param statut      Nouveau statut.
+     * @param commentaire Note ou motif associé au changement.
+     * @param dateModif   Date de modification technique.
+     * @param dateValid   Date effective de validation (si applicable).
+     */
     @Override
     public void updateStatus(String id, StatutDemande statut, String commentaire, LocalDate dateModif,
             LocalDate dateValid) {
@@ -210,6 +257,17 @@ public class DemandeCongeRepositoryImpl implements DemandeCongeRepository {
         }
     }
 
+    /**
+     * Vérifie si un utilisateur a déjà une demande active chevauchant une période
+     * donnée.
+     *
+     * @param userId           L'identifiant de l'utilisateur.
+     * @param excludeDemandeId Identifiant à exclure de la recherche (pour
+     *                         modification).
+     * @param debut            Date de début souhaitée.
+     * @param fin              Date de fin souhaitée.
+     * @return true s'il y a un conflit de dates, false sinon.
+     */
     @Override
     public boolean hasChevauchement(String userId, String excludeDemandeId, LocalDate debut, LocalDate fin) {
         String sql = SqlQueries.CHECK_CHEVAUCHEMENT;
@@ -234,6 +292,12 @@ public class DemandeCongeRepositoryImpl implements DemandeCongeRepository {
         }
     }
 
+    /**
+     * Supprime physiquement une demande de la base de données.
+     *
+     * @param id L'identifiant de la demande à supprimer.
+     * @throws RuntimeException Si la demande n'existe pas ou erreur SQL.
+     */
     @Override
     public void deleteById(String id) {
         String sql = SqlQueries.SUPPRIMER_DEMANDE_BY_ID;

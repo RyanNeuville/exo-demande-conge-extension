@@ -10,7 +10,7 @@ import java.util.List;
 public interface UtilisateurService {
     Utilisateur synchroniserUtilisateur(Utilisateur utilisateur);
 
-    int consulterSolde(String userId);
+    double consulterSolde(String userId);
 
     List<Utilisateur> getTousLesResponsables();
 

@@ -13,7 +13,8 @@ public class UtilisateurSummaryDTO {
     public UtilisateurSummaryDTO() {
     }
 
-    public UtilisateurSummaryDTO(String id, String nom, String prenom, String email, Role role, int soldeCongesRestants) {
+    public UtilisateurSummaryDTO(String id, String nom, String prenom, String email, Role role,
+            int soldeCongesRestants) {
         this.id = id;
         this.nom = nom;
         this.prenom = prenom;

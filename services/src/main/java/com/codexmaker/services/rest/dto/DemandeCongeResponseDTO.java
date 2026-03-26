@@ -1,20 +1,22 @@
 package com.codexmaker.services.rest.dto;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
 import com.codexmaker.services.rest.model.entity.TypeConge;
 import com.codexmaker.services.rest.model.enums.StatutDemande;
 
+/**
+ * Format de réponse enrichi pour l'affichage dans l'interface utilisateur.
+ * Contient les libellés des noms d'employés et valideurs en plus des IDs
+ * techniques.
+ */
 public class DemandeCongeResponseDTO {
     private String id;
     private String numero;
     private String userId;
     private String nomEmploye;
     private String prenomEmploye;
-    private LocalDate dateDebut;
+    private String dateDebut;
     private boolean demiJourneeDebut;
-    private LocalDate dateFin;
+    private String dateFin;
     private boolean demiJourneeFin;
     private TypeConge typeConge;
     private StatutDemande statut;
@@ -23,43 +25,16 @@ public class DemandeCongeResponseDTO {
     private String commentaireValideur;
     private String valideurId;
     private String nomValideur;
-    private LocalDateTime dateSoumission;
-    private LocalDateTime dateValidation;
-    private LocalDateTime dateModification;
-    private int soldeCongesAvant;
-    private int dureeJoursOuvres;
+    private String dateSoumission;
+    private String dateValidation;
+    private String dateModification;
+    private double soldeCongesAvant;
+    private double dureeJoursOuvres;
 
     public DemandeCongeResponseDTO() {
     }
 
-    public DemandeCongeResponseDTO(String id, String numero, String userId, String nomEmploye, String prenomEmploye,
-            LocalDate dateDebut, boolean demiJourneeDebut, LocalDate dateFin, boolean demiJourneeFin,
-            TypeConge typeConge, StatutDemande statut, String motif, String commentaireEmploye,
-            String commentaireValideur, String valideurId, String nomValideur, LocalDateTime dateSoumission,
-            LocalDateTime dateValidation, LocalDateTime dateModification, int soldeCongesAvant, int dureeJoursOuvres) {
-        this.id = id;
-        this.numero = numero;
-        this.userId = userId;
-        this.nomEmploye = nomEmploye;
-        this.prenomEmploye = prenomEmploye;
-        this.dateDebut = dateDebut;
-        this.demiJourneeDebut = demiJourneeDebut;
-        this.dateFin = dateFin;
-        this.demiJourneeFin = demiJourneeFin;
-        this.typeConge = typeConge;
-        this.statut = statut;
-        this.motif = motif;
-        this.commentaireEmploye = commentaireEmploye;
-        this.commentaireValideur = commentaireValideur;
-        this.valideurId = valideurId;
-        this.nomValideur = nomValideur;
-        this.dateSoumission = dateSoumission;
-        this.dateValidation = dateValidation;
-        this.dateModification = dateModification;
-        this.soldeCongesAvant = soldeCongesAvant;
-        this.dureeJoursOuvres = dureeJoursOuvres;
-    }
-
+    /** Getters and Setters */
     public String getId() {
         return id;
     }
@@ -100,11 +75,11 @@ public class DemandeCongeResponseDTO {
         this.prenomEmploye = prenomEmploye;
     }
 
-    public LocalDate getDateDebut() {
+    public String getDateDebut() {
         return dateDebut;
     }
 
-    public void setDateDebut(LocalDate dateDebut) {
+    public void setDateDebut(String dateDebut) {
         this.dateDebut = dateDebut;
     }
 
@@ -116,11 +91,11 @@ public class DemandeCongeResponseDTO {
         this.demiJourneeDebut = demiJourneeDebut;
     }
 
-    public LocalDate getDateFin() {
+    public String getDateFin() {
         return dateFin;
     }
 
-    public void setDateFin(LocalDate dateFin) {
+    public void setDateFin(String dateFin) {
         this.dateFin = dateFin;
     }
 
@@ -188,44 +163,43 @@ public class DemandeCongeResponseDTO {
         this.nomValideur = nomValideur;
     }
 
-    public LocalDateTime getDateSoumission() {
+    public String getDateSoumission() {
         return dateSoumission;
     }
 
-    public void setDateSoumission(LocalDateTime dateSoumission) {
+    public void setDateSoumission(String dateSoumission) {
         this.dateSoumission = dateSoumission;
     }
 
-    public LocalDateTime getDateValidation() {
+    public String getDateValidation() {
         return dateValidation;
     }
 
-    public void setDateValidation(LocalDateTime dateValidation) {
+    public void setDateValidation(String dateValidation) {
         this.dateValidation = dateValidation;
     }
 
-    public LocalDateTime getDateModification() {
+    public String getDateModification() {
         return dateModification;
     }
 
-    public void setDateModification(LocalDateTime dateModification) {
+    public void setDateModification(String dateModification) {
         this.dateModification = dateModification;
     }
 
-    public int getSoldeCongesAvant() {
+    public double getSoldeCongesAvant() {
         return soldeCongesAvant;
     }
 
-    public void setSoldeCongesAvant(int soldeCongesAvant) {
+    public void setSoldeCongesAvant(double soldeCongesAvant) {
         this.soldeCongesAvant = soldeCongesAvant;
     }
 
-    public int getDureeJoursOuvres() {
+    public double getDureeJoursOuvres() {
         return dureeJoursOuvres;
     }
 
-    public void setDureeJoursOuvres(int dureeJoursOuvres) {
+    public void setDureeJoursOuvres(double dureeJoursOuvres) {
         this.dureeJoursOuvres = dureeJoursOuvres;
     }
-
 }

@@ -18,12 +18,12 @@ public interface UtilisateurRepository {
     /**
      * Met à jour le solde de congés d'un utilisateur.
      */
-    void updateSolde(String userId, int newSolde);
+    void updateSolde(String userId, double newSolde);
 
     /**
      * Récupère le solde actuel d'un utilisateur.
      */
-    int getSoldeById(String userId);
+    double getSoldeById(String userId);
 
     /**
      * Récupère tous les utilisateurs (pour admin).

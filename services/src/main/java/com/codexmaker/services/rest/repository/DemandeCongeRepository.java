@@ -2,62 +2,86 @@ package com.codexmaker.services.rest.repository;
 
 import com.codexmaker.services.rest.model.entity.DemandeConge;
 import com.codexmaker.services.rest.model.enums.StatutDemande;
-
 import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Interface du repository pour l'entité DemandeConge.
- * Toutes les opérations CRUD + spécifiques métier.
+ * Contrat pour la gestion de la persistance des demandes de congés.
  */
 public interface DemandeCongeRepository {
 
     /**
-     * Crée ou persiste une nouvelle demande.
-     * Retourne l'entité avec l'ID généré.
+     * Sauvegarde une demande en base.
+     * 
+     * @param demande L'entité à créer.
+     * @return L'entité sauvegardée.
      */
     DemandeConge save(DemandeConge demande);
 
     /**
-     * Met à jour une demande existante.
+     * Met à jour les infos d'une demande.
+     * 
+     * @param demande L'entité modifiée.
      */
     void update(DemandeConge demande);
 
     /**
-     * Récupère une demande par son ID.
+     * Recherche par ID.
+     * 
+     * @param id UUID.
+     * @return La demande.
      */
     DemandeConge findById(String id);
 
     /**
-     * Récupère toutes les demandes d'un utilisateur donné.
+     * Liste les demandes d'un employé.
+     * 
+     * @param userId ID utilisateur.
+     * @return Liste de demandes.
      */
     List<DemandeConge> findByUserId(String userId);
 
     /**
-     * Récupère toutes les demandes du système.
+     * Retourne toutes les demandes.
+     * 
+     * @return Liste complète.
      */
     List<DemandeConge> findAll();
 
     /**
-     * Récupère les demandes en attente pour un valideur donné.
+     * Liste les demandes en attente pour un responsable donné.
+     * 
+     * @param validatorId ID du valideur.
+     * @return Liste filtrée.
      */
     List<DemandeConge> findPendingForValidator(String validatorId);
 
     /**
-     * Met à jour uniquement le statut + commentaire + dates de
-     * validation/modification.
+     * Met à jour le statut et les métadonnées de décision.
+     * 
+     * @param id          ID demande.
+     * @param statut      Nouveau statut.
+     * @param commentaire Motif.
+     * @param dateModif   Date modification.
+     * @param dateValid   Date validation.
      */
     void updateStatus(String id, StatutDemande statut, String commentaire, LocalDate dateModif, LocalDate dateValid);
 
     /**
-     * Vérifie s'il y a chevauchement de dates pour un utilisateur (exclut la
-     * demande actuelle si modification).
-     * Retourne true si au moins une demande chevauche.
+     * Vérifie la validité temporelle d'une demande.
+     * 
+     * @param userId           ID utilisateur.
+     * @param excludeDemandeId ID à ignorer (pour update).
+     * @param debut            Date début.
+     * @param fin              Date fin.
+     * @return true si conflit.
      */
     boolean hasChevauchement(String userId, String excludeDemandeId, LocalDate debut, LocalDate fin);
 
     /**
-     * Supprime une demande (réservé admin).
+     * Suppression définitive d'une demande.
+     * 
+     * @param id ID demande.
      */
     void deleteById(String id);
 }

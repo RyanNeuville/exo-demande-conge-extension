@@ -6,32 +6,60 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.util.logging.Logger;
 
+import com.codexmaker.services.rest.utils.Constants;
+
+/**
+ * Responsable de l'initialisation du schéma de base de données.
+ * Lit et exécute le script 'init_db.sql' pour créer les tables et insérer
+ * les données de référence (types de congés).
+ */
 public class DatabaseInitializer {
 
     private static final Logger LOGGER = Logger.getLogger(DatabaseInitializer.class.getName());
 
-    public static void initialize() {
-        try (Connection conn = DatabaseConnection.getConnection();
-                Statement stmt = conn.createStatement()) {
+    /**
+     * Exécute le script d'initialisation sur la connexion fournie.
+     * Le script est nettoyé des commentaires et des lignes vides avant exécution.
+     *
+     * @param conn La connexion JDBC active.
+     */
+    public static void initialize(Connection conn) {
+        if (conn == null) {
+            LOGGER.severe("ÉCHEC : La connexion fournie est null.");
+            return;
+        }
 
-            /** Lecture du fichier init_db.sql */
+        try (Statement stmt = conn.createStatement()) {
+
+            /**
+             * Chargement du fichier SQL depuis les ressources du classpath.
+             */
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(
                             DatabaseInitializer.class.getClassLoader().getResourceAsStream("init_db.sql")))) {
+
+                if (reader == null) {
+                    LOGGER.severe("ÉCHEC : Impossible de trouver init_db.sql dans les ressources.");
+                    return;
+                }
 
                 StringBuilder sql = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String trimmedLine = line.trim();
-                    /** Ignorer les lignes vides ou les commentaires */ 
+
+                    /**
+                     * Exclusion des lignes vides et des commentaires SQL (--).
+                     */
                     if (trimmedLine.isEmpty() || trimmedLine.startsWith("--")) {
                         continue;
                     }
-                    /** Ajouter un espace au lieu de \n pour éviter les coupures de mots */
-                    sql.append(line).append(" "); 
+                    sql.append(line).append(" ");
                 }
 
-                /** Exécution des statements */
+                /**
+                 * Découpage du script en instructions individuelles via le séparateur ';'.
+                 */
                 for (String statement : sql.toString().split(";")) {
                     statement = statement.trim();
                     if (!statement.isEmpty()) {
@@ -39,14 +67,24 @@ public class DatabaseInitializer {
                     }
                 }
 
-                LOGGER.info("Base SQLite initialisée avec succès");
+                LOGGER.info(Constants.SUCCES_DB_INITIALIZED);
             }
         } catch (Exception e) {
-            LOGGER.severe("Échec initialisation DB : " + e.getMessage());
-            /** Gardez la trace pour le débogage */
-            e.printStackTrace(); 
-            throw new RuntimeException("Initialisation DB échouée: " + e.getMessage());
+            LOGGER.severe(Constants.ERROR_DB_INITIALIZATION + " : " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException(Constants.ERROR_DB_INITIALIZATION + " : " + e.getMessage());
         }
     }
 
+    /**
+     * Version simplifiée récupérant automatiquement la connexion via
+     * DatabaseConnection.
+     */
+    public static void initialize() {
+        try {
+            initialize(DatabaseConnection.getConnection());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

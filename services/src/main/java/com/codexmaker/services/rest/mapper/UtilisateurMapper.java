@@ -10,23 +10,24 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Mapper pour transformer les données de la base de données (ResultSet)
- * en objets de type Utilisateur (Employe, Responsable, Administrateur).
+ * Mapper pour transformer les données de la base de données vers le modèle
+ * objet Utilisateur.
+ * Gère la spécialisation des instances (Employe, Responsable, Administrateur)
+ * en fonction du rôle.
  */
 public class UtilisateurMapper {
 
     private UtilisateurMapper() {
-        // Constructeur privé pour empêcher l'instanciation
+        /** Constructeur privé pour empêcher l'instanciation. */
     }
 
     /**
-     * Convertit une ligne d'un ResultSet en une instance concrète de Utilisateur.
-     * Le type d'objet retourné (Employe, Responsable, Administrateur) dépend du
-     * rôle.
+     * Instancie et peuple un objet Utilisateur à partir d'un ResultSet.
+     * Le type concret de l'instance retournée est déterminé par la colonne 'role'.
      * 
-     * @param rs le ResultSet positionné sur la ligne à mapper
-     * @return une instance de Utilisateur (ou ses sous-types)
-     * @throws SQLException en cas d'erreur de lecture du ResultSet
+     * @param rs Le ResultSet positionné sur la ligne client.
+     * @return Une instance concrète de Utilisateur.
+     * @throws SQLException En cas de problème d'accès aux données SQL.
      */
     public static Utilisateur fromResultSet(ResultSet rs) throws SQLException {
         Role role = Role.valueOf(rs.getString("role"));
@@ -52,7 +53,7 @@ public class UtilisateurMapper {
         utilisateur.setUsername(rs.getString("username"));
         utilisateur.setEmail(rs.getString("email"));
         utilisateur.setRole(role);
-        utilisateur.setSoldeConges(rs.getInt("solde_conges"));
+        utilisateur.setSoldeConges(rs.getDouble("solde_conges"));
 
         return utilisateur;
     }

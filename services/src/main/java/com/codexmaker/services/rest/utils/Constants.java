@@ -1,88 +1,39 @@
 package com.codexmaker.services.rest.utils;
 
 /**
- * Regroupe toutes les constantes du projet pour éviter les chaînes de
- * caractères en dur.
- * Toutes les valeurs sont en français pour faciliter la lecture et la
- * maintenance.
+ * Regroupe toutes les constantes du projet pour éviter les valeurs en dur
+ * (hardcoded).
+ * Centralise les chemins d'API, les messages utilisateur, les patterns de
+ * validation
+ * et les formats de données.
  */
 public final class Constants {
 
     private Constants() {
+        /** Constructeur privé. */
     }
 
-    /** CATÉGORIE : ENDPOINTS API (REST) */
+    /** --- ENDPOINTS API REST --- **/
 
     public static final String API_BASE = "/api";
-
-    /** 1. GESTION DES DEMANDES (Base & Employé) */
-    /** POST : Soumettre une demande ("Soumettre une demande") */
-    /**
-     * GET : Consulter l'historique de SES demandes ("Consulter l'historique de ses
-     * demandes")
-     */
+    public static final String MAIN_END_POINT = API_BASE + "/conges";
     public static final String API_DEMANDES = API_BASE + "/demandes";
-    /** GET : Lire une demande spécifique */
-    /**
-     * PUT : Modifier une demande en attente ou un brouillon ("Modifier ses demandes
-     * en attente")
-     */
-    /**
-     * DELETE : Supprimer une demande (Réservé Administrateur : "Supprimer une
-     * demande")
-     */
+    public static final String API_DEMANDES_ME = API_DEMANDES + "/me";
     public static final String API_DEMANDES_BY_ID = API_DEMANDES + "/{id}";
-    /** PUT : Annuler une demande en attente ("Annuler ses demandes en attente") */
     public static final String API_DEMANDES_ANNULER = API_DEMANDES_BY_ID + "/annuler";
-    /**
-     * GET : Consulter l'historique des états d'une demande (Classe
-     * "HistoriqueEtat")
-     */
     public static final String API_DEMANDES_HISTORIQUE = API_DEMANDES_BY_ID + "/historique";
-
-    /** 2. GESTION MANAGÉRIALE (Responsable) */
-    /**
-     * GET : Consulter les demandes de son équipe ("Consulter demandes à traiter")
-     */
     public static final String API_DEMANDES_A_TRAITER = API_DEMANDES + "/a-traiter";
-    /**
-     * PUT : Valider une demande ("Valider une demande" + "Ajouter commentaire de
-     * validation")
-     */
     public static final String API_DEMANDES_VALIDER = API_DEMANDES_BY_ID + "/valider";
-    /** PUT : Refuser une demande ("Refuser une demande") */
     public static final String API_DEMANDES_REFUSER = API_DEMANDES_BY_ID + "/refuser";
-
-    /** 3. GESTION ADMINISTRATIVE (Administrateur) */
-    /**
-     * GET : Consulter absolument toutes les demandes du système ("Consulter toutes
-     * les demandes")
-     */
     public static final String API_DEMANDES_TOUTES = API_DEMANDES + "/toutes";
-    /** GET : Exporter les rapports ("Exporter les rapports") */
-    public static final String API_DEMANDES_EXPORTER = API_DEMANDES + "/exporter";
-
-    /** 4. GESTION DES UTILISATEURS / SOLDES (Employé) */
-
-    /**
-     * GET : Consulter le solde de l'utilisateur connecté ("Consulter solde congés")
-     */
+    public static final String API_DEMANDES_EXPORTER = API_DEMANDES + "/export";
     public static final String API_UTILISATEUR_ME_SOLDE = API_BASE + "/utilisateurs/me/solde";
-    /** GET : Consulter les informations personnelles de l'utilisateur connecté */
     public static final String API_UTILISATEUR_ME = API_BASE + "/utilisateurs/me";
-
-    /** 5. GESTION DES TYPES DE CONGÉS (Administrateur & Employé) */
-
-    /** GET : Lister les types de congés (Pour formulaire) */
-    /**
-     * POST : Créer un nouveau type de congé (Admin : "Gérer les types de congés")
-     */
+    public static final String API_UTILISATEURS_RESPONSABLES = API_BASE + "/utilisateurs/responsables";
     public static final String API_TYPES_CONGES = API_BASE + "/types-conges";
-    /** PUT : Modifier un type de congé */
-    /** DELETE : Supprimer un type de congé */
     public static final String API_TYPES_CONGES_BY_ID = API_TYPES_CONGES + "/{id}";
 
-    /** CATÉGORIE : MESSAGES DE SUCCÈS */
+    /** --- MESSAGES DE SUCCÈS --- **/
 
     public static final String SUCCES_DEMANDE_BROUILLON_CREEE = "Brouillon de demande de congé créé avec succès.";
     public static final String SUCCES_DEMANDE_SOUmise = "Votre demande de congé a été soumise avec succès.";
@@ -99,7 +50,7 @@ public final class Constants {
     public static final String SUCCES_OPERATION_EFFECTUEE = "Opération effectuée avec succès.";
     public static final String SUCCES_RAPPORT_EXPORT = "Rapport exporté avec succès.";
 
-    /** CATÉGORIE : MESSAGES D'ERREUR */
+    /** --- MESSAGES D'ERREUR --- **/
 
     public static final String ERREUR_UTILISATEUR_NON_TROUVE = "Utilisateur non trouvé.";
     public static final String ERREUR_DEMANDE_NON_TROUVEE = "Demande de congé non trouvée.";
@@ -124,9 +75,8 @@ public final class Constants {
     public static final String ERREUR_TYPE_CONGE_RECUPERATION_ECHOUEE = "Échec récupération type congé";
     public static final String ERREUR_TYPE_CONGE_SUPPRESSION_ECHOUEE = "Échec suppression type congé";
 
-    /** CATÉGORIE : MESSAGES DE LOG */
+    /** --- MESSAGES DE LOG --- **/
 
-    /** Logs généraux opérationnels */
     public static final String LOG_DEMANDE_BROUILLON_CREE = "Brouillon de demande créé - Utilisateur: {} - ID temporaire: {}";
     public static final String LOG_DEMANDE_SOUMISE = "Demande de congé soumise avec succès - ID: {} - Utilisateur: {}";
     public static final String LOG_DEMANDE_MODIFIEE = "Demande modifiée avec succès - ID: {} - Utilisateur: {}";
@@ -144,8 +94,6 @@ public final class Constants {
     public static final String LOG_ERREUR_TYPE_CONGE_RECUPERATION_TOUS = "Erreur lors de la récupération des types de congés : {}";
     public static final String LOG_ERREUR_TYPE_CONGE_SUPPRESSION = "Erreur lors de la suppression du type de congé ID={} : {}";
     public static final String LOG_UTILISATEUR_CREE = "Utilisateur créé avec succès - ID: {} - Email: {}";
-
-    /** Logs de vérification et erreurs métier */
     public static final String LOG_SOLDE_INSUFFISANT = "Solde insuffisant pour soumission - Utilisateur: {} - Solde: {} - Demandé: {}";
     public static final String LOG_CHEVAUCHEMENT_DETECTE = "Chevauchement de dates détecté - Utilisateur: {} - Demande ID: {}";
     public static final String LOG_STATUT_INCORRECT = "Statut incorrect pour l'action - Demande ID: {} - Statut actuel: {}";
@@ -170,10 +118,19 @@ public final class Constants {
     public static final String LOG_ERREUR_RESPONSABLES_RECUPERATION = "Erreur lors de la récupération des responsables : {}";
     public static final String LOG_ERREUR_UTILISATEUR_EXISTENCE = "Erreur lors de la vérification d'existence de l'utilisateur ID={} : {}";
     public static final String LOG_ERREUR_EMAIL_EXISTENCE = "Erreur lors de la vérification d'existence de l'email={} : {}";
-    /** LOG pour le Debug */
     public static final String LOG_TYPE_CONGE_RECUPERER = "Récupérés {} types de congé";
+    public static final String LOG_ERREUR_DEMANDE_CREATION = "Erreur lors de la création de la demande: {}";
+    public static final String LOG_ERREUR_DEMANDE_MODIFICATION_BD = "Erreur lors de la modification de la demande ID={}: {}";
+    public static final String LOG_ERREUR_DEMANDE_RECUPERATION = "Erreur lors de la récupération de la demande ID={}: {}";
+    public static final String LOG_ERREUR_DEMANDES_RECUPERATION = "Erreur lors de la récupération des demandes: {}";
+    public static final String LOG_ERREUR_DEMANDE_STATUT = "Erreur lors de la mise à jour du statut ID={}: {}";
+    public static final String LOG_ERREUR_DEMANDE_SUPPRESSION = "Erreur lors de la suppression de la demande ID={}: {}";
+    public static final String LOG_ERREUR_DEMANDE_CHEVAUCHEMENT = "Erreur lors de la vérification du chevauchement: {}";
+    public static final String LOG_DEMANDES_RECUPEREES = "Récupérées {} demandes de congés";
+    public static final String LOG_STATUT_DEMANDE_MIS_A_JOUR = "Statut de la demande ID={} mis à jour avec succès statut={}";
 
-    /** Constatnts pour les exceptions */
+    /** --- EXCEPTIONS --- **/
+
     public static final String EXCEPTION_TYPE_CONGE_SUPPRESSION_IMPOSSIBLE = "Impossible de supprimer : type de congé utilisé dans au moins une demande";
     public static final String EXCEPTION_TYPE_CONGE_NON_TROUVE = "Type de congé non trouvé : ";
     public static final String EXCEPTION_TYPE_CONGE_UTILISATION_ECHOUEE = "Échec vérification d'utilisation du type de congé";
@@ -191,31 +148,16 @@ public final class Constants {
     public static final String EXCEPTION_DEMANDE_SUPPRESSION_ECHOUEE = "Échec suppression de la demande de congé";
     public static final String EXCEPTION_DEMANDE_STATUT_ECHOUEE = "Échec mise à jour du statut de la demande";
 
-    public static final String LOG_ERREUR_DEMANDE_CREATION = "Erreur lors de la création de la demande: {}";
-    public static final String LOG_ERREUR_DEMANDE_MODIFICATION_BD = "Erreur lors de la modification de la demande ID={}: {}";
-    public static final String LOG_ERREUR_DEMANDE_RECUPERATION = "Erreur lors de la récupération de la demande ID={}: {}";
-    public static final String LOG_ERREUR_DEMANDES_RECUPERATION = "Erreur lors de la récupération des demandes: {}";
-    public static final String LOG_ERREUR_DEMANDE_STATUT = "Erreur lors de la mise à jour du statut ID={}: {}";
-    public static final String LOG_ERREUR_DEMANDE_SUPPRESSION = "Erreur lors de la suppression de la demande ID={}: {}";
-    public static final String LOG_ERREUR_DEMANDE_CHEVAUCHEMENT = "Erreur lors de la vérification du chevauchement: {}";
-    public static final String LOG_DEMANDES_RECUPEREES = "Récupérées {} demandes de congés";
-    public static final String LOG_STATUT_DEMANDE_MIS_A_JOUR = "Statut de la demande ID={} mis à jour avec succès statut={}";
-
-    /** CATÉGORIE : VARIABLES STATIQUES / VALEURS FIXES */
+    /** --- FORMATS ET VALEURS DE RÉFÉRENCE --- **/
 
     public static final int SOLDE_INITIAL_PAR_DEFAUT = 25;
     public static final int MAX_JOURS_DEMANDE_AUTORISE = 30;
-    public static final String FORMAT_NUMERO_DEMANDE = "DC-%d-%04d"; // ex: DC-2025-0001
+    public static final String FORMAT_NUMERO_DEMANDE = "DC-%d-%04d";
     public static final String FORMAT_DATE_SQLITE = "yyyy-MM-dd";
     public static final String FORMAT_DATE_HEURE_SQLITE = "yyyy-MM-dd HH:mm:ss";
-
-    /** CATÉGORIE : PATTERNS / REGEX / FORMATS */
-
     public static final String PATTERN_EMAIL = "^[A-Za-z0-9+_.-]+@(.+)$";
     public static final String PATTERN_UUID = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}";
     public static final String PATTERN_DATE = "\\d{4}-\\d{2}-\\d{2}";
-
-    /** CATÉGORIE : AUTRES CATÉGORIES UTILES */
 
     public static final String ROLE_EMPLOYE = "EMPLOYE";
     public static final String ROLE_RESPONSABLE = "RESPONSABLE";
@@ -229,4 +171,8 @@ public final class Constants {
 
     public static final String MESSAGE_VALIDATION_OK = "Demande validée avec succès.";
     public static final String MESSAGE_REFUS_OK = "Demande refusée avec succès.";
+    public static final String ERROR_SAVE_HISTORIQUE_ETAT = "Erreur lors de l'enregistrement de l'historique :";
+    public static final String ERROR_GET_HISTORIQUE_ETAT = "Erreur lors de la récupération de l'historique :";
+    public static final String SUCCES_DB_INITIALIZED = "Base SQLite initialisée avec succès";
+    public static final String ERROR_DB_INITIALIZATION = "Échec initialisation DB : ";
 }
