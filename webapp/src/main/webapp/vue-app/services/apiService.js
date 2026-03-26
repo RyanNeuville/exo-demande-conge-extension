@@ -1,8 +1,8 @@
-import axios from 'axios';
-
 /**
  * Service API centralisé pour la gestion des requêtes vers le backend.
  * Gère automatiquement le préfixe d'URL eXo Platform et les en-têtes.
+ * Utilise l'API native fetch() (comme dans le projet Alfresco) pour garantir
+ * la compatibilité des sessions avec le portail.
  */
 
 /* Obtenir l'URL de base pour l'API REST eXo */
@@ -19,65 +19,64 @@ const getBaseUrl = () => {
 
 const BASE_URL = getBaseUrl();
 
-const api = axios.create({
-  baseURL: BASE_URL,
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  }
-});
-
 /**
- * Intercepteur pour la gestion globale des erreurs.
+ * Wrapper interne pour fetch qui simule la réponse Axios { data: ... }
+ * afin de ne pas casser les composants existants.
  */
-api.interceptors.response.use(
-  response => response,
-  error => {
-    const message = error.response?.data?.message || "Une erreur technique est survenue.";
-    /* Possibilité de déclencher un toast global ici via un EventBus ou un Store */
-    console.error(`[API Error] ${message}`, error);
-    return Promise.reject(error);
+const fetchApi = async (endpoint, options = {}) => {
+  const url = `${BASE_URL}${endpoint}`;
+  const defaultOptions = {
+    credentials: 'include', // Indispensable pour garder la session eXo !
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+  };
+
+  const finalOptions = {
+    ...defaultOptions,
+    ...options,
+    headers: {
+      ...defaultOptions.headers,
+      ...options.headers,
+    },
+  };
+
+  if (finalOptions.body && typeof finalOptions.body === 'object' && !(finalOptions.body instanceof FormData)) {
+    finalOptions.body = JSON.stringify(finalOptions.body);
   }
-);
+
+  try {
+    const response = await fetch(url, finalOptions);
+    if (!response.ok && response.status !== 404) {
+      throw response;
+    }
+    if (response.status === 204) {
+      return { data: null };
+    }
+    const data = await response.json().catch(() => null);
+    return { data, status: response.status };
+  } catch (error) {
+    console.error(`[API Error]`, error);
+    throw error;
+  }
+};
 
 export default {
   /** --- Demandes --- **/
-  getMesDemandes() {
-    return api.get('/demandes/me');
-  },
-  getDemandesATraiter() {
-    return api.get('/demandes/a-traiter');
-  },
-  getToutesLesDemandes() {
-    return api.get('/demandes/toutes');
-  },
-  getDemande(id) {
-    return api.get(`/demandes/${id}`);
-  },
-  soumettreDemande(data) {
-    return api.post('/demandes', data);
-  },
-  validerDemande(id, commentaire) {
-    return api.post(`/demandes/${id}/valider`, { commentaire });
-  },
-  refuserDemande(id, commentaire) {
-    return api.post(`/demandes/${id}/refuser`, { commentaire });
-  },
-  annulerDemande(id) {
-    return api.post(`/demandes/${id}/annuler`);
-  },
+  getMesDemandes: () => fetchApi('/demandes/me', { method: 'GET' }),
+  getDemandesATraiter: () => fetchApi('/demandes/a-traiter', { method: 'GET' }),
+  getToutesLesDemandes: () => fetchApi('/demandes/toutes', { method: 'GET' }),
+  getDemande: (id) => fetchApi(`/demandes/${id}`, { method: 'GET' }),
+  soumettreDemande: (data) => fetchApi('/demandes', { method: 'POST', body: data }),
+  validerDemande: (id, commentaire) => fetchApi(`/demandes/${id}/valider`, { method: 'POST', body: { commentaire } }),
+  refuserDemande: (id, commentaire) => fetchApi(`/demandes/${id}/refuser`, { method: 'POST', body: { commentaire } }),
+  annulerDemande: (id) => fetchApi(`/demandes/${id}/annuler`, { method: 'POST' }),
 
   /** --- Utilisateurs & Solde --- **/
-  getMonSolde() {
-    return api.get('/utilisateurs/me/solde');
-  },
-  getUtilisateurs() {
-    return api.get('/utilisateurs/me');
-  },
+  getMonSolde: () => fetchApi('/utilisateurs/me/solde', { method: 'GET' }),
+  getUtilisateurs: () => fetchApi('/utilisateurs/me', { method: 'GET' }),
 
   /** --- Types de Congés --- **/
-  getTypesConges() {
-    return api.get('/types-conges');
-  }
+  getTypesConges: () => fetchApi('/types-conges', { method: 'GET' })
 };

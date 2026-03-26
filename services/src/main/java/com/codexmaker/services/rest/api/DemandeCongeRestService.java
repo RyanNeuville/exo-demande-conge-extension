@@ -96,8 +96,8 @@ public class DemandeCongeRestService implements ResourceContainer {
 
         Utilisateur existing = utilisateurService.getUtilisateur(userId);
         if (existing == null) {
-            System.out.println("[DemandeConge] Creating new user record for: " + userId);
-            // Création automatique
+            System.out.println("[DemandeConge] User " + userId + " not in DB. Returning transient profile.");
+            // Création automatique en mémoire seulement (sera persisté lors de la 1ère demande)
             Utilisateur newUser;
             if (appRole == com.codexmaker.services.rest.model.enums.Role.ADMINISTRATEUR) {
                 newUser = new com.codexmaker.services.rest.model.entity.Administrateur();
@@ -114,7 +114,7 @@ public class DemandeCongeRestService implements ResourceContainer {
             newUser.setRole(appRole);
             newUser.setSoldeConges(Constants.SOLDE_INITIAL_PAR_DEFAUT);
             
-            return utilisateurService.synchroniserUtilisateur(newUser);
+            return newUser;
         } else {
             // Mise à jour du rôle si nécessaire
             if (existing.getRole() != appRole) {
@@ -322,6 +322,7 @@ public class DemandeCongeRestService implements ResourceContainer {
 
     /**
      * Récupère le solde de congés actuel de l'utilisateur connecté.
+     * Gère gracieusement le cas où l'utilisateur n'a pas encore fait de demande (et n'est pas en BDD).
      * 
      * @return Réponse HTTP contenant le solde.
      */
@@ -329,8 +330,14 @@ public class DemandeCongeRestService implements ResourceContainer {
     @Path(Constants.API_UTILISATEUR_ME_SOLDE)
     @RolesAllowed("users")
     public Response getMySolde() {
-        double solde = utilisateurService.consulterSolde(getAuthenticatedUserId());
-        return Response.ok(new SoldeResponseDTO(solde)).build();
+        try {
+            double solde = utilisateurService.consulterSolde(getAuthenticatedUserId());
+            return Response.ok(new SoldeResponseDTO(solde)).build();
+        } catch (Exception e) {
+            // L'utilisateur n'est pas encore en BDD (transitoire), il a le solde max
+            System.out.println("[DemandeConge] Solde introuvable (utilisateur transitoire), renvoi du defaut.");
+            return Response.ok(new SoldeResponseDTO((double) Constants.SOLDE_INITIAL_PAR_DEFAUT)).build();
+        }
     }
 
     /**

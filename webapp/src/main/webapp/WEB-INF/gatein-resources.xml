@@ -10,8 +10,8 @@
     <application-name>demande-conge-extension-webapp</application-name>
       <!-- nom du portlet défini dans le fichier portlet.xml -->
     <portlet-name>demandeCongePortlet</portlet-name>
-      <!-- Nom du skin : dans notre cas Community -->
-    <skin-name>Community</skin-name>
+      <!-- Nom du skin : * pour s'appliquer à tous les thèmes -->
+    <skin-name>*</skin-name>
       <!-- Chemin vers le fichier CSS sous cette application Web-->
     <css-path>/css/demandeCongeApp.css</css-path>
   </portlet-skin>
