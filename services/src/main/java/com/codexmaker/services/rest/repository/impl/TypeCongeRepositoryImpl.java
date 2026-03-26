@@ -19,17 +19,17 @@ import org.exoplatform.services.log.Log;
 
 /**
  * Implémentation JDBC du repository pour l'entité TypeConge.
- * Gère toutes les opérations CRUD sur les types de congés (côté admin).
+ * Permet de gérer les paramétrages des types de congés autorisés dans
+ * l'entreprise.
  */
 public class TypeCongeRepositoryImpl implements TypeCongeRepository {
     private static final Log LOG = ExoLogger.getLogger(TypeCongeRepositoryImpl.class);
 
     /**
-     * Crée un nouveau type de congé.
+     * Enregistre un nouveau type de congé.
      *
-     * @param typeConge l'entité à persister (doit avoir un ID UUID généré)
-     * @return l'entité persistée avec ID confirmé
-     * @throws RuntimeException en cas d'erreur SQL
+     * @param typeConge L'entité TypeConge.
+     * @return L'entité persistée.
      */
     @Override
     public TypeConge save(TypeConge typeConge) {
@@ -57,10 +57,9 @@ public class TypeCongeRepositoryImpl implements TypeCongeRepository {
     }
 
     /**
-     * Met à jour un type de congé existant.
+     * Met à jour les propriétés d'un type de congé existant.
      *
-     * @param typeConge l'entité mise à jour
-     * @throws RuntimeException si la mise à jour échoue ou si non trouvé
+     * @param typeConge L'entité modifiée.
      */
     @Override
     public void update(TypeConge typeConge) {
@@ -87,10 +86,10 @@ public class TypeCongeRepositoryImpl implements TypeCongeRepository {
     }
 
     /**
-     * Récupère un type de congé par son ID.
+     * Récupère un type de congé par son identifiant unique.
      *
-     * @param id l'UUID du type de congé
-     * @return l'entité ou null si non trouvé
+     * @param id L'identifiant (UUID).
+     * @return L'entité correspondante ou null.
      */
     @Override
     public TypeConge findById(String id) {
@@ -112,9 +111,9 @@ public class TypeCongeRepositoryImpl implements TypeCongeRepository {
     }
 
     /**
-     * Récupère la liste complète des types de congé (triés par libellé).
-     *
-     * @return liste non nulle (vide si aucun type)
+     * Liste l'intégralité des types de congés référencés.
+     * 
+     * @return Liste ordonnée de types de congés.
      */
     @Override
     public List<TypeConge> findAll() {
@@ -138,10 +137,11 @@ public class TypeCongeRepositoryImpl implements TypeCongeRepository {
     }
 
     /**
-     * Supprime un type de congé (uniquement si non utilisé).
+     * Supprime un type de congé de la base de données.
+     * La suppression est refusée si des demandes utilisent déjà ce type.
      *
-     * @param id l'UUID du type à supprimer
-     * @throws RuntimeException si suppression impossible (utilisé ou non trouvé)
+     * @param id L'identifiant du type à supprimer.
+     * @throws IllegalStateException Si le type est encore utilisé.
      */
     @Override
     public void deleteById(String id) {
@@ -166,10 +166,10 @@ public class TypeCongeRepositoryImpl implements TypeCongeRepository {
     }
 
     /**
-     * Vérifie si un type de congé est référencé dans au moins une demande.
+     * Vérifie si un type de congé est associé à au moins une demande de congé.
      *
-     * @param typeCongeId UUID du type
-     * @return true si utilisé, false sinon
+     * @param typeCongeId L'identifiant du type de congé.
+     * @return true si associé, false sinon.
      */
     @Override
     public boolean isTypeUsed(String typeCongeId) {

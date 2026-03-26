@@ -19,12 +19,19 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
 /**
- * Implémentation JDBC pour l'historique des états.
+ * Implémentation JDBC pour la gestion de l'historique des états.
+ * Permet de conserver une trace de toutes les actions et changements de statut
+ * sur les demandes de congés.
  */
 public class HistoriqueEtatRepositoryImpl implements HistoriqueEtatRepository {
 
     private static final Log LOG = ExoLogger.getLogger(HistoriqueEtatRepositoryImpl.class);
 
+    /**
+     * Enregistre un nouvel événement dans l'historique d'une demande.
+     *
+     * @param historique L'entrée d'historique à sauvegarder.
+     */
     @Override
     public void save(HistoriqueEtat historique) {
         if (historique.getId() == null) {
@@ -51,6 +58,12 @@ public class HistoriqueEtatRepositoryImpl implements HistoriqueEtatRepository {
         }
     }
 
+    /**
+     * Récupère l'historique chronologique pour une demande de congé donnée.
+     *
+     * @param demandeId L'identifiant de la demande concernée.
+     * @return Liste chronologique des changements d'état.
+     */
     @Override
     public List<HistoriqueEtat> findByDemandeId(String demandeId) {
         String sql = SqlQueries.GET_HISTORIQUE_ETAT_BY_DEMANDE_ID;

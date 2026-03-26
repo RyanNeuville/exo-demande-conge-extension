@@ -1,11 +1,15 @@
 package com.codexmaker.services.rest.model.entity;
 
 import com.codexmaker.services.rest.model.enums.StatutDemande;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Entité principale représentant une demande de congé.
+ * Contient toutes les informations relatives à la période, au type, au statut
+ * et à la traçabilité de la demande.
+ */
 public class DemandeConge {
     private String id;
     private String numero;
@@ -24,41 +28,69 @@ public class DemandeConge {
     private String valideurId;
     private LocalDate dateValidation;
     private LocalDate dateModification;
-    private int soldeCongesAvant;
-    private int dureeJoursOuvres;
+    private double soldeCongesAvant;
+    private double dureeJoursOuvres;
+
     @com.fasterxml.jackson.annotation.JsonManagedReference
     private List<HistoriqueEtat> historique = new ArrayList<>();
 
     public DemandeConge() {
     }
 
-    public DemandeConge(String id, String numero, String userId, LocalDate dateCreation, LocalDate dateSoumission,
-            LocalDate dateDebut, LocalDate dateFin, boolean demiJourneeDebut, boolean demiJourneeFin,
-            TypeConge typeConge, StatutDemande statut, String motif, String commentaireEmploye,
-            String commentaireValideur, String valideurId, LocalDate dateValidation, LocalDate dateModification,
-            int soldeCongesAvant, int dureeJoursOuvres, List<HistoriqueEtat> historique) {
-        this.id = id;
-        this.numero = numero;
-        this.userId = userId;
-        this.dateCreation = dateCreation;
-        this.dateSoumission = dateSoumission;
-        this.dateDebut = dateDebut;
-        this.dateFin = dateFin;
-        this.demiJourneeDebut = demiJourneeDebut;
-        this.demiJourneeFin = demiJourneeFin;
-        this.typeConge = typeConge;
-        this.statut = statut;
-        this.motif = motif;
-        this.commentaireEmploye = commentaireEmploye;
-        this.commentaireValideur = commentaireValideur;
-        this.valideurId = valideurId;
-        this.dateValidation = dateValidation;
-        this.dateModification = dateModification;
-        this.soldeCongesAvant = soldeCongesAvant;
-        this.dureeJoursOuvres = dureeJoursOuvres;
-        this.historique = historique;
+    /**
+     * Calcule la durée effective de la demande en jours ouvrés.
+     * Exclut les samedis et dimanches et déduit les demi-journées si cochées.
+     * Met à jour l'attribut interne 'dureeJoursOuvres'.
+     * 
+     * @return La durée calculée (ex: 2.5 pour 3 jours ouvrés moins une matinée).
+     */
+    public double calculerDureeJoursOuvres() {
+        if (dateDebut == null || dateFin == null)
+            return 0.0;
+        if (dateDebut.isAfter(dateFin))
+            return 0.0;
+
+        double count = 0.0;
+        LocalDate current = dateDebut;
+        while (!current.isAfter(dateFin)) {
+            java.time.DayOfWeek day = current.getDayOfWeek();
+            if (day != java.time.DayOfWeek.SATURDAY && day != java.time.DayOfWeek.SUNDAY) {
+                count += 1.0;
+            }
+            current = current.plusDays(1);
+        }
+
+        if (count > 0) {
+            if (demiJourneeDebut)
+                count -= 0.5;
+            if (demiJourneeFin)
+                count -= 0.5;
+        }
+
+        this.dureeJoursOuvres = Math.max(0, count);
+        return this.dureeJoursOuvres;
     }
 
+    /**
+     * Vérifie si la demande est encore éditable.
+     * Une demande n'est modifiable que si elle est en attente de validation.
+     * 
+     * @return true si modifiable.
+     */
+    public boolean estModifiable() {
+        return statut == StatutDemande.EN_ATTENTE;
+    }
+
+    /**
+     * Vérifie si l'utilisateur peut annuler sa demande.
+     * 
+     * @return true si annulable.
+     */
+    public boolean estAnnulable() {
+        return statut == StatutDemande.EN_ATTENTE;
+    }
+
+    /** Getters and Setters */
     public String getId() {
         return id;
     }
@@ -195,19 +227,19 @@ public class DemandeConge {
         this.dateModification = dateModification;
     }
 
-    public int getSoldeCongesAvant() {
+    public double getSoldeCongesAvant() {
         return soldeCongesAvant;
     }
 
-    public void setSoldeCongesAvant(int soldeCongesAvant) {
+    public void setSoldeCongesAvant(double soldeCongesAvant) {
         this.soldeCongesAvant = soldeCongesAvant;
     }
 
-    public int getDureeJoursOuvres() {
+    public double getDureeJoursOuvres() {
         return dureeJoursOuvres;
     }
 
-    public void setDureeJoursOuvres(int dureeJoursOuvres) {
+    public void setDureeJoursOuvres(double dureeJoursOuvres) {
         this.dureeJoursOuvres = dureeJoursOuvres;
     }
 
@@ -217,17 +249,5 @@ public class DemandeConge {
 
     public void setHistorique(List<HistoriqueEtat> historique) {
         this.historique = historique;
-    }
-
-    public int calculerDureeJoursOuvres() {
-        return 0;
-    }
-
-    public boolean estModifiable() {
-        return statut == StatutDemande.EN_ATTENTE;
-    }
-
-    public boolean estAnnulable() {
-        return statut == StatutDemande.EN_ATTENTE;
     }
 }

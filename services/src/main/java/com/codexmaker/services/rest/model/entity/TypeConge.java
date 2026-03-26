@@ -1,5 +1,9 @@
 package com.codexmaker.services.rest.model.entity;
 
+/**
+ * Représente une catégorie de congé (ex: Congé Payé, RTT, Maladie).
+ * Définit les règles de calcul (plafond annuel, déduction du solde).
+ */
 public class TypeConge {
     private String id;
     private String code;
@@ -11,15 +15,7 @@ public class TypeConge {
     public TypeConge() {
     }
 
-    public TypeConge(String id, String code, String libelle, String description, int joursMaxParAn, boolean deductionSolde) {
-        this.id = id;
-        this.code = code;
-        this.libelle = libelle;
-        this.description = description;
-        this.joursMaxParAn = joursMaxParAn;
-        this.deductionSolde = deductionSolde;
-    }
-
+    /** Getters & Setters */
     public String getId() {
         return id;
     }

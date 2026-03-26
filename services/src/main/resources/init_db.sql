@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS utilisateur (
     username TEXT NOT NULL UNIQUE,
     email TEXT NOT NULL UNIQUE,
     role TEXT NOT NULL CHECK(role IN ('EMPLOYE', 'RESPONSABLE', 'ADMINISTRATEUR')),
-    solde_conges INTEGER NOT NULL DEFAULT 25
+    solde_conges REAL NOT NULL DEFAULT 25.0
 );
 
 -- ============================================================================
@@ -70,8 +70,8 @@ CREATE TABLE IF NOT EXISTS demande_conge (
     date_soumission DATE NOT NULL,
     date_modification DATE,
     date_validation DATE,
-    solde_conges_avant INTEGER NOT NULL,
-    duree_jours_ouvres INTEGER NOT NULL,
+    solde_conges_avant REAL NOT NULL,
+    duree_jours_ouvres REAL NOT NULL,
     FOREIGN KEY (user_id) REFERENCES utilisateur(id),
     FOREIGN KEY (type_conge_id) REFERENCES type_conge(id),
     FOREIGN KEY (valideur_id) REFERENCES utilisateur(id)
@@ -106,3 +106,16 @@ CREATE INDEX IF NOT EXISTS idx_demande_user_id ON demande_conge(user_id);
 CREATE INDEX IF NOT EXISTS idx_demande_statut ON demande_conge(statut);
 CREATE INDEX IF NOT EXISTS idx_demande_valideur_id ON demande_conge(valideur_id);
 CREATE INDEX IF NOT EXISTS idx_historique_demande_id ON historique_etat(demande_id);
+
+-- ============================================================================
+-- Seeding des types de congés
+-- ============================================================================
+INSERT OR IGNORE INTO type_conge (id, code, libelle, description, jours_max_par_an, deduction_solde) VALUES 
+('type-001', 'ANNUEL', 'Congé Annuel', 'Congés payés réguliers de l''entreprise', 25, 1),
+('type-002', 'MALADIE', 'Congé Maladie', 'Absence justifiée pour raisons de santé', 30, 0),
+('type-003', 'R_EXCEPTIONNEL', 'Repos Exceptionnel', 'Événements familiaux (Mariage, Naissance, Décès)', 10, 0),
+('type-004', 'SANS_SOLDE', 'Congé Sans Solde', 'Absence non rémunérée autorisée par la direction', 90, 0),
+('type-005', 'MATERNITE', 'Congé Maternité', 'Période légale de repos pré et post-natal', 112, 0),
+('type-006', 'PATERNITE', 'Congé Paternité', 'Congé réservé au second parent suite à une naissance', 11, 0),
+('type-007', 'FORMATION', 'Congé Formation', 'Absence pour montée en compétences ou bilans', 5, 0),
+('type-008', 'DEMENAGEMENT', 'Déménagement', 'Journée accordée pour changement de domicile', 1, 0);
