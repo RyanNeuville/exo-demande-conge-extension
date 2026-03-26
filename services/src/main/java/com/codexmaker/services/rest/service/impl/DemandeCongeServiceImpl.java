@@ -52,7 +52,15 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
 
     @Override
     public DemandeConge soumettreDemande(DemandeConge demande, String userId) {
-        /** 1. Vérification de chevauchement */
+        /** 1. Vérification de la cohérence des dates */
+        if (demande.getDateDebut() == null || demande.getDateFin() == null) {
+            throw new BusinessException("Les dates de début et de fin sont obligatoires.");
+        }
+        if (demande.getDateDebut().isAfter(demande.getDateFin())) {
+            throw new BusinessException("La date de début ne peut pas être après la date de fin.");
+        }
+
+        /** 2. Vérification de chevauchement */
         if (demandeCongeRepository.hasChevauchement(userId, null, demande.getDateDebut(), demande.getDateFin())) {
             throw new BusinessException("Une demande existe déjà pour cette période.");
         }
