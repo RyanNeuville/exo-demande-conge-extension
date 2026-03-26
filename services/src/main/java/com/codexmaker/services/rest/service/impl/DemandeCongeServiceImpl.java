@@ -21,6 +21,8 @@ import java.util.UUID;
 
 /**
  * Implémentation du service métier pour les demandes de congés.
+ * Gère la logique de soumission, validation, refus et annulation des demandes,
+ * ainsi que le calcul automatique de la durée et la mise à jour des soldes.
  */
 public class DemandeCongeServiceImpl implements DemandeCongeService {
 
@@ -43,16 +45,33 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
      * @param historiqueEtatRepository le dépôt des historiques
      */
     public DemandeCongeServiceImpl(DemandeCongeRepository demandeCongeRepository,
-                                   UtilisateurRepository utilisateurRepository,
-                                   HistoriqueEtatRepository historiqueEtatRepository) {
+            UtilisateurRepository utilisateurRepository,
+            HistoriqueEtatRepository historiqueEtatRepository) {
         this.demandeCongeRepository = demandeCongeRepository;
         this.utilisateurRepository = utilisateurRepository;
         this.historiqueEtatRepository = historiqueEtatRepository;
     }
 
+    /**
+     * Soumet une nouvelle demande de congé pour un utilisateur.
+     * Réalise plusieurs vérifications : cohérence des dates, chevauchement, et
+     * solde suffisant.
+     * Réalise également la création automatique de l'utilisateur (JIT) si
+     * nécessaire.
+     *
+     * @param demande L'objet demande contenant les dates et le motif.
+     * @param userId  L'identifiant de l'utilisateur qui soumet la demande.
+     * @return La demande sauvegardée avec son état initial "EN_ATTENTE".
+     * @throws BusinessException                 Si les dates sont incohérentes ou
+     *                                           s'il y a un chevauchement.
+     * @throws InsufficientLeaveBalanceException Si le solde de l'utilisateur est
+     *                                           insuffisant.
+     */
     @Override
     public DemandeConge soumettreDemande(DemandeConge demande, String userId) {
-        /** 1. Vérification de la cohérence des dates */
+        /**
+         * Vérification de la cohérence des dates.
+         */
         if (demande.getDateDebut() == null || demande.getDateFin() == null) {
             throw new BusinessException("Les dates de début et de fin sont obligatoires.");
         }
@@ -60,12 +79,16 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
             throw new BusinessException("La date de début ne peut pas être après la date de fin.");
         }
 
-        /** 2. Vérification de chevauchement */
+        /**
+         * Vérification de chevauchement avec une demande existante.
+         */
         if (demandeCongeRepository.hasChevauchement(userId, null, demande.getDateDebut(), demande.getDateFin())) {
             throw new BusinessException("Une demande existe déjà pour cette période.");
         }
 
-        /** 2. Vérification / Création automatique de l'utilisateur (JIT) */
+        /**
+         * Vérification / Création automatique de l'utilisateur (Just-In-Time creation).
+         */
         if (!utilisateurRepository.existsById(userId)) {
             com.codexmaker.services.rest.model.entity.Employe nouvelUtilisateur = new com.codexmaker.services.rest.model.entity.Employe();
             nouvelUtilisateur.setId(userId);
@@ -74,48 +97,71 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
             nouvelUtilisateur.setPrenom(userId);
             nouvelUtilisateur.setEmail(userId + "@kozao.ko");
             nouvelUtilisateur.setRole(com.codexmaker.services.rest.model.enums.Role.EMPLOYE);
-            /** Solde par défaut d'une demande chaque année */
             nouvelUtilisateur.setSoldeConges(25.0);
             utilisateurRepository.save(nouvelUtilisateur);
         }
 
-        /** 3. Calculer la durée et vérifier le solde */
+        /**
+         * Calcul de la durée et vérification du solde.
+         */
         demande.calculerDureeJoursOuvres();
         double soldeActuel = utilisateurRepository.getSoldeById(userId);
         if (soldeActuel < demande.getDureeJoursOuvres()) {
             throw new InsufficientLeaveBalanceException("Solde insuffisant pour cette demande.");
         }
 
-        /** 3. Initialisation des champs */
+        /**
+         * Initialisation des champs techniques de la demande.
+         */
         if (demande.getId() == null)
             demande.setId(UUID.randomUUID().toString());
         if (demande.getNumero() == null)
             demande.setNumero("REQ-" + System.currentTimeMillis());
         if (demande.getValideurId() == null)
             demande.setValideurId("root");
+
         demande.setUserId(userId);
         demande.setStatut(StatutDemande.EN_ATTENTE);
         demande.setDateCreation(LocalDate.now());
         demande.setDateSoumission(LocalDate.now());
         demande.setSoldeCongesAvant(soldeActuel);
 
-        /** 4. Réserver le solde immédiatement (Logique de soumission) */
+        /**
+         * Déduction immédiate du solde (réservation).
+         */
         utilisateurRepository.updateSolde(userId, soldeActuel - demande.getDureeJoursOuvres());
 
-        /** 5. Sauvegarde de la demande */
+        /**
+         * Sauvegarde effective dans la base de données.
+         */
         DemandeConge saved = demandeCongeRepository.save(demande);
 
-        /** 6. Historisation */
+        /**
+         * Enregistrement de l'action dans l'historique.
+         */
         logHistorique(saved, null, StatutDemande.EN_ATTENTE, userId, "Soumission initiale");
 
         return saved;
     }
 
+    /**
+     * Récupère une demande par son identifiant unique.
+     *
+     * @param demandeId L'identifiant UUID de la demande.
+     * @return L'entité demande ou null si non trouvée.
+     */
     @Override
     public DemandeConge getDemande(String demandeId) {
         return demandeCongeRepository.findById(demandeId);
     }
 
+    /**
+     * Récupère toutes les demandes associées à un utilisateur.
+     * L'historique des changements d'état est également chargé pour chaque demande.
+     *
+     * @param userId L'identifiant de l'utilisateur.
+     * @return Une liste de demandes de congés.
+     */
     @Override
     public List<DemandeConge> getDemandesParUtilisateur(String userId) {
         List<DemandeConge> demandes = demandeCongeRepository.findByUserId(userId);
@@ -125,22 +171,39 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
         return demandes;
     }
 
+    /**
+     * Liste l'intégralité des demandes présentes dans le système.
+     * 
+     * @return Liste de toutes les demandes.
+     */
     @Override
     public List<DemandeConge> getToutesLesDemandes() {
         return demandeCongeRepository.findAll();
     }
 
+    /**
+     * Récupère les demandes en attente d'un valideur spécifique.
+     *
+     * @param valideurId L'identifiant du manager/valideur.
+     * @return Liste des demandes à traiter.
+     */
     @Override
     public List<DemandeConge> getDemandesATraiter(String valideurId) {
         return demandeCongeRepository.findPendingForValidator(valideurId);
     }
 
+    /**
+     * Valide une demande de congé.
+     * Puisque le solde est déjà déduit à la soumission, cette action ne fait que
+     * confirmer le statut.
+     *
+     * @param demandeId   Identifiant de la demande.
+     * @param commentaire Note de validation par le manager.
+     */
     @Override
     public void validerDemande(String demandeId, String commentaire) {
         DemandeConge demande = demandeCongeRepository.findById(demandeId);
         if (demande != null && demande.getStatut() == StatutDemande.EN_ATTENTE) {
-            /** Le solde est déjà déduit à la soumission. */
-            /** On confirme juste la validation. */
             demandeCongeRepository.updateStatus(demandeId, StatutDemande.VALIDEE, commentaire,
                     LocalDate.now(), LocalDate.now());
 
@@ -148,6 +211,12 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
         }
     }
 
+    /**
+     * Refuse une demande de congé et recrédite le solde de l'utilisateur.
+     *
+     * @param demandeId   Identifiant de la demande.
+     * @param commentaire Motif du refus.
+     */
     @Override
     public void refuserDemande(String demandeId, String commentaire) {
         DemandeConge demande = demandeCongeRepository.findById(demandeId);
@@ -163,6 +232,16 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
         }
     }
 
+    /**
+     * Modifie une demande encore en attente de validation.
+     * Gère dynamiquement l'ajustement du solde si la durée est modifiée.
+     *
+     * @param demande Les nouvelles données de la demande.
+     * @param userId  L'identifiant de l'utilisateur effectuant la modification.
+     * @throws UnauthorizedActionException       Si la demande n'est pas modifiable.
+     * @throws InsufficientLeaveBalanceException Si le nouveau solde requis est
+     *                                           indisponible.
+     */
     @Override
     public void modifierDemandeEnAttente(DemandeConge demande, String userId) {
         DemandeConge existante = demandeCongeRepository.findById(demande.getId());
@@ -170,7 +249,7 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
             throw new UnauthorizedActionException("Seulement les demandes en attente peuvent être modifiées.");
         }
 
-        /** Si la durée change, il faut ajuster le solde réservé */
+        /** Ajustement du solde réservé si la durée change */
         demande.calculerDureeJoursOuvres();
         double diff = demande.getDureeJoursOuvres() - existante.getDureeJoursOuvres();
         if (diff != 0) {
@@ -197,14 +276,17 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
                 "Modification de la demande");
     }
 
+    /**
+     * Annule une demande de congé et recrédite systématiquement le solde.
+     * L'annulation est possible pour les demandes "EN_ATTENTE" ou "VALIDEE".
+     *
+     * @param demandeId Identifiant de la demande à annuler.
+     */
     @Override
     public void annulerDemande(String demandeId) {
         DemandeConge demande = demandeCongeRepository.findById(demandeId);
         if (demande != null
                 && (demande.getStatut() == StatutDemande.EN_ATTENTE || demande.getStatut() == StatutDemande.VALIDEE)) {
-            /**
-             * Recréditer le solde dans tous les cas d'annulation (En attente ou Validée)
-             */
             double soldeActuel = utilisateurRepository.getSoldeById(demande.getUserId());
             utilisateurRepository.updateSolde(demande.getUserId(), soldeActuel + demande.getDureeJoursOuvres());
 
@@ -216,11 +298,24 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
         }
     }
 
+    /**
+     * Supprime définitivement une demande de la base de données.
+     * 
+     * @param demandeId Identifiant de la demande.
+     */
     @Override
     public void supprimerDemande(String demandeId) {
         demandeCongeRepository.deleteById(demandeId);
     }
 
+    /**
+     * Exporte les rapports de congés dans une chaîne CSV structurée.
+     *
+     * @param format Le format (actuellement seul CSV est supporté).
+     * @param debut  Date de début de filtre.
+     * @param fin    Date de fin de filtre.
+     * @return Chaîne de caractères au format CSV.
+     */
     @Override
     public String exporterRapports(String format, LocalDate debut, LocalDate fin) {
         List<DemandeConge> demandes = demandeCongeRepository.findAll();

@@ -19,20 +19,19 @@ import org.exoplatform.services.log.Log;
 
 /**
  * Implémentation JDBC du repository pour l'entité Utilisateur.
- * Gère toutes les opérations CRUD sur les utilisateurs.
- * Les utilisateurs sont souvent synchronisés depuis eXo Platform.
+ * Gère le stockage et la récupération des profils utilisateurs,
+ * souvent synchronisés depuis les identités eXo Platform.
  */
 public class UtilisateurRepositoryImpl implements UtilisateurRepository {
 
     private static final Log LOG = ExoLogger.getLogger(UtilisateurRepositoryImpl.class);
 
     /**
-     * Crée ou persiste un nouvel utilisateur (souvent synchronisé depuis eXo).
+     * Enregistre un nouvel utilisateur ou met à jour une synchronisation existante.
      *
-     * @param utilisateur l'entité à persister (doit avoir un ID généré au
-     *                    préalable)
-     * @return l'entité persistée avec ID confirmé
-     * @throws RuntimeException en cas d'erreur SQL
+     * @param utilisateur L'entité utilisateur à persister.
+     * @return L'entité persistée.
+     * @throws RuntimeException En cas d'erreur de contrainte ou technique SQL.
      */
     @Override
     public Utilisateur save(Utilisateur utilisateur) {
@@ -62,11 +61,10 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
     }
 
     /**
-     * Récupère un utilisateur par son ID (username eXo ou UUID).
+     * Recherche un utilisateur par son identifiant principal (ID eXo).
      *
-     * @param id l'identifiant de l'utilisateur
-     * @return l'entité Utilisateur trouvée, ou null si inexistante
-     * @throws RuntimeException en cas d'erreur SQL
+     * @param id L'identifiant (souvent le username).
+     * @return L'utilisateur trouvé ou null.
      */
     @Override
     public Utilisateur findById(String id) {
@@ -93,12 +91,10 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
     }
 
     /**
-     * Met à jour le solde de congés d'un utilisateur.
+     * Met à jour le solde de congés (en jours) d'un utilisateur.
      *
-     * @param userId   l'identifiant de l'utilisateur
-     * @param newSolde le nouveau solde à enregistrer
-     * @throws RuntimeException en cas d'erreur SQL ou si l'utilisateur est
-     *                          introuvable
+     * @param userId   L'identifiant de l'utilisateur.
+     * @param newSolde La nouvelle valeur du solde (double pour la précision).
      */
     @Override
     public void updateSolde(String userId, double newSolde) {
@@ -122,11 +118,10 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
     }
 
     /**
-     * Récupère le solde de congés actuel d'un utilisateur.
+     * Récupère le solde actuel d'un utilisateur directement par une requête ciblée.
      *
-     * @param userId l'identifiant de l'utilisateur
-     * @return le solde de congés (en jours)
-     * @throws RuntimeException en cas d'erreur SQL
+     * @param userId L'identifiant de l'utilisateur.
+     * @return Le solde actuel sous forme de double.
      */
     @Override
     public double getSoldeById(String userId) {
@@ -152,10 +147,9 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
     }
 
     /**
-     * Récupère la liste complète de tous les utilisateurs (triés par nom).
-     *
-     * @return liste non nulle (vide si aucun utilisateur)
-     * @throws RuntimeException en cas d'erreur SQL
+     * Liste l'intégralité des utilisateurs enregistrés dans le système.
+     * 
+     * @return Liste ordonnée par nom d'utilisateur.
      */
     @Override
     public List<Utilisateur> findAll() {
@@ -179,11 +173,9 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
     }
 
     /**
-     * Récupère la liste de tous les utilisateurs ayant le rôle RESPONSABLE.
-     * Utile pour alimenter la liste de sélection du valideur lors d'une demande.
-     *
-     * @return liste non nulle (vide si aucun responsable)
-     * @throws RuntimeException en cas d'erreur SQL
+     * Récupère les utilisateurs disposant du rôle RESPONSABLE.
+     * 
+     * @return Liste de responsables.
      */
     @Override
     public List<Utilisateur> findAllResponsables() {
@@ -207,11 +199,10 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
     }
 
     /**
-     * Vérifie si un utilisateur existe en base par son ID.
+     * Vérifie la présence d'un utilisateur en base de données par son ID.
      *
-     * @param id l'identifiant de l'utilisateur
-     * @return true si l'utilisateur existe, false sinon
-     * @throws RuntimeException en cas d'erreur SQL
+     * @param id L'identifiant à vérifier.
+     * @return true s'il existe, false sinon.
      */
     @Override
     public boolean existsById(String id) {
@@ -237,12 +228,10 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
     }
 
     /**
-     * Vérifie si un email est déjà utilisé par un autre utilisateur.
-     * Utile lors de la création d'un compte pour éviter les doublons.
+     * Vérifie si une adresse email est déjà présente dans le système.
      *
-     * @param email l'adresse email à vérifier
-     * @return true si l'email est déjà enregistré, false sinon
-     * @throws RuntimeException en cas d'erreur SQL
+     * @param email L'adresse email.
+     * @return true si déjà utilisée.
      */
     @Override
     public boolean existsByEmail(String email) {

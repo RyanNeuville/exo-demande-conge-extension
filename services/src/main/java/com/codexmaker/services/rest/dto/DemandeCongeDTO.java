@@ -2,6 +2,10 @@ package com.codexmaker.services.rest.dto;
 
 import com.codexmaker.services.rest.model.entity.TypeConge;
 
+/**
+ * Objet de transfert de données utilisé lors de la soumission ou modification
+ * d'une demande par le client REST.
+ */
 public class DemandeCongeDTO {
     private String id;
     private String userId;

@@ -1,12 +1,15 @@
 package com.codexmaker.services.rest.model.entity;
 
 import com.codexmaker.services.rest.model.enums.Role;
-
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Classe de base abstraite représentant un utilisateur du système.
+ * Les utilisateurs sont spécialisés par rôle (Employé, Responsable,
+ * Administrateur).
+ */
 public abstract class Utilisateur {
-    /** attribut commun a tous les utilisateurs */
     private String id;
     private String username;
     private String nom;
@@ -18,20 +21,7 @@ public abstract class Utilisateur {
     @com.fasterxml.jackson.annotation.JsonIgnore
     private List<DemandeConge> demandes = new ArrayList<>();
 
-    /** Constructeur */
     public Utilisateur() {
-    }
-
-    public Utilisateur(String id, String username, String nom, String prenom, String email, Role role, double soldeConges,
-            List<DemandeConge> demandes) {
-        this.id = id;
-        this.username = username;
-        this.nom = nom;
-        this.prenom = prenom;
-        this.email = email;
-        this.role = role;
-        this.soldeConges = soldeConges;
-        this.demandes = demandes;
     }
 
     /** Getters & Setters */
@@ -51,36 +41,12 @@ public abstract class Utilisateur {
         this.username = username;
     }
 
-    public List<DemandeConge> getDemandes() {
-        return demandes;
+    public String getNom() {
+        return nom;
     }
 
-    public void setDemandes(List<DemandeConge> demandes) {
-        this.demandes = demandes;
-    }
-
-    public double getSoldeConges() {
-        return soldeConges;
-    }
-
-    public void setSoldeConges(double soldeConges) {
-        this.soldeConges = soldeConges;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
+    public void setNom(String nom) {
+        this.nom = nom;
     }
 
     public String getPrenom() {
@@ -91,11 +57,35 @@ public abstract class Utilisateur {
         this.prenom = prenom;
     }
 
-    public String getNom() {
-        return nom;
+    public String getEmail() {
+        return email;
     }
 
-    public void setNom(String nom) {
-        this.nom = nom;
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public double getSoldeConges() {
+        return soldeConges;
+    }
+
+    public void setSoldeConges(double soldeConges) {
+        this.soldeConges = soldeConges;
+    }
+
+    public List<DemandeConge> getDemandes() {
+        return demandes;
+    }
+
+    public void setDemandes(List<DemandeConge> demandes) {
+        this.demandes = demandes;
     }
 }

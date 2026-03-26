@@ -8,8 +8,10 @@ import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
 /**
- * Configuration personnalisée de Jackson pour supporter les types Java 8 (LocalDate, etc.).
- * Ce provider permet à eXo Platform de désérialiser correctement les dates envoyées par le frontend.
+ * Configuration personnalisée de Jackson pour supporter les types Java 8
+ * (LocalDate, etc.).
+ * Ce provider permet à eXo Platform de désérialiser correctement les dates
+ * envoyées par le frontend.
  */
 @Provider
 public class JacksonContextResolver implements ContextResolver<ObjectMapper> {
@@ -20,7 +22,10 @@ public class JacksonContextResolver implements ContextResolver<ObjectMapper> {
         this.mapper = new ObjectMapper();
         /** Enregistre le module pour LocalDate, LocalDateTime, etc. */
         this.mapper.registerModule(new JavaTimeModule());
-        /** Désactive l'écriture des dates sous forme de timestamps numériques pour préférer ISO-8601 */
+        /**
+         * Désactive l'écriture des dates sous forme de timestamps numériques pour
+         * préférer ISO-8601
+         */
         this.mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
     }
 

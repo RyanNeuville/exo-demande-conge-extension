@@ -1,9 +1,13 @@
 package com.codexmaker.services.rest.dto;
 
-
 import com.codexmaker.services.rest.model.entity.TypeConge;
 import com.codexmaker.services.rest.model.enums.StatutDemande;
 
+/**
+ * Format de réponse enrichi pour l'affichage dans l'interface utilisateur.
+ * Contient les libellés des noms d'employés et valideurs en plus des IDs
+ * techniques.
+ */
 public class DemandeCongeResponseDTO {
     private String id;
     private String numero;
@@ -30,34 +34,7 @@ public class DemandeCongeResponseDTO {
     public DemandeCongeResponseDTO() {
     }
 
-    public DemandeCongeResponseDTO(String id, String numero, String userId, String nomEmploye, String prenomEmploye,
-            String dateDebut, boolean demiJourneeDebut, String dateFin, boolean demiJourneeFin,
-            TypeConge typeConge, StatutDemande statut, String motif, String commentaireEmploye,
-            String commentaireValideur, String valideurId, String nomValideur, String dateSoumission,
-            String dateValidation, String dateModification, int soldeCongesAvant, int dureeJoursOuvres) {
-        this.id = id;
-        this.numero = numero;
-        this.userId = userId;
-        this.nomEmploye = nomEmploye;
-        this.prenomEmploye = prenomEmploye;
-        this.dateDebut = dateDebut;
-        this.demiJourneeDebut = demiJourneeDebut;
-        this.dateFin = dateFin;
-        this.demiJourneeFin = demiJourneeFin;
-        this.typeConge = typeConge;
-        this.statut = statut;
-        this.motif = motif;
-        this.commentaireEmploye = commentaireEmploye;
-        this.commentaireValideur = commentaireValideur;
-        this.valideurId = valideurId;
-        this.nomValideur = nomValideur;
-        this.dateSoumission = dateSoumission;
-        this.dateValidation = dateValidation;
-        this.dateModification = dateModification;
-        this.soldeCongesAvant = soldeCongesAvant;
-        this.dureeJoursOuvres = dureeJoursOuvres;
-    }
-
+    /** Getters and Setters */
     public String getId() {
         return id;
     }
@@ -213,14 +190,16 @@ public class DemandeCongeResponseDTO {
     public double getSoldeCongesAvant() {
         return soldeCongesAvant;
     }
+
     public void setSoldeCongesAvant(double soldeCongesAvant) {
         this.soldeCongesAvant = soldeCongesAvant;
     }
+
     public double getDureeJoursOuvres() {
         return dureeJoursOuvres;
     }
+
     public void setDureeJoursOuvres(double dureeJoursOuvres) {
         this.dureeJoursOuvres = dureeJoursOuvres;
     }
-
 }

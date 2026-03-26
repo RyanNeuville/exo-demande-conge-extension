@@ -42,7 +42,8 @@ public class DemandeCongeServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        demandeCongeService = new DemandeCongeServiceImpl(demandeCongeRepository, utilisateurRepository, historiqueEtatRepository);
+        demandeCongeService = new DemandeCongeServiceImpl(demandeCongeRepository, utilisateurRepository,
+                historiqueEtatRepository);
     }
 
     /**
@@ -50,12 +51,12 @@ public class DemandeCongeServiceImplTest {
      */
     @Test
     void soumettreDemande_Success() {
-        /** Given  */
+        /** Given */
         String userId = "user123";
         DemandeConge demande = new DemandeConge();
         demande.setDateDebut(LocalDate.now().plusDays(1));
         demande.setDateFin(LocalDate.now().plusDays(2)); // 2 jours ouvrés (ex: Lundi-Mardi)
-        
+
         when(demandeCongeRepository.hasChevauchement(eq(userId), isNull(), any(), any())).thenReturn(false);
         when(utilisateurRepository.getSoldeById(userId)).thenReturn(10.0);
         when(demandeCongeRepository.save(any(DemandeConge.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -126,7 +127,8 @@ public class DemandeCongeServiceImplTest {
         demandeCongeService.validerDemande(demandeId, "Approuvé");
 
         /** Then */
-        verify(demandeCongeRepository).updateStatus(eq(demandeId), eq(StatutDemande.VALIDEE), eq("Approuvé"), any(), any());
+        verify(demandeCongeRepository).updateStatus(eq(demandeId), eq(StatutDemande.VALIDEE), eq("Approuvé"), any(),
+                any());
         verify(historiqueEtatRepository).save(any());
     }
 
@@ -135,7 +137,7 @@ public class DemandeCongeServiceImplTest {
      */
     @Test
     void refuserDemande_Success() {
-        /** Given */    
+        /** Given */
         String demandeId = "req1";
         String userId = "user123";
         DemandeConge demande = new DemandeConge();
@@ -152,7 +154,8 @@ public class DemandeCongeServiceImplTest {
 
         /** Then */
         verify(utilisateurRepository).updateSolde(userId, 13.0); // Restored
-        verify(demandeCongeRepository).updateStatus(eq(demandeId), eq(StatutDemande.REFUSEE), eq("Budget insuffisant"), any(), any());
+        verify(demandeCongeRepository).updateStatus(eq(demandeId), eq(StatutDemande.REFUSEE), eq("Budget insuffisant"),
+                any(), any());
         verify(historiqueEtatRepository).save(any());
     }
 }

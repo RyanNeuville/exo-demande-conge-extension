@@ -9,13 +9,22 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Mapper pour l'entité HistoriqueEtat.
+ * Mapper spécialisé dans la transformation des événements d'historique
+ * depuis la base de données vers le modèle objet.
  */
 public final class HistoriqueEtatMapper {
 
     private HistoriqueEtatMapper() {
+        /** Constructeur privé. */
     }
 
+    /**
+     * Reconstruit un objet HistoriqueEtat à partir d'un ResultSet.
+     * 
+     * @param rs Le ResultSet JDBC.
+     * @return L'instance HistoriqueEtat.
+     * @throws SQLException En cas d'erreur SQL.
+     */
     public static HistoriqueEtat fromResultSet(ResultSet rs) throws SQLException {
         HistoriqueEtat historique = new HistoriqueEtat();
         historique.setId(rs.getString("id"));
@@ -32,8 +41,8 @@ public final class HistoriqueEtatMapper {
 
         String dateStr = rs.getString("date_changement");
         if (dateStr != null) {
-            /** SQLite stored as String, usually ISO format for DATETIME
-             * Note: SQLite CURRENT_TIMESTAMP is YYYY-MM-DD HH:MM:SS
+            /**
+             * SQLite stocke les DATETIME sous forme de chaîne au format standard ISO.
              */
             historique.setDateChangement(
                     LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));

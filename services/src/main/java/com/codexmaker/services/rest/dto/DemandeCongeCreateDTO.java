@@ -16,7 +16,9 @@ public class DemandeCongeCreateDTO {
     public DemandeCongeCreateDTO() {
     }
 
-    public DemandeCongeCreateDTO(String userId, String dateDebut, boolean demiJourneeDebut, String dateFin, boolean demiJourneeFin, TypeConge typeConge, String motif, String commentaireEmploye, int dureeJoursOuvres) {
+    public DemandeCongeCreateDTO(String userId, String dateDebut, boolean demiJourneeDebut, String dateFin,
+            boolean demiJourneeFin, TypeConge typeConge, String motif, String commentaireEmploye,
+            int dureeJoursOuvres) {
         this.userId = userId;
         this.dateDebut = dateDebut;
         this.demiJourneeDebut = demiJourneeDebut;

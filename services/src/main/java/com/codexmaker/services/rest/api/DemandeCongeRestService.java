@@ -25,6 +25,8 @@ import java.util.List;
 /**
  * Service REST pour la gestion complète des demandes de congés, types et
  * utilisateurs.
+ * Ce service expose les endpoints nécessaires pour les employés, les
+ * responsables et les administrateurs.
  */
 @Path(Constants.API_BASE)
 @Produces(MediaType.APPLICATION_JSON)
@@ -34,27 +36,38 @@ public class DemandeCongeRestService implements ResourceContainer {
     private final TypeCongeService typeCongeService;
     private final UtilisateurService utilisateurService;
 
+    /**
+     * Constructeur par défaut initialisant les services métier via le conteneur
+     * eXo.
+     */
     public DemandeCongeRestService() {
         this.demandeCongeService = ExoContainerContext.getService(DemandeCongeService.class);
         this.typeCongeService = ExoContainerContext.getService(TypeCongeService.class);
+
         /**
-         * UtilisateurService might not be an eXo Service if not registered in
-         * configuration.xml,
-         * using impl directly if not available in context.
+         * Récupération du service utilisateur.
+         * Si non enregistré dans le contexte eXo, une implémentation par défaut est
+         * utilisée.
          */
         UtilisateurService us = ExoContainerContext.getService(UtilisateurService.class);
         this.utilisateurService = (us != null) ? us : new UtilisateurServiceImpl();
     }
 
+    /**
+     * Récupère l'identifiant de l'utilisateur actuellement authentifié.
+     * 
+     * @return l'identifiant de l'utilisateur ou "anonymous" si non authentifié.
+     */
     private String getAuthenticatedUserId() {
         ConversationState state = ConversationState.getCurrent();
         return (state != null && state.getIdentity() != null) ? state.getIdentity().getUserId() : "anonymous";
     }
 
     /**
-     * GESTION DES DEMANDES (Base & Employé)
+     * Récupère la liste des demandes de l'utilisateur connecté.
+     * 
+     * @return Réponse HTTP contenant la liste des demandes.
      */
-
     @GET
     @Path(Constants.API_DEMANDES_ME)
     @RolesAllowed("users")
@@ -65,6 +78,12 @@ public class DemandeCongeRestService implements ResourceContainer {
                 .toList()).build();
     }
 
+    /**
+     * Soumet une nouvelle demande de congé.
+     * 
+     * @param dto Les informations de la demande.
+     * @return Réponse HTTP avec l'objet créé.
+     */
     @POST
     @Path(Constants.API_DEMANDES)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -76,6 +95,12 @@ public class DemandeCongeRestService implements ResourceContainer {
         return Response.status(Response.Status.CREATED).entity(saved).build();
     }
 
+    /**
+     * Récupère une demande par son identifiant unique.
+     * 
+     * @param id L'identifiant de la demande.
+     * @return Réponse HTTP contenant la demande ou 404 si non trouvée.
+     */
     @GET
     @Path(Constants.API_DEMANDES_BY_ID)
     @RolesAllowed("users")
@@ -86,6 +111,13 @@ public class DemandeCongeRestService implements ResourceContainer {
         return Response.ok(DemandeCongeMapper.toResponseDTO(demande)).build();
     }
 
+    /**
+     * Modifie une demande existante (uniquement si elle est en attente).
+     * 
+     * @param id  L'identifiant de la demande à modifier.
+     * @param dto Les nouvelles informations.
+     * @return Réponse HTTP de succès.
+     */
     @PUT
     @Path(Constants.API_DEMANDES_BY_ID)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -97,6 +129,12 @@ public class DemandeCongeRestService implements ResourceContainer {
         return Response.ok().build();
     }
 
+    /**
+     * Annule une demande de congé.
+     * 
+     * @param id L'identifiant de la demande.
+     * @return Réponse HTTP de succès.
+     */
     @DELETE
     @Path(Constants.API_DEMANDES_BY_ID)
     @RolesAllowed("users")
@@ -105,13 +143,16 @@ public class DemandeCongeRestService implements ResourceContainer {
         return Response.ok().build();
     }
 
+    /**
+     * Récupère l'historique des changements d'état d'une demande.
+     * 
+     * @param id L'identifiant de la demande.
+     * @return Réponse HTTP contenant l'historique.
+     */
     @GET
     @Path(Constants.API_DEMANDES_HISTORIQUE)
     @RolesAllowed("users")
     public Response getHistoriqueDemande(@PathParam("id") String id) {
-        /**
-         * Logique déléguée au service (qui récupère l'historique depuis le repo)
-         */
         DemandeConge demande = demandeCongeService.getDemande(id);
         if (demande == null)
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -119,9 +160,10 @@ public class DemandeCongeRestService implements ResourceContainer {
     }
 
     /**
-     * GESTION MANAGÉRIALE (Responsable)
+     * Récupère la liste des demandes à traiter par le manager connecté.
+     * 
+     * @return Réponse HTTP contenant les demandes en attente.
      */
-
     @GET
     @Path(Constants.API_DEMANDES_A_TRAITER)
     @RolesAllowed("users")
@@ -132,6 +174,13 @@ public class DemandeCongeRestService implements ResourceContainer {
                 .toList()).build();
     }
 
+    /**
+     * Valide une demande de congé.
+     * 
+     * @param id          L'identifiant de la demande.
+     * @param commentaire Un commentaire optionnel du valideur.
+     * @return Réponse HTTP de succès.
+     */
     @POST
     @Path(Constants.API_DEMANDES_VALIDER)
     @RolesAllowed("users")
@@ -140,6 +189,13 @@ public class DemandeCongeRestService implements ResourceContainer {
         return Response.ok().build();
     }
 
+    /**
+     * Refuse une demande de congé.
+     * 
+     * @param id          L'identifiant de la demande.
+     * @param commentaire Le motif du refus.
+     * @return Réponse HTTP de succès.
+     */
     @POST
     @Path(Constants.API_DEMANDES_REFUSER)
     @RolesAllowed("users")
@@ -149,9 +205,10 @@ public class DemandeCongeRestService implements ResourceContainer {
     }
 
     /**
-     * GESTION ADMINISTRATIVE (Admin)
+     * Récupère l'intégralité des demandes de congés (réservé aux administrateurs).
+     * 
+     * @return Réponse HTTP contenant toutes les demandes.
      */
-
     @GET
     @Path(Constants.API_DEMANDES_TOUTES)
     @RolesAllowed("administrators")
@@ -162,6 +219,14 @@ public class DemandeCongeRestService implements ResourceContainer {
                 .toList()).build();
     }
 
+    /**
+     * Exporte un rapport des congés sous format CSV.
+     * 
+     * @param format Le format d'exportation (ex: 'CSV').
+     * @param debut  Date de début de la période au format ISO.
+     * @param fin    Date de fin de la période au format ISO.
+     * @return Réponse HTTP contenant le fichier généré.
+     */
     @GET
     @Path(Constants.API_DEMANDES_EXPORTER)
     @RolesAllowed("administrators")
@@ -177,9 +242,10 @@ public class DemandeCongeRestService implements ResourceContainer {
     }
 
     /**
-     * GESTION DES UTILISATEURS / SOLDES
+     * Récupère les informations de profil de l'utilisateur connecté.
+     * 
+     * @return Réponse HTTP contenant l'utilisateur.
      */
-
     @GET
     @Path(Constants.API_UTILISATEUR_ME)
     @RolesAllowed("users")
@@ -190,6 +256,11 @@ public class DemandeCongeRestService implements ResourceContainer {
         return Response.ok(u).build();
     }
 
+    /**
+     * Récupère le solde de congés actuel de l'utilisateur connecté.
+     * 
+     * @return Réponse HTTP contenant le solde.
+     */
     @GET
     @Path(Constants.API_UTILISATEUR_ME_SOLDE)
     @RolesAllowed("users")
@@ -198,6 +269,12 @@ public class DemandeCongeRestService implements ResourceContainer {
         return Response.ok(new SoldeResponseDTO(solde)).build();
     }
 
+    /**
+     * Liste tous les utilisateurs ayant le rôle responsable (pour assigner un
+     * valideur).
+     * 
+     * @return Réponse HTTP contenant la liste des responsables.
+     */
     @GET
     @Path(Constants.API_UTILISATEURS_RESPONSABLES)
     @RolesAllowed("users")
@@ -206,9 +283,10 @@ public class DemandeCongeRestService implements ResourceContainer {
     }
 
     /**
-     * GESTION DES TYPES DE CONGÉS
+     * Liste tous les types de congés paramétrés.
+     * 
+     * @return Réponse HTTP contenant la liste des types de congés.
      */
-
     @GET
     @Path(Constants.API_TYPES_CONGES)
     public Response getTypesConges() {
@@ -216,6 +294,12 @@ public class DemandeCongeRestService implements ResourceContainer {
         return Response.ok(types).build();
     }
 
+    /**
+     * Crée un nouveau type de congé.
+     * 
+     * @param type Les informations du nouveau type.
+     * @return Réponse HTTP avec l'objet créé.
+     */
     @POST
     @Path(Constants.API_TYPES_CONGES)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -225,6 +309,13 @@ public class DemandeCongeRestService implements ResourceContainer {
         return Response.status(Response.Status.CREATED).entity(created).build();
     }
 
+    /**
+     * Modifie un type de congé existant.
+     * 
+     * @param id   L'identifiant du type à modifier.
+     * @param type Les nouvelles informations.
+     * @return Réponse HTTP de succès.
+     */
     @PUT
     @Path(Constants.API_TYPES_CONGES_BY_ID)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -235,6 +326,12 @@ public class DemandeCongeRestService implements ResourceContainer {
         return Response.ok().build();
     }
 
+    /**
+     * Supprime un type de congé par son identifiant.
+     * 
+     * @param id L'identifiant à supprimer.
+     * @return Réponse HTTP de succès.
+     */
     @DELETE
     @Path(Constants.API_TYPES_CONGES_BY_ID)
     @RolesAllowed("administrators")

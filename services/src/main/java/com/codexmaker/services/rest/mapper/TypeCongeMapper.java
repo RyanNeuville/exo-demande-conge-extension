@@ -6,21 +6,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Mapper pour transformer les données de la base de données (ResultSet)
- * en objets de type TypeConge.
+ * Mapper dédié à la transformation des lignes SQL en entités TypeConge.
  */
 public class TypeCongeMapper {
 
     private TypeCongeMapper() {
-        // Constructeur privé pour empêcher l'instanciation
+        /** Constructeur privé pour empêcher l'instanciation. */
     }
 
     /**
-     * Convertit une ligne d'un ResultSet en une instance de TypeConge.
+     * Map un ResultSet vers un objet TypeConge.
      * 
-     * @param rs le ResultSet positionné sur la ligne à mapper
-     * @return une instance de TypeConge
-     * @throws SQLException en cas d'erreur de lecture du ResultSet
+     * @param rs Le ResultSet SQL.
+     * @return L'instance TypeConge correspondante.
+     * @throws SQLException En cas d'erreur JDBC.
      */
     public static TypeConge fromResultSet(ResultSet rs) throws SQLException {
         TypeConge typeConge = new TypeConge();

@@ -2,13 +2,18 @@ package com.codexmaker.services.rest.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.codexmaker.services.rest.model.enums.StatutDemande;
-
 import java.time.LocalDateTime;
 
+/**
+ * Enregistre un changement d'état sur une demande pour assurer la traçabilité.
+ * Permet de savoir qui a fait quoi et quand sur une demande précise.
+ */
 public class HistoriqueEtat {
     private String id;
+
     @JsonBackReference
     private DemandeConge demande;
+
     private StatutDemande statutAvant;
     private StatutDemande statutAPres;
     private LocalDateTime dateChangement;
@@ -18,17 +23,7 @@ public class HistoriqueEtat {
     public HistoriqueEtat() {
     }
 
-    public HistoriqueEtat(String id, DemandeConge demande, StatutDemande statutAvant, StatutDemande statutAPres,
-            LocalDateTime dateChangement, String utilisateurChange, String commentaire) {
-        this.id = id;
-        this.demande = demande;
-        this.statutAvant = statutAvant;
-        this.statutAPres = statutAPres;
-        this.dateChangement = dateChangement;
-        this.utilisateurChange = utilisateurChange;
-        this.commentaire = commentaire;
-    }
-
+    /** Getters & Setters */
     public String getId() {
         return id;
     }
