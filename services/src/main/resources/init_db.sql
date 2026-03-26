@@ -106,3 +106,17 @@ CREATE INDEX IF NOT EXISTS idx_demande_user_id ON demande_conge(user_id);
 CREATE INDEX IF NOT EXISTS idx_demande_statut ON demande_conge(statut);
 CREATE INDEX IF NOT EXISTS idx_demande_valideur_id ON demande_conge(valideur_id);
 CREATE INDEX IF NOT EXISTS idx_historique_demande_id ON historique_etat(demande_id);
+-- ============================================================================
+-- Données de base (Type de congés)
+-- ============================================================================
+INSERT OR IGNORE INTO type_conge (id, code, libelle, description, jours_max_par_an, deduction_solde) 
+VALUES ('type-001', 'ANNUEL', 'Congé Annuel', 'Congés payés annuels standard', 30, 1);
+
+INSERT OR IGNORE INTO type_conge (id, code, libelle, description, jours_max_par_an, deduction_solde) 
+VALUES ('type-002', 'MALADIE', 'Congé Maladie', 'Arrêt maladie justifié', 15, 0);
+
+INSERT OR IGNORE INTO type_conge (id, code, libelle, description, jours_max_par_an, deduction_solde) 
+VALUES ('type-003', 'R_EXCEPTIONNEL', 'Repos Exceptionnel', 'Événements familiaux', 5, 0);
+
+INSERT OR IGNORE INTO type_conge (id, code, libelle, description, jours_max_par_an, deduction_solde) 
+VALUES ('type-004', 'SANS_SOLDE', 'Congé Sans Solde', 'Congé non rémunéré', 365, 0);

@@ -57,7 +57,21 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
             throw new BusinessException("Une demande existe déjà pour cette période.");
         }
 
-        /** 2. Calculer le solde */
+        /** 2. Vérification / Création automatique de l'utilisateur (JIT) */
+        if (!utilisateurRepository.existsById(userId)) {
+            com.codexmaker.services.rest.model.entity.Employe nouvelUtilisateur = new com.codexmaker.services.rest.model.entity.Employe();
+            nouvelUtilisateur.setId(userId);
+            nouvelUtilisateur.setUsername(userId);
+            nouvelUtilisateur.setNom("Employé");
+            nouvelUtilisateur.setPrenom(userId);
+            nouvelUtilisateur.setEmail(userId + "@kozao.ko");
+            nouvelUtilisateur.setRole(com.codexmaker.services.rest.model.enums.Role.EMPLOYE);
+            /** Solde par défaut d'une demande chaque année */
+            nouvelUtilisateur.setSoldeConges(25);
+            utilisateurRepository.save(nouvelUtilisateur);
+        }
+
+        /** 3. Calculer le solde */
         int soldeActuel = utilisateurRepository.getSoldeById(userId);
         if (soldeActuel < demande.getDureeJoursOuvres()) {
             throw new InsufficientLeaveBalanceException("Solde insuffisant pour cette demande.");
