@@ -1,6 +1,12 @@
 <template>
   <div id="demandeCongeApp">
-    <div class="app-container">
+    <!-- Initial Loading Overlay -->
+    <div v-if="loading" class="app-loader">
+       <div class="loader"></div>
+       <p>Initialisation de votre espace de gestion des congés...</p>
+    </div>
+
+    <div v-else class="app-container">
       <!-- Sidebar Navigation -->
       <aside class="sidebar">
         <div class="sidebar-brand">
@@ -11,27 +17,27 @@
         </div>
 
         <nav class="nav-menu">
-          <router-link to="/" exact class="nav-item">
+          <a href="#" class="nav-item" :class="{ active: currentView === 'Dashboard' }" @click.prevent="currentView = 'Dashboard'">
             <i class="fas fa-th-large"></i>
             Tableau de Bord
-          </router-link>
+          </a>
           
-          <router-link to="/nouvelle-demande" class="nav-item">
+          <a href="#" class="nav-item" :class="{ active: currentView === 'DemandeForm' }" @click.prevent="currentView = 'DemandeForm'">
             <i class="fas fa-plus-circle"></i>
             Nouvelle Demande
-          </router-link>
+          </a>
 
-          <router-link to="/historique" class="nav-item">
+          <a href="#" class="nav-item" :class="{ active: currentView === 'DemandeHistory' }" @click.prevent="currentView = 'DemandeHistory'">
             <i class="fas fa-history"></i>
             Mes Demandes
-          </router-link>
+          </a>
 
           <div v-if="isAdmin" class="admin-section">
             <div class="nav-section-title">Administration</div>
-            <router-link to="/administration" class="nav-item">
+            <a href="#" class="nav-item" :class="{ active: currentView === 'AdminPanel' }" @click.prevent="currentView = 'AdminPanel'">
               <i class="fas fa-user-shield"></i>
               Gestion Équipe
-            </router-link>
+            </a>
           </div>
         </nav>
 
@@ -51,7 +57,7 @@
       <!-- Main Content Area -->
       <main class="main-content">
         <header class="page-header">
-           <h2>{{ currentRouteTitle }}</h2>
+           <h2>{{ viewTitle }}</h2>
            <div class="header-actions">
               <button class="btn btn-outline" @click="refreshData">
                  <i class="fas fa-sync-alt"></i>
@@ -59,10 +65,10 @@
            </div>
         </header>
 
-        <!-- Dynamic Views with Transitions -->
-        <transition name="fade" mode="out-in">
-          <router-view :key="$route.path"></router-view>
-        </transition>
+        <!-- Dynamic Content Switcher -->
+        <section class="view-content">
+          <component :is="currentView" @change-view="currentView = $event" @show-notification="showNotification" />
+        </section>
       </main>
     </div>
 
@@ -78,41 +84,88 @@
 
 <script>
 import apiService from '../services/apiService';
+import Dashboard from '../views/Dashboard.vue';
+import DemandeForm from '../views/DemandeForm.vue';
+import DemandeHistory from '../views/DemandeHistory.vue';
+import AdminPanel from '../views/AdminPanel.vue';
 
 export default {
+  components: {
+    Dashboard,
+    DemandeForm,
+    DemandeHistory,
+    AdminPanel
+  },
   data: () => ({
-    userName: (eXo && eXo.env && eXo.env.portal && eXo.env.portal.userName) || 'Utilisateur',
+    currentView: 'Dashboard',
+    userName: 'Utilisateur',
     userRole: 'Employé',
     isAdmin: false,
-    notification: null
+    notification: null,
+    loading: true
   }),
   computed: {
     userInitials() {
+      if (!this.userName) {
+        return 'U';
+      }
       return this.userName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
     },
-    currentRouteTitle() {
-      return this.$route.meta?.title || 'Gestion des Congés';
+    viewTitle() {
+      const titles = {
+        'Dashboard': 'Tableau de Bord',
+        'DemandeForm': 'Nouvelle Demande de Congé',
+        'DemandeHistory': 'Historique des Demandes',
+        'AdminPanel': 'Portail d\'Administration'
+      };
+      return titles[this.currentView] || 'Gestion des Congés';
     }
   },
-  created() {
-    this.checkUserRole();
+  async mounted() {
+    await this.checkUserRole();
   },
   methods: {
     async checkUserRole() {
-       try {
-         /* Appel pour vérifier si responsable/admin */
-         const resp = await apiService.getDemandesATraiter();
-         if (resp.status === 200) {
-           this.isAdmin = true;
-           this.userRole = 'Responsable';
-         }
-       } catch (e) {
-         this.isAdmin = false;
-         this.userRole = 'Employé';
-       }
+      console.log('[DemandeConge] Initialisation du profil utilisateur...');
+      this.loading = true;
+
+      // Sécurité : Si l'API met plus de 8 secondes, on affiche quand même l'app
+      const timeoutToken = setTimeout(() => {
+        if (this.loading) {
+          console.warn('[DemandeConge] Délai d\'attente dépassé pour le profil. Affichage forcé.');
+          this.loading = false;
+        }
+      }, 8000);
+
+      try {
+        const resp = await apiService.getUtilisateurs();
+        if (resp.data) {
+          const user = resp.data;
+          console.log('[DemandeConge] Profil reçu:', user.username, 'Rôle:', user.role);
+          this.userName = `${user.prenom || ''} ${user.nom || ''}`.trim() || user.username || 'Utilisateur';
+          
+          if (user.role === 'ADMINISTRATEUR') {
+            this.isAdmin = true;
+            this.userRole = 'Administrateur';
+          } else if (user.role === 'RESPONSABLE') {
+            this.isAdmin = true;
+            this.userRole = 'Responsable';
+          } else {
+            this.isAdmin = false;
+            this.userRole = 'Employé';
+          }
+        }
+      } catch (e) {
+        console.error('[DemandeConge] Erreur récupération profil:', e);
+        this.isAdmin = false;
+        this.userRole = 'Employé';
+      } finally {
+        clearTimeout(timeoutToken);
+        this.loading = false;
+        console.log('[DemandeConge] Chargement initial terminé.');
+      }
     },
     refreshData() {
-       /* Trigger refresh logic in views if needed via event bus or shared state */
        location.reload(); 
     },
     showNotification(message, type = 'success') {

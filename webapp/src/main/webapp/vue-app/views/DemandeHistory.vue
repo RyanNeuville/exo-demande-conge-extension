@@ -38,8 +38,24 @@
                </td>
             </tr>
             <tr v-else-if="filteredDemandes.length === 0">
-               <td colspan="6" class="text-center py-12 text-gray-500 italic">
-                  Aucune demande trouvée.
+               <td colspan="6">
+                  <div class="empty-history">
+                     <svg
+                        width="150"
+                        height="150"
+                        viewBox="0 0 200 200"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="empty-svg"
+                     >
+                        <rect x="40" y="40" width="120" height="120" rx="12" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="4"></rect>
+                        <line x1="60" y1="70" x2="140" y2="70" stroke="#CBD5E1" stroke-width="4" stroke-linecap="round"></line>
+                        <line x1="60" y1="100" x2="140" y2="100" stroke="#CBD5E1" stroke-width="4" stroke-linecap="round"></line>
+                        <line x1="60" y1="130" x2="100" y2="130" stroke="#CBD5E1" stroke-width="4" stroke-linecap="round"></line>
+                     </svg>
+                     <p>Votre historique de demandes est vide.</p>
+                     <button class="btn btn-primary btn-sm mt-4" @click="$emit('change-view', 'DemandeForm')">Faire ma première demande</button>
+                  </div>
                </td>
             </tr>
             <tr v-for="demande in filteredDemandes" :key="demande.id">
@@ -104,7 +120,7 @@ export default {
         const resp = await apiService.getMesDemandes();
         this.demandes = resp.data;
       } catch (e) {
-        this.$root.$children[0]?.showNotification("Erreur lors du chargement de l'historique", "error");
+        this.$emit('show-notification', "Erreur lors du chargement de l'historique", "error");
       } finally {
         this.loading = false;
       }
@@ -113,10 +129,10 @@ export default {
        if (confirm("Voulez-vous vraiment annuler cette demande ?")) {
           try {
             await apiService.annulerDemande(id);
-            this.$root.$children[0]?.showNotification("Demande annulée.");
+            this.$emit('show-notification', "Demande annulée.");
             this.fetchDemandes();
           } catch (e) {
-            this.$root.$children[0]?.showNotification("Erreur lors de l'annulation.", "error");
+            this.$emit('show-notification', "Erreur lors de l'annulation.", "error");
           }
        }
     },
@@ -134,3 +150,18 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.empty-history {
+  padding: 60px 20px;
+  text-align: center;
+  color: #64748B;
+}
+
+.empty-svg {
+  margin-bottom: 24px;
+  opacity: 0.5;
+}
+
+.mt-4 { margin-top: 1rem; }
+</style>

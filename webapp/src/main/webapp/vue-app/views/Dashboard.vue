@@ -43,8 +43,21 @@
         <div v-if="loading" class="skeleton-placeholder py-4">
            Chargement en cours...
         </div>
-        <div v-else-if="recentDemandes.length === 0" class="empty-state py-12 text-center text-gray-500">
-           Aucune activité récente.
+        <div v-else-if="recentDemandes.length === 0" class="empty-dashboard">
+          <svg
+            width="120"
+            height="120"
+            viewBox="0 0 200 200"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            class="empty-svg"
+          >
+            <circle cx="100" cy="100" r="80" fill="#F8FAFC"></circle>
+            <path d="M60 140C60 140 80 120 100 120C120 120 140 140 140 140" stroke="#CBD5E1" stroke-width="8" stroke-linecap="round"></path>
+            <circle cx="70" cy="80" r="10" fill="#CBD5E1"></circle>
+            <circle cx="130" cy="80" r="10" fill="#CBD5E1"></circle>
+          </svg>
+          <p>Aucune activité pour le moment. C'est le moment idéal pour planifier vos vacances !</p>
         </div>
         <ul v-else class="activity-list">
           <li v-for="demande in recentDemandes" :key="demande.id" class="activity-item">
@@ -59,7 +72,7 @@
           </li>
         </ul>
         <div class="mt-6">
-           <router-link to="/historique" class="btn btn-outline w-full">Voir tout l'historique</router-link>
+           <button class="btn btn-outline w-full" @click="$emit('change-view', 'DemandeHistory')">Voir tout l'historique</button>
         </div>
       </section>
 
@@ -69,9 +82,9 @@
             <div class="promo-content">
                <h3>Besoin de repos ?</h3>
                <p>Soumettez votre demande en quelques clics et suivez son approbation en temps réel.</p>
-               <router-link to="/nouvelle-demande" class="btn btn-primary">
+               <button class="btn btn-primary" @click="$emit('change-view', 'DemandeForm')">
                  Poser un Congé
-               </router-link>
+               </button>
             </div>
             <i class="fas fa-umbrella-beach promo-icon"></i>
          </div>
@@ -131,10 +144,10 @@ export default {
     },
     getStatusClass(statut) {
       return {
-        'bg-green-500': statut === 'VALIDEE',
-        'bg-orange-500': statut === 'EN_ATTENTE',
-        'bg-red-500': statut === 'REFUSEE' || statut === 'ANNULEE',
-        'bg-gray-400': statut === 'BROUILLON'
+        'status-bg-green': statut === 'VALIDEE',
+        'status-bg-orange': statut === 'EN_ATTENTE',
+        'status-bg-red': statut === 'REFUSEE' || statut === 'ANNULEE',
+        'status-bg-gray': statut === 'BROUILLON'
       };
     },
     getBadgeClass(statut) {
@@ -153,4 +166,20 @@ export default {
   max-height: 400px;
   overflow-y: auto;
 }
+
+.empty-dashboard {
+  padding: 40px 20px;
+  text-align: center;
+  color: #64748B;
+}
+
+.empty-svg {
+  margin-bottom: 20px;
+  opacity: 0.6;
+}
+
+.status-bg-green { background-color: var(--success-color); }
+.status-bg-orange { background-color: var(--warning-color); }
+.status-bg-red { background-color: var(--error-color); }
+.status-bg-gray { background-color: #94A3B8; }
 </style>

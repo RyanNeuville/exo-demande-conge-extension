@@ -56,7 +56,7 @@
 
           <!-- Actions -->
           <div class="form-actions">
-            <button type="button" class="btn btn-outline" @click="$router.push('/')">Annuler</button>
+            <button type="button" class="btn btn-outline" @click="$emit('change-view', 'Dashboard')">Annuler</button>
             <button type="submit" class="btn btn-primary" :disabled="submitting">
                <i v-if="submitting" class="fas fa-spinner fa-spin"></i>
                Soumettre la demande
@@ -158,11 +158,11 @@ export default {
         };
         
         await apiService.soumettreDemande(payload);
-        this.$root.$children[0].showNotification("Demande soumise avec succès !");
-        this.$router.push('/historique');
+        this.$emit('show-notification', "Demande soumise avec succès !");
+        this.$emit('change-view', 'DemandeHistory');
       } catch (e) {
         const msg = e.response?.data?.message || "Erreur lors de la soumission de la demande.";
-        this.$root.$children[0].showNotification(msg, "error");
+        this.$emit('show-notification', msg, "error");
       } finally {
         this.submitting = false;
       }

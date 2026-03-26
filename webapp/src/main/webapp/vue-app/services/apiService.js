@@ -6,8 +6,18 @@ import axios from 'axios';
  */
 
 /* Obtenir l'URL de base pour l'API REST eXo */
-/* Note: Utilisation du double préfixe /api/api comme requis par le déploiement actuel */
-const BASE_URL = `${eXo.env.portal.context}/${eXo.env.portal.rest}/api/api`;
+const getBaseUrl = () => {
+  try {
+    const context = eXo?.env?.portal?.context || '/portal';
+    const rest = eXo?.env?.portal?.rest || 'rest';
+    return `${context}/${rest}/api/api`;
+  } catch (e) {
+    console.warn("[DemandeConge] Impossible de lire l'environnement eXo, repli sur /portal/rest/api/api");
+    return '/portal/rest/api/api';
+  }
+};
+
+const BASE_URL = getBaseUrl();
 
 const api = axios.create({
   baseURL: BASE_URL,

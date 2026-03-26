@@ -73,7 +73,7 @@ export default {
         const resp = await apiService.getDemandesATraiter();
         this.requests = resp.data;
       } catch (e) {
-        this.$root.$children[0]?.showNotification("Erreur lors du chargement des demandes", "error");
+        this.$emit('show-notification', "Erreur lors du chargement des demandes", "error");
       } finally {
         this.loading = false;
       }
@@ -81,18 +81,18 @@ export default {
     async processRequest(req, action) {
        const comment = prompt(`Commentaire pour cette ${action === 'valider' ? 'validation' : 'refus'} (optionnel) :`);
        if (comment === null) return;
-
+ 
        try {
          if (action === 'valider') {
            await apiService.validerDemande(req.id, comment);
-           this.$root.$children[0]?.showNotification("Demande validée avec succès.");
+           this.$emit('show-notification', "Demande validée avec succès.");
          } else {
            await apiService.refuserDemande(req.id, comment);
-           this.$root.$children[0]?.showNotification("Demande refusée.", "warning");
+           this.$emit('show-notification', "Demande refusée.", "warning");
          }
          this.fetchRequests();
        } catch (e) {
-         this.$root.$children[0]?.showNotification("Erreur lors du traitement.", "error");
+         this.$emit('show-notification', "Erreur lors du traitement.", "error");
        }
     },
     formatDate(dateStr) {

@@ -64,6 +64,69 @@ public class DemandeCongeRestService implements ResourceContainer {
     }
 
     /**
+     * Synchronise l'utilisateur eXo avec la base de données locale.
+     * Mappe les groupes eXo vers les rôles applicatifs.
+     */
+    private Utilisateur syncUserWithExo() {
+        ConversationState state = ConversationState.getCurrent();
+        if (state == null || state.getIdentity() == null) {
+            System.out.println("[DemandeConge] No ConversationState found.");
+            return null;
+        }
+
+        String userId = state.getIdentity().getUserId();
+        java.util.Collection<String> roles = state.getIdentity().getRoles();
+        
+        System.out.println("[DemandeConge] Synchronizing user: " + userId + " with roles: " + roles);
+
+        // Détermination du rôle
+        com.codexmaker.services.rest.model.enums.Role appRole = com.codexmaker.services.rest.model.enums.Role.EMPLOYE;
+        
+        // Robust root check (case insensitive, or contains root)
+        boolean isRoot = "root".equalsIgnoreCase(userId) || (userId != null && userId.toLowerCase().contains("root"));
+        boolean isAdminGroup = roles != null && roles.stream().anyMatch(r -> r.toLowerCase().contains("administrators") || r.toLowerCase().contains("admin"));
+
+        if (isRoot || isAdminGroup) {
+            appRole = com.codexmaker.services.rest.model.enums.Role.ADMINISTRATEUR;
+        } else if (roles != null && roles.stream().anyMatch(r -> r.toLowerCase().contains("manager") || r.toLowerCase().contains("responsable"))) {
+            appRole = com.codexmaker.services.rest.model.enums.Role.RESPONSABLE;
+        }
+
+        System.out.println("[DemandeConge] Mapped role for " + userId + ": " + appRole);
+
+        Utilisateur existing = utilisateurService.getUtilisateur(userId);
+        if (existing == null) {
+            System.out.println("[DemandeConge] Creating new user record for: " + userId);
+            // Création automatique
+            Utilisateur newUser;
+            if (appRole == com.codexmaker.services.rest.model.enums.Role.ADMINISTRATEUR) {
+                newUser = new com.codexmaker.services.rest.model.entity.Administrateur();
+            } else if (appRole == com.codexmaker.services.rest.model.enums.Role.RESPONSABLE) {
+                newUser = new com.codexmaker.services.rest.model.entity.Responsable();
+            } else {
+                newUser = new com.codexmaker.services.rest.model.entity.Employe();
+            }
+            
+            newUser.setId(userId);
+            newUser.setUsername(userId);
+            newUser.setNom(userId);
+            newUser.setEmail(userId + "@kozao.africa");
+            newUser.setRole(appRole);
+            newUser.setSoldeConges(Constants.SOLDE_INITIAL_PAR_DEFAUT);
+            
+            return utilisateurService.synchroniserUtilisateur(newUser);
+        } else {
+            // Mise à jour du rôle si nécessaire
+            if (existing.getRole() != appRole) {
+                System.out.println("[DemandeConge] Updating role for " + userId + " to " + appRole);
+                existing.setRole(appRole);
+                return utilisateurService.synchroniserUtilisateur(existing);
+            }
+            return existing;
+        }
+    }
+
+    /**
      * Récupère la liste des demandes de l'utilisateur connecté.
      * 
      * @return Réponse HTTP contenant la liste des demandes.
@@ -72,6 +135,7 @@ public class DemandeCongeRestService implements ResourceContainer {
     @Path(Constants.API_DEMANDES_ME)
     @RolesAllowed("users")
     public Response getMyDemandes() {
+        syncUserWithExo(); // Sync before fetch
         List<DemandeConge> demandes = demandeCongeService.getDemandesParUtilisateur(getAuthenticatedUserId());
         return Response.ok(demandes.stream()
                 .map(DemandeCongeMapper::toResponseDTO)
@@ -250,7 +314,7 @@ public class DemandeCongeRestService implements ResourceContainer {
     @Path(Constants.API_UTILISATEUR_ME)
     @RolesAllowed("users")
     public Response getMe() {
-        Utilisateur u = utilisateurService.getUtilisateur(getAuthenticatedUserId());
+        Utilisateur u = syncUserWithExo();
         if (u == null)
             return Response.status(Response.Status.NOT_FOUND).build();
         return Response.ok(u).build();

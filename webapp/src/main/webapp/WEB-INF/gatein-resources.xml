@@ -32,6 +32,9 @@
       </script>
         <!-- Dépendances Javascript pour ce module JS -->
       <depends>
+        <module>commonVueComponents</module>
+      </depends>
+      <depends>
         <module>vue</module>
       </depends>
       <depends>
