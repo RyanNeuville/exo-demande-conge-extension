@@ -54,6 +54,13 @@ public final class DatabaseConnection {
             LOGGER.info("Tentative de connexion à : jdbc:sqlite:" + dbPath);
             connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
             
+            // Initialisation automatique du schéma (CREATE TABLE IF NOT EXISTS + INSERT OR IGNORE)
+            try {
+                DatabaseInitializer.initialize();
+            } catch (Exception e) {
+                LOGGER.warning("Erreur lors de l'initialisation auto : " + e.getMessage());
+            }
+
             try (var stmt = connection.createStatement()) {
                 stmt.execute("PRAGMA journal_mode = WAL;");
                 stmt.execute("PRAGMA synchronous = NORMAL;");
