@@ -12,14 +12,22 @@ public class DatabaseInitializer {
 
     private static final Logger LOGGER = Logger.getLogger(DatabaseInitializer.class.getName());
 
-    public static void initialize() {
-        try (Connection conn = DatabaseConnection.getConnection();
-                Statement stmt = conn.createStatement()) {
+    public static void initialize(Connection conn) {
+        if (conn == null) {
+            LOGGER.severe("ÉCHEC : La connexion fournie est null.");
+            return;
+        }
 
+        try (Statement stmt = conn.createStatement()) {
             /** Lecture du fichier init_db.sql */
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(
                             DatabaseInitializer.class.getClassLoader().getResourceAsStream("init_db.sql")))) {
+                
+                if (reader == null) {
+                    LOGGER.severe("ÉCHEC : Impossible de trouver init_db.sql dans les ressources.");
+                    return;
+                }
 
                 StringBuilder sql = new StringBuilder();
                 String line;
@@ -44,10 +52,18 @@ public class DatabaseInitializer {
                 LOGGER.info(Constants.SUCCES_DB_INITIALIZED);
             }
         } catch (Exception e) {
-            LOGGER.severe(Constants.ERROR_DB_INITIALIZATION + e.getMessage());
-            /** Gardez la trace pour le débogage */
+            LOGGER.severe(Constants.ERROR_DB_INITIALIZATION + " : " + e.getMessage());
             e.printStackTrace(); 
-            throw new RuntimeException(Constants.ERROR_DB_INITIALIZATION + e.getMessage());
+            throw new RuntimeException(Constants.ERROR_DB_INITIALIZATION + " : " + e.getMessage());
+        }
+    }
+
+    /** Pour garder la compatibilité avec le test main */
+    public static void initialize() {
+        try {
+             initialize(DatabaseConnection.getConnection());
+        } catch (Exception e) {
+             throw new RuntimeException(e);
         }
     }
 

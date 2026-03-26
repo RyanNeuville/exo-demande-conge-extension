@@ -56,7 +56,7 @@ public final class DatabaseConnection {
             
             // Initialisation automatique du schéma (CREATE TABLE IF NOT EXISTS + INSERT OR IGNORE)
             try {
-                DatabaseInitializer.initialize();
+                DatabaseInitializer.initialize(connection);
             } catch (Exception e) {
                 LOGGER.warning("Erreur lors de l'initialisation auto : " + e.getMessage());
             }
