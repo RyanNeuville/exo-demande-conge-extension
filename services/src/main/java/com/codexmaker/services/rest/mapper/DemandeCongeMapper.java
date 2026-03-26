@@ -110,6 +110,7 @@ public final class DemandeCongeMapper {
         entity.setMotif(dto.getMotif());
         entity.setCommentaireEmploye(dto.getCommentaireEmploye());
         entity.setDureeJoursOuvres(dto.getDureeJoursOuvres());
+        entity.setTypeConge(dto.getTypeConge());
 
         /** Cas specifiques pour les convertions des dates, statut en String */
         if (dto.getDateDebut() != null) {

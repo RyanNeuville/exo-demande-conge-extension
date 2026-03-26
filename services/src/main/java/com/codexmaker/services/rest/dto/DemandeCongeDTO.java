@@ -1,9 +1,11 @@
 package com.codexmaker.services.rest.dto;
 
+import com.codexmaker.services.rest.model.entity.TypeConge;
+
 public class DemandeCongeDTO {
     private String id;
     private String userId;
-    private String typeConge;
+    private TypeConge typeConge;
     private String dateDebut;
     private String dateFin;
     private boolean demiJourneeDebut;
@@ -32,11 +34,11 @@ public class DemandeCongeDTO {
         this.userId = userId;
     }
 
-    public String getTypeConge() {
+    public TypeConge getTypeConge() {
         return typeConge;
     }
 
-    public void setTypeConge(String typeConge) {
+    public void setTypeConge(TypeConge typeConge) {
         this.typeConge = typeConge;
     }
 
