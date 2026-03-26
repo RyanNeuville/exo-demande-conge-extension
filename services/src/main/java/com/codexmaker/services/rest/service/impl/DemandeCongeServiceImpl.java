@@ -168,8 +168,18 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
             utilisateurRepository.updateSolde(userId, soldeActuel - diff);
         }
 
-        demande.setDateModification(LocalDate.now());
-        demandeCongeRepository.update(demande);
+        /** Mise à jour uniquement des champs autorisés */
+        existante.setDateDebut(demande.getDateDebut());
+        existante.setDemiJourneeDebut(demande.isDemiJourneeDebut());
+        existante.setDateFin(demande.getDateFin());
+        existante.setDemiJourneeFin(demande.isDemiJourneeFin());
+        existante.setTypeConge(demande.getTypeConge());
+        existante.setMotif(demande.getMotif());
+        existante.setCommentaireEmploye(demande.getCommentaireEmploye());
+        existante.setDureeJoursOuvres(demande.getDureeJoursOuvres());
+        existante.setDateModification(LocalDate.now());
+
+        demandeCongeRepository.update(existante);
 
         logHistorique(existante, StatutDemande.EN_ATTENTE, StatutDemande.EN_ATTENTE, userId,
                 "Modification de la demande");
