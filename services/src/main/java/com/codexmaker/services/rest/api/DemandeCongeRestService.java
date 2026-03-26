@@ -1,6 +1,7 @@
 package com.codexmaker.services.rest.api;
 
 import com.codexmaker.services.rest.dto.DemandeCongeDTO;
+import com.codexmaker.services.rest.dto.SoldeResponseDTO;
 import com.codexmaker.services.rest.mapper.DemandeCongeMapper;
 import com.codexmaker.services.rest.model.entity.DemandeConge;
 import com.codexmaker.services.rest.model.entity.TypeConge;
@@ -193,8 +194,8 @@ public class DemandeCongeRestService implements ResourceContainer {
     @Path(Constants.API_UTILISATEUR_ME_SOLDE)
     @RolesAllowed("users")
     public Response getMySolde() {
-        int solde = utilisateurService.consulterSolde(getAuthenticatedUserId());
-        return Response.ok(solde).build();
+        double solde = utilisateurService.consulterSolde(getAuthenticatedUserId());
+        return Response.ok(new SoldeResponseDTO(solde)).build();
     }
 
     @GET

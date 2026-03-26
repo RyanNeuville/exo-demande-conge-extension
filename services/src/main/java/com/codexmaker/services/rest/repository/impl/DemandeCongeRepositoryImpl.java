@@ -50,8 +50,8 @@ public class DemandeCongeRepositoryImpl implements DemandeCongeRepository {
             pstmt.setString(15,
                     demande.getDateModification() != null ? demande.getDateModification().toString() : null);
             pstmt.setString(16, demande.getDateValidation() != null ? demande.getDateValidation().toString() : null);
-            pstmt.setInt(17, demande.getSoldeCongesAvant());
-            pstmt.setInt(18, demande.getDureeJoursOuvres());
+            pstmt.setDouble(17, demande.getSoldeCongesAvant());
+            pstmt.setDouble(18, demande.getDureeJoursOuvres());
 
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected == 0) {
@@ -85,8 +85,8 @@ public class DemandeCongeRepositoryImpl implements DemandeCongeRepository {
             pstmt.setString(11, demande.getValideurId());
             pstmt.setString(12,
                     demande.getDateModification() != null ? demande.getDateModification().toString() : null);
-            pstmt.setInt(13, demande.getSoldeCongesAvant());
-            pstmt.setInt(14, demande.getDureeJoursOuvres());
+            pstmt.setDouble(13, demande.getSoldeCongesAvant());
+            pstmt.setDouble(14, demande.getDureeJoursOuvres());
             pstmt.setString(15, demande.getId());
 
             int rows = pstmt.executeUpdate();

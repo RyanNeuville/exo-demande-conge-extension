@@ -43,7 +43,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     }
 
     @Override
-    public int consulterSolde(String userId) {
+    public double consulterSolde(String userId) {
         return utilisateurRepository.getSoldeById(userId);
     }
 

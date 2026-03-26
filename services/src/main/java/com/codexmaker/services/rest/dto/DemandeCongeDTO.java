@@ -12,7 +12,7 @@ public class DemandeCongeDTO {
     private boolean demiJourneeFin;
     private String motif;
     private String commentaireEmploye;
-    private int dureeJoursOuvres;
+    private double dureeJoursOuvres;
 
     public DemandeCongeDTO() {
     }
@@ -90,11 +90,11 @@ public class DemandeCongeDTO {
         this.commentaireEmploye = commentaireEmploye;
     }
 
-    public int getDureeJoursOuvres() {
+    public double getDureeJoursOuvres() {
         return dureeJoursOuvres;
     }
 
-    public void setDureeJoursOuvres(int dureeJoursOuvres) {
+    public void setDureeJoursOuvres(double dureeJoursOuvres) {
         this.dureeJoursOuvres = dureeJoursOuvres;
     }
 }

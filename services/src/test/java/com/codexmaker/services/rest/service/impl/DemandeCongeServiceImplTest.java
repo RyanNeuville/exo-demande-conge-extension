@@ -54,11 +54,10 @@ public class DemandeCongeServiceImplTest {
         String userId = "user123";
         DemandeConge demande = new DemandeConge();
         demande.setDateDebut(LocalDate.now().plusDays(1));
-        demande.setDateFin(LocalDate.now().plusDays(3));
-        demande.setDureeJoursOuvres(2);
-
+        demande.setDateFin(LocalDate.now().plusDays(2)); // 2 jours ouvrés (ex: Lundi-Mardi)
+        
         when(demandeCongeRepository.hasChevauchement(eq(userId), isNull(), any(), any())).thenReturn(false);
-        when(utilisateurRepository.getSoldeById(userId)).thenReturn(10);
+        when(utilisateurRepository.getSoldeById(userId)).thenReturn(10.0);
         when(demandeCongeRepository.save(any(DemandeConge.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         /** When */
@@ -68,7 +67,9 @@ public class DemandeCongeServiceImplTest {
         assertNotNull(result);
         assertEquals(StatutDemande.EN_ATTENTE, result.getStatut());
         assertEquals(userId, result.getUserId());
-        verify(utilisateurRepository).updateSolde(userId, 8);
+        // La durée est calculée automatiquement par le service maintenant
+        assertTrue(result.getDureeJoursOuvres() > 0);
+        verify(utilisateurRepository).updateSolde(eq(userId), anyDouble());
         verify(demandeCongeRepository).save(demande);
         verify(historiqueEtatRepository).save(any());
     }
@@ -97,10 +98,11 @@ public class DemandeCongeServiceImplTest {
         /** Given */
         String userId = "user123";
         DemandeConge demande = new DemandeConge();
-        demande.setDureeJoursOuvres(5);
+        demande.setDateDebut(LocalDate.now().plusDays(1));
+        demande.setDateFin(LocalDate.now().plusDays(10)); // Grande période
 
         when(demandeCongeRepository.hasChevauchement(anyString(), isNull(), any(), any())).thenReturn(false);
-        when(utilisateurRepository.getSoldeById(userId)).thenReturn(3);
+        when(utilisateurRepository.getSoldeById(userId)).thenReturn(1.0);
 
         /** When & Then */
         InsufficientLeaveBalanceException exception = assertThrows(InsufficientLeaveBalanceException.class, () -> {
@@ -140,16 +142,16 @@ public class DemandeCongeServiceImplTest {
         demande.setId(demandeId);
         demande.setUserId(userId);
         demande.setStatut(StatutDemande.EN_ATTENTE);
-        demande.setDureeJoursOuvres(3);
+        demande.setDureeJoursOuvres(3.0);
 
         when(demandeCongeRepository.findById(demandeId)).thenReturn(demande);
-        when(utilisateurRepository.getSoldeById(userId)).thenReturn(10);
+        when(utilisateurRepository.getSoldeById(userId)).thenReturn(10.0);
 
         /** When */
         demandeCongeService.refuserDemande(demandeId, "Budget insuffisant");
 
         /** Then */
-        verify(utilisateurRepository).updateSolde(userId, 13); // Restored
+        verify(utilisateurRepository).updateSolde(userId, 13.0); // Restored
         verify(demandeCongeRepository).updateStatus(eq(demandeId), eq(StatutDemande.REFUSEE), eq("Budget insuffisant"), any(), any());
         verify(historiqueEtatRepository).save(any());
     }

@@ -46,7 +46,7 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
             pstmt.setString(4, utilisateur.getUsername());
             pstmt.setString(5, utilisateur.getEmail());
             pstmt.setString(6, utilisateur.getRole().name());
-            pstmt.setInt(7, utilisateur.getSoldeConges());
+            pstmt.setDouble(7, utilisateur.getSoldeConges());
 
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected == 0) {
@@ -101,12 +101,12 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
      *                          introuvable
      */
     @Override
-    public void updateSolde(String userId, int newSolde) {
+    public void updateSolde(String userId, double newSolde) {
         String sql = SqlQueries.UPDATE_SOLDE_UTILISATEUR;
         try (Connection conn = DatabaseConnection.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setInt(1, newSolde);
+            pstmt.setDouble(1, newSolde);
             pstmt.setString(2, userId);
 
             int rowsAffected = pstmt.executeUpdate();
@@ -129,7 +129,7 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
      * @throws RuntimeException en cas d'erreur SQL
      */
     @Override
-    public int getSoldeById(String userId) {
+    public double getSoldeById(String userId) {
         String sql = SqlQueries.SELECT_SOLDE_UTILISATEUR;
         try (Connection conn = DatabaseConnection.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -138,7 +138,7 @@ public class UtilisateurRepositoryImpl implements UtilisateurRepository {
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    int solde = rs.getInt("solde_conges");
+                    double solde = rs.getDouble("solde_conges");
                     LOG.debug(Constants.LOG_SOLDE_RECUPERE, userId, solde);
                     return solde;
                 }

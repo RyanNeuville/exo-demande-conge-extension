@@ -67,12 +67,13 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
             nouvelUtilisateur.setEmail(userId + "@kozao.ko");
             nouvelUtilisateur.setRole(com.codexmaker.services.rest.model.enums.Role.EMPLOYE);
             /** Solde par défaut d'une demande chaque année */
-            nouvelUtilisateur.setSoldeConges(25);
+            nouvelUtilisateur.setSoldeConges(25.0);
             utilisateurRepository.save(nouvelUtilisateur);
         }
 
-        /** 3. Calculer le solde */
-        int soldeActuel = utilisateurRepository.getSoldeById(userId);
+        /** 3. Calculer la durée et vérifier le solde */
+        demande.calculerDureeJoursOuvres();
+        double soldeActuel = utilisateurRepository.getSoldeById(userId);
         if (soldeActuel < demande.getDureeJoursOuvres()) {
             throw new InsufficientLeaveBalanceException("Solde insuffisant pour cette demande.");
         }
@@ -82,6 +83,8 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
             demande.setId(UUID.randomUUID().toString());
         if (demande.getNumero() == null)
             demande.setNumero("REQ-" + System.currentTimeMillis());
+        if (demande.getValideurId() == null)
+            demande.setValideurId("root");
         demande.setUserId(userId);
         demande.setStatut(StatutDemande.EN_ATTENTE);
         demande.setDateCreation(LocalDate.now());
@@ -142,7 +145,7 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
         DemandeConge demande = demandeCongeRepository.findById(demandeId);
         if (demande != null && demande.getStatut() == StatutDemande.EN_ATTENTE) {
             /** Recréditer le solde car la demande est refusée */
-            int soldeActuel = utilisateurRepository.getSoldeById(demande.getUserId());
+            double soldeActuel = utilisateurRepository.getSoldeById(demande.getUserId());
             utilisateurRepository.updateSolde(demande.getUserId(), soldeActuel + demande.getDureeJoursOuvres());
 
             demandeCongeRepository.updateStatus(demandeId, StatutDemande.REFUSEE, commentaire,
@@ -160,9 +163,10 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
         }
 
         /** Si la durée change, il faut ajuster le solde réservé */
-        int diff = demande.getDureeJoursOuvres() - existante.getDureeJoursOuvres();
+        demande.calculerDureeJoursOuvres();
+        double diff = demande.getDureeJoursOuvres() - existante.getDureeJoursOuvres();
         if (diff != 0) {
-            int soldeActuel = utilisateurRepository.getSoldeById(userId);
+            double soldeActuel = utilisateurRepository.getSoldeById(userId);
             if (soldeActuel < diff)
                 throw new InsufficientLeaveBalanceException("Solde insuffisant pour la modification.");
             utilisateurRepository.updateSolde(userId, soldeActuel - diff);
@@ -193,7 +197,7 @@ public class DemandeCongeServiceImpl implements DemandeCongeService {
             /**
              * Recréditer le solde dans tous les cas d'annulation (En attente ou Validée)
              */
-            int soldeActuel = utilisateurRepository.getSoldeById(demande.getUserId());
+            double soldeActuel = utilisateurRepository.getSoldeById(demande.getUserId());
             utilisateurRepository.updateSolde(demande.getUserId(), soldeActuel + demande.getDureeJoursOuvres());
 
             StatutDemande ancienStatut = demande.getStatut();

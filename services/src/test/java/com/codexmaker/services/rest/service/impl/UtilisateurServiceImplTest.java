@@ -39,13 +39,13 @@ public class UtilisateurServiceImplTest {
     void consulterSolde_Success() {
         /** Given */
         String userId = "user1";
-        when(utilisateurRepository.getSoldeById(userId)).thenReturn(25);
+        when(utilisateurRepository.getSoldeById(userId)).thenReturn(25.0);
 
         /** When */
-        int solde = utilisateurService.consulterSolde(userId);
+        double solde = utilisateurService.consulterSolde(userId);
 
         /** Then */
-        assertEquals(25, solde);
+        assertEquals(25.0, solde);
         verify(utilisateurRepository).getSoldeById(userId);
     }
 

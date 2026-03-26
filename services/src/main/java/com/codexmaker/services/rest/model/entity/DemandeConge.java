@@ -24,8 +24,8 @@ public class DemandeConge {
     private String valideurId;
     private LocalDate dateValidation;
     private LocalDate dateModification;
-    private int soldeCongesAvant;
-    private int dureeJoursOuvres;
+    private double soldeCongesAvant;
+    private double dureeJoursOuvres;
     @com.fasterxml.jackson.annotation.JsonManagedReference
     private List<HistoriqueEtat> historique = new ArrayList<>();
 
@@ -36,7 +36,7 @@ public class DemandeConge {
             LocalDate dateDebut, LocalDate dateFin, boolean demiJourneeDebut, boolean demiJourneeFin,
             TypeConge typeConge, StatutDemande statut, String motif, String commentaireEmploye,
             String commentaireValideur, String valideurId, LocalDate dateValidation, LocalDate dateModification,
-            int soldeCongesAvant, int dureeJoursOuvres, List<HistoriqueEtat> historique) {
+            double soldeCongesAvant, double dureeJoursOuvres, List<HistoriqueEtat> historique) {
         this.id = id;
         this.numero = numero;
         this.userId = userId;
@@ -195,19 +195,16 @@ public class DemandeConge {
         this.dateModification = dateModification;
     }
 
-    public int getSoldeCongesAvant() {
+    public double getSoldeCongesAvant() {
         return soldeCongesAvant;
     }
-
-    public void setSoldeCongesAvant(int soldeCongesAvant) {
+    public void setSoldeCongesAvant(double soldeCongesAvant) {
         this.soldeCongesAvant = soldeCongesAvant;
     }
-
-    public int getDureeJoursOuvres() {
+    public double getDureeJoursOuvres() {
         return dureeJoursOuvres;
     }
-
-    public void setDureeJoursOuvres(int dureeJoursOuvres) {
+    public void setDureeJoursOuvres(double dureeJoursOuvres) {
         this.dureeJoursOuvres = dureeJoursOuvres;
     }
 
@@ -219,8 +216,27 @@ public class DemandeConge {
         this.historique = historique;
     }
 
-    public int calculerDureeJoursOuvres() {
-        return 0;
+    public double calculerDureeJoursOuvres() {
+        if (dateDebut == null || dateFin == null) return 0.0;
+        if (dateDebut.isAfter(dateFin)) return 0.0;
+
+        double count = 0.0;
+        LocalDate current = dateDebut;
+        while (!current.isAfter(dateFin)) {
+            java.time.DayOfWeek day = current.getDayOfWeek();
+            if (day != java.time.DayOfWeek.SATURDAY && day != java.time.DayOfWeek.SUNDAY) {
+                count += 1.0;
+            }
+            current = current.plusDays(1);
+        }
+
+        if (count > 0) {
+            if (demiJourneeDebut) count -= 0.5;
+            if (demiJourneeFin) count -= 0.5;
+        }
+
+        this.dureeJoursOuvres = Math.max(0, count);
+        return this.dureeJoursOuvres;
     }
 
     public boolean estModifiable() {

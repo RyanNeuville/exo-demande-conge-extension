@@ -24,8 +24,8 @@ public class DemandeCongeResponseDTO {
     private String dateSoumission;
     private String dateValidation;
     private String dateModification;
-    private int soldeCongesAvant;
-    private int dureeJoursOuvres;
+    private double soldeCongesAvant;
+    private double dureeJoursOuvres;
 
     public DemandeCongeResponseDTO() {
     }
@@ -210,19 +210,16 @@ public class DemandeCongeResponseDTO {
         this.dateModification = dateModification;
     }
 
-    public int getSoldeCongesAvant() {
+    public double getSoldeCongesAvant() {
         return soldeCongesAvant;
     }
-
-    public void setSoldeCongesAvant(int soldeCongesAvant) {
+    public void setSoldeCongesAvant(double soldeCongesAvant) {
         this.soldeCongesAvant = soldeCongesAvant;
     }
-
-    public int getDureeJoursOuvres() {
+    public double getDureeJoursOuvres() {
         return dureeJoursOuvres;
     }
-
-    public void setDureeJoursOuvres(int dureeJoursOuvres) {
+    public void setDureeJoursOuvres(double dureeJoursOuvres) {
         this.dureeJoursOuvres = dureeJoursOuvres;
     }
 

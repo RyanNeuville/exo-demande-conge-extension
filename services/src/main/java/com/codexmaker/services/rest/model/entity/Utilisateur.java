@@ -13,7 +13,7 @@ public abstract class Utilisateur {
     private String prenom;
     private String email;
     private Role role;
-    private int soldeConges;
+    private double soldeConges;
 
     @com.fasterxml.jackson.annotation.JsonIgnore
     private List<DemandeConge> demandes = new ArrayList<>();
@@ -22,7 +22,7 @@ public abstract class Utilisateur {
     public Utilisateur() {
     }
 
-    public Utilisateur(String id, String username, String nom, String prenom, String email, Role role, int soldeConges,
+    public Utilisateur(String id, String username, String nom, String prenom, String email, Role role, double soldeConges,
             List<DemandeConge> demandes) {
         this.id = id;
         this.username = username;
@@ -59,11 +59,11 @@ public abstract class Utilisateur {
         this.demandes = demandes;
     }
 
-    public int getSoldeConges() {
+    public double getSoldeConges() {
         return soldeConges;
     }
 
-    public void setSoldeConges(int soldeConges) {
+    public void setSoldeConges(double soldeConges) {
         this.soldeConges = soldeConges;
     }
 

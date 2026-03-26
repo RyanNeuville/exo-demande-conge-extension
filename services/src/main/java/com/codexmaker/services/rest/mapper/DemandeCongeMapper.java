@@ -88,8 +88,8 @@ public final class DemandeCongeMapper {
             demande.setDateModification(LocalDate.parse(dateModificationStr, dateFormatter));
         }
 
-        demande.setSoldeCongesAvant(rs.getInt("solde_conges_avant"));
-        demande.setDureeJoursOuvres(rs.getInt("duree_jours_ouvres"));
+        demande.setSoldeCongesAvant(rs.getDouble("solde_conges_avant"));
+        demande.setDureeJoursOuvres(rs.getDouble("duree_jours_ouvres"));
 
         return demande;
     }
