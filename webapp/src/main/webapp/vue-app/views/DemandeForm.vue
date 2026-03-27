@@ -169,7 +169,6 @@ export default {
       this.duration = Math.max(0, count);
     },
     async submitForm() {
-      /* Vérification date dans le passé */
       if (this.form.dateDebut < this.today) {
         this.$emit('show-notification', "La date de début ne peut pas être dans le passé.", "error");
         return;
@@ -178,6 +177,20 @@ export default {
         this.$emit('show-notification', "La durée doit être supérieure à 0.", "warning");
         return;
       }
+
+      const parent = this.$root.$children[0];
+      if (parent && parent.showConfirm) {
+        const confirmed = await parent.showConfirm({
+          title: 'Soumettre la demande ?',
+          message: `Confirmez-vous la soumission de cette demande de ${this.duration} jour(s) ?`,
+          icon: 'fas fa-paper-plane',
+          type: 'info',
+          confirmText: 'Oui, soumettre',
+          btnClass: 'btn-primary'
+        });
+        if (!confirmed) return;
+      }
+
       this.submitting = true;
       try {
         await apiService.soumettreDemande({
@@ -192,7 +205,10 @@ export default {
         this.$emit('show-notification', "Demande soumise avec succès !");
         this.$emit('change-view', 'DemandeHistory');
       } catch (e) {
-        const msg = e.response?.data?.message || "Erreur lors de la soumission.";
+        let msg = "Erreur lors de la soumission.";
+        if (e.response && e.response.data && e.response.data.message) {
+          msg = e.response.data.message;
+        }
         this.$emit('show-notification', msg, "error");
       } finally {
         this.submitting = false;

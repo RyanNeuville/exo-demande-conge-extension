@@ -68,10 +68,15 @@
                 <span class="status-badge" :class="getBadgeClass(demande.statut)">{{ formatStatus(demande.statut) }}</span>
               </td>
               <td class="text-right actions-cell" data-label="Actions">
+                <button v-if="demande.statut === 'EN_ATTENTE'" class="btn btn-icon btn-approve" style="color:var(--warning)" title="Modifier" @click="openEditModal(demande)">
+                  <i class="fas fa-pen"></i>
+                </button>
                 <button v-if="demande.statut === 'EN_ATTENTE'" class="btn btn-icon btn-reject" title="Annuler" @click="cancelDemande(demande.id)">
                   <i class="fas fa-times"></i>
                 </button>
-                <span v-else style="font-size:0.75rem;color:var(--text-muted)">—</span>
+                <button class="btn btn-icon btn-view" title="Détails" @click="viewDetail(demande)">
+                  <i class="fas fa-eye"></i>
+                </button>
               </td>
             </tr>
           </tbody>
@@ -93,6 +98,34 @@
         </div>
       </div>
     </div>
+
+    <!-- Edit Modal -->
+    <div v-if="editingDemande" class="modal-overlay" @click.self="closeEditModal">
+      <div class="modal-box" style="width: 95%; max-width: 500px; text-align: left;">
+        <h3 class="modal-title mb-4"><i class="fas fa-pen"></i> Modifier la demande</h3>
+        
+        <div class="form-group">
+          <label>Motif / Commentaire</label>
+          <textarea v-model="editForm.motif" class="textarea" rows="3" required></textarea>
+        </div>
+
+        <div class="info-card mt-4 mb-4" style="padding: 1rem;">
+          <p style="margin: 0; font-size: 0.8125rem; color: #9A4A28;">
+            <i class="fas fa-info-circle"></i> Seul le motif de la demande peut être modifié pour l'instant via l'interface simplifiée.
+          </p>
+        </div>
+
+        <div class="modal-actions" style="justify-content: flex-end; margin-top: 1rem;">
+          <button class="btn btn-outline" @click="closeEditModal">Annuler</button>
+          <button class="btn btn-primary" :disabled="submittingEdit" @click="submitEdit">
+            <i v-if="submittingEdit" class="fas fa-spinner fa-spin"></i>
+            <i v-else class="fas fa-save"></i>
+            Enregistrer
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -102,12 +135,17 @@ import apiService from '../services/apiService';
 export default {
   data: () => ({
     demandes: [],
+    typesMap: {},
     search: '',
     filterStatus: 'ALL',
     loading: true,
     currentPage: 1,
     perPage: 8,
-    currentYear: new Date().getFullYear()
+    currentYear: new Date().getFullYear(),
+    
+    editingDemande: null,
+    editForm: { motif: '' },
+    submittingEdit: false
   }),
   computed: {
     filteredDemandes() {
@@ -138,10 +176,22 @@ export default {
     search() { this.currentPage = 1; },
     filterStatus() { this.currentPage = 1; }
   },
-  created() {
-    this.fetchDemandes();
+  async created() {
+    await this.fetchTypes();
+    await this.fetchDemandes();
   },
   methods: {
+    async fetchTypes() {
+      try {
+        const resp = await apiService.getTypesConges();
+        const types = resp.data || [];
+        types.forEach(t => {
+          this.typesMap[t.id] = t.libelle;
+        });
+      } catch (e) {
+        console.warn("Could not fetch types map", e);
+      }
+    },
     async fetchDemandes() {
       this.loading = true;
       try {
@@ -154,7 +204,6 @@ export default {
       }
     },
     async cancelDemande(id) {
-      /* Use custom modal from parent */
       const parent = this.$root.$children[0];
       if (parent && parent.showConfirm) {
         const confirmed = await parent.showConfirm({
@@ -171,13 +220,74 @@ export default {
       try {
         await apiService.annulerDemande(id);
         this.$emit('show-notification', "Demande annulée avec succès.");
-        /* Refresh the list to update the status */
         await this.fetchDemandes();
       } catch (e) {
-        this.$emit('show-notification', "Erreur lors de l'annulation.", "error");
+        let msg = "Erreur lors de l'annulation.";
+        if (e.response && e.response.data && e.response.data.message) {
+          msg = e.response.data.message;
+        }
+        this.$emit('show-notification', msg, "error");
+      }
+    },
+    async viewDetail(req) {
+      const parent = this.$root.$children[0];
+      if (parent && parent.showConfirm) {
+        await parent.showConfirm({
+          title: `Détails #${req.id.substring(0,8)}`,
+          message: `Type: ${this.getTypeName(req)}\nPériode: Du ${this.formatDate(req.dateDebut)} au ${this.formatDate(req.dateFin)}\nDurée: ${req.dureeJoursOuvres} jours\nMotif: ${req.motif || 'Non spécifié'}`,
+          icon: 'fas fa-info-circle',
+          type: 'info',
+          confirmText: 'Fermer',
+          btnClass: 'btn-primary'
+        });
+      } else {
+        alert(`Détails:\n${this.getTypeName(req)}\nDu ${this.formatDate(req.dateDebut)} au ${this.formatDate(req.dateFin)}\nMotif: ${req.motif}`);
+      }
+    },
+    openEditModal(demande) {
+      this.editingDemande = demande;
+      this.editForm.motif = demande.motif || '';
+    },
+    closeEditModal() {
+      this.editingDemande = null;
+      this.editForm.motif = '';
+    },
+    async submitEdit() {
+      if (!this.editingDemande) return;
+      this.submittingEdit = true;
+      try {
+        // Envoi complet avec l'update du motif
+        const payload = {
+          id: this.editingDemande.id,
+          dateDebut: this.editingDemande.dateDebut,
+          dateFin: this.editingDemande.dateFin,
+          demiJourneeDebut: this.editingDemande.demiJourneeDebut,
+          demiJourneeFin: this.editingDemande.demiJourneeFin,
+          typeConge: this.editingDemande.typeConge,
+          motif: this.editForm.motif,
+          commentaireEmploye: this.editingDemande.commentaireEmploye
+        };
+        // Backend attend un POST sur /demandes pour update ou insert en fonction de l'id ? 
+        // En vrai il y a apiService.modifierDemande(payload) ? Non, le backend prend le POST sur /demandes.
+        await apiService.soumettreDemande(payload);
+        
+        this.$emit('show-notification', "Demande modifiée avec succès.");
+        this.closeEditModal();
+        await this.fetchDemandes();
+      } catch (e) {
+        let msg = "Erreur lors de la modification.";
+        if (e.response && e.response.data && e.response.data.message) {
+          msg = e.response.data.message;
+        }
+        this.$emit('show-notification', msg, "error");
+      } finally {
+        this.submittingEdit = false;
       }
     },
     getTypeName(demande) {
+      if (demande.typeConge && demande.typeConge.id && this.typesMap[demande.typeConge.id]) {
+        return this.typesMap[demande.typeConge.id];
+      }
       if (demande.typeConge && demande.typeConge.libelle) {
         return demande.typeConge.libelle;
       }

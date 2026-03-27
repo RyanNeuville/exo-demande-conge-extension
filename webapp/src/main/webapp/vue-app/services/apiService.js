@@ -49,7 +49,8 @@ const fetchApi = async (endpoint, options = {}) => {
   try {
     const response = await fetch(url, finalOptions);
     if (!response.ok && response.status !== 404) {
-      throw response;
+      const errorData = await response.json().catch(() => null);
+      throw { response: { data: errorData, status: response.status } };
     }
     if (response.status === 204) {
       return { data: null };
