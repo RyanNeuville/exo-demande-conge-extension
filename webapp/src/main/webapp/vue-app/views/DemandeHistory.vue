@@ -194,8 +194,8 @@
     </div>
 
     <!-- Hidden Printable Receipt -->
-    <div id="print-area" v-if="printData" style="display:none">
-      <div class="receipt-container">
+    <div id="print-area">
+      <div v-if="printData" class="receipt-container">
         <div class="receipt-header">
           <img src="/image/logo-kozao.png" alt="Kozao Logo" class="receipt-logo">
           <div class="receipt-title">
@@ -207,7 +207,8 @@
         <div class="receipt-body">
           <div class="receipt-section">
             <h3>INFORMATIONS EMPLOYÉ</h3>
-            <p><strong>Nom :</strong> {{ userName }}</p>
+            <p><strong>Nom :</strong> {{ printData.prenomEmploye }} {{ printData.nomEmploye }}</p>
+            <p><strong>Matricule/ID :</strong> {{ printData.userId }}</p>
             <p><strong>Date de demande :</strong> {{ formatDate(printData.dateSoumission) }}</p>
           </div>
 
@@ -225,12 +226,13 @@
             <div class="status-stamp" :class="printData.statut">
               {{ formatStatus(printData.statut).toUpperCase() }}
             </div>
-            <p>Validé par le système le {{ formatDateTime(new Date()) }}</p>
+            <p v-if="printData.dateValidation">Validé officiellement le {{ formatDate(printData.dateValidation) }}</p>
+            <p v-else>Document généré le {{ formatDateTime(new Date()) }}</p>
           </div>
         </div>
 
         <div class="receipt-footer">
-          <p>Ce document est généré numériquement et sert de preuve de validation.</p>
+          <p>Ce document est généré numériquement et sert de preuve de validation au sein de Kozao Africa.</p>
           <p>© {{ currentYear }} Kozao Africa - Système de Gestion des Congés</p>
         </div>
       </div>
