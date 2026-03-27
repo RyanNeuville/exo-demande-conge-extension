@@ -208,6 +208,8 @@ export default {
         let msg = "Erreur lors de la soumission.";
         if (e.response && e.response.data && e.response.data.message) {
           msg = e.response.data.message;
+        } else if (e.message) {
+          msg = e.message;
         }
         this.$emit('show-notification', msg, "error");
       } finally {

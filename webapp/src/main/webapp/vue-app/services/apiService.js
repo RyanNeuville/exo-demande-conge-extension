@@ -70,9 +70,11 @@ export default {
   getToutesLesDemandes: () => fetchApi('/demandes/toutes', { method: 'GET' }),
   getDemande: (id) => fetchApi(`/demandes/${id}`, { method: 'GET' }),
   soumettreDemande: (data) => fetchApi('/demandes', { method: 'POST', body: data }),
+  modifierDemande: (id, data) => fetchApi(`/demandes/${id}`, { method: 'PUT', body: data }),
   validerDemande: (id, commentaire) => fetchApi(`/demandes/${id}/valider`, { method: 'POST', body: { commentaire } }),
   refuserDemande: (id, commentaire) => fetchApi(`/demandes/${id}/refuser`, { method: 'POST', body: { commentaire } }),
-  annulerDemande: (id) => fetchApi(`/demandes/${id}/annuler`, { method: 'POST' }),
+  annulerDemande: (id) => fetchApi(`/demandes/${id}`, { method: 'DELETE' }),
+  getHistoriqueDemande: (id) => fetchApi(`/demandes/${id}/historique`, { method: 'GET' }),
 
   /** --- Utilisateurs & Solde --- **/
   getMonSolde: () => fetchApi('/utilisateurs/me/solde', { method: 'GET' }),

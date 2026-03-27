@@ -1588,5 +1588,115 @@ h1, h2, h3, h4 {
   from { transform: scale(0.9); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
+/* ═══════════════════════════════════════════════════════════════
+   DETAILS CARD & TIMELINE
+   ═══════════════════════════════════════════════════════════════ */
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.detail-item label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-gray);
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.detail-item span {
+  font-size: 0.9375rem;
+  color: var(--text-dark);
+  font-weight: 500;
+}
+
+.timeline-title {
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin: 2rem 0 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 0.5rem;
+}
+
+.timeline {
+  position: relative;
+  padding-left: 1.5rem;
+  text-align: left;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0.3125rem;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--border-light);
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 1.5rem;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -1.4375rem;
+  top: 0.25rem;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid var(--primary-blue);
+  z-index: 1;
+}
+
+.timeline-item.active::before {
+  background: var(--primary-orange);
+  border-color: var(--primary-orange);
+}
+
+.timeline-date {
+  font-size: 0.75rem;
+  color: var(--text-gray);
+  display: block;
+  margin-bottom: 0.125rem;
+}
+
+.timeline-desc {
+  font-size: 0.875rem;
+  color: var(--text-dark);
+  font-weight: 500;
+}
+
+.timeline-user {
+  font-size: 0.75rem;
+  color: var(--primary-blue);
+  margin-left: 0.5rem;
+}
+
+.timeline-comment {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+/* Animations for detail modal */
+.modal-box.large {
+  max-width: 600px;
+  width: 95%;
+}
+
 
 

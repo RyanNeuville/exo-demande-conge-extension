@@ -74,7 +74,7 @@
                 <button v-if="demande.statut === 'EN_ATTENTE'" class="btn btn-icon btn-reject" title="Annuler" @click="cancelDemande(demande.id)">
                   <i class="fas fa-times"></i>
                 </button>
-                <button class="btn btn-icon btn-view" title="Détails" @click="viewDetail(demande)">
+                <button class="btn btn-icon btn-view" title="Détails" @click="openDetailModal(demande)">
                   <i class="fas fa-eye"></i>
                 </button>
               </td>
@@ -126,6 +126,70 @@
       </div>
     </div>
 
+    <!-- Premium Detail Modal -->
+    <div v-if="viewingDemande" class="modal-overlay" @click.self="closeDetailModal">
+      <div class="modal-box large">
+         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h3 class="modal-title" style="margin:0"><i class="fas fa-file-alt"></i> Détails de la Demande</h3>
+            <span class="status-badge" :class="getBadgeClass(viewingDemande.statut)">{{ formatStatus(viewingDemande.statut) }}</span>
+         </div>
+
+         <div class="details-grid">
+            <div class="detail-item">
+              <label>ID de Référence</label>
+              <span>#{{ viewingDemande.id.substring(0,8).toUpperCase() }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Type de Congé</label>
+              <span>{{ getTypeName(viewingDemande) }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Date de Début</label>
+              <span>{{ formatDate(viewingDemande.dateDebut) }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Date de Fin</label>
+              <span>{{ formatDate(viewingDemande.dateFin) }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Durée Totale</label>
+              <span>{{ viewingDemande.dureeJoursOuvres }} Jours ouvrés</span>
+            </div>
+            <div class="detail-item">
+              <label>Date Soumission</label>
+              <span>{{ formatDate(viewingDemande.dateSoumission) }}</span>
+            </div>
+         </div>
+
+         <div class="detail-item" style="margin-bottom: 2rem; border-top: 1px solid var(--border-light); padding-top: 1.5rem;">
+            <label>Motif de la demande</label>
+            <p style="margin:0; font-size:0.9375rem; color:var(--text-dark); line-height: 1.6;">{{ viewingDemande.motif || 'Aucun motif spécifié' }}</p>
+         </div>
+
+         <div v-if="historyLoading" class="text-center py-4">
+            <i class="fas fa-spinner fa-spin text-gray-400"></i> Chargement de l'historique...
+         </div>
+         <div v-else-if="auditTrail.length > 0">
+            <h4 class="timeline-title">Historique des actions</h4>
+            <div class="timeline">
+              <div v-for="(step, idx) in auditTrail" :key="step.id || idx" class="timeline-item" :class="{active: idx === 0}">
+                <span class="timeline-date">{{ formatDateTime(step.dateChangement) }}</span>
+                <span class="timeline-desc">{{ formatStepAction(step) }}</span>
+                <span class="timeline-user">par {{ step.acteurId }}</span>
+                <span v-if="step.commentaire" class="timeline-comment">"{{ step.commentaire }}"</span>
+              </div>
+            </div>
+         </div>
+
+         <div class="modal-actions" style="margin-top: 2rem; border-top: 1px solid var(--border-light); padding-top: 1.5rem;">
+            <button class="btn btn-outline" @click="closeDetailModal">Fermer</button>
+            <button v-if="viewingDemande.statut === 'EN_ATTENTE'" class="btn btn-primary" @click="openEditModal(viewingDemande); closeDetailModal()">
+              <i class="fas fa-pen"></i> Modifier
+            </button>
+         </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -145,7 +209,11 @@ export default {
     
     editingDemande: null,
     editForm: { motif: '' },
-    submittingEdit: false
+    submittingEdit: false,
+
+    viewingDemande: null,
+    auditTrail: [],
+    historyLoading: false
   }),
   computed: {
     filteredDemandes() {
@@ -229,20 +297,22 @@ export default {
         this.$emit('show-notification', msg, "error");
       }
     },
-    async viewDetail(req) {
-      const parent = this.$root.$children[0];
-      if (parent && parent.showConfirm) {
-        await parent.showConfirm({
-          title: `Détails #${req.id.substring(0,8)}`,
-          message: `Type: ${this.getTypeName(req)}\nPériode: Du ${this.formatDate(req.dateDebut)} au ${this.formatDate(req.dateFin)}\nDurée: ${req.dureeJoursOuvres} jours\nMotif: ${req.motif || 'Non spécifié'}`,
-          icon: 'fas fa-info-circle',
-          type: 'info',
-          confirmText: 'Fermer',
-          btnClass: 'btn-primary'
-        });
-      } else {
-        alert(`Détails:\n${this.getTypeName(req)}\nDu ${this.formatDate(req.dateDebut)} au ${this.formatDate(req.dateFin)}\nMotif: ${req.motif}`);
+    async openDetailModal(req) {
+      this.viewingDemande = req;
+      this.historyLoading = true;
+      this.auditTrail = [];
+      try {
+        const resp = await apiService.getHistoriqueDemande(req.id);
+        this.auditTrail = (resp.data || []).sort((a,b) => new Date(b.dateChangement) - new Date(a.dateChangement));
+      } catch (e) {
+        console.error("Failed to load audit trail", e);
+      } finally {
+        this.historyLoading = false;
       }
+    },
+    closeDetailModal() {
+      this.viewingDemande = null;
+      this.auditTrail = [];
     },
     openEditModal(demande) {
       this.editingDemande = demande;
@@ -256,20 +326,12 @@ export default {
       if (!this.editingDemande) return;
       this.submittingEdit = true;
       try {
-        // Envoi complet avec l'update du motif
         const payload = {
-          id: this.editingDemande.id,
-          dateDebut: this.editingDemande.dateDebut,
-          dateFin: this.editingDemande.dateFin,
-          demiJourneeDebut: this.editingDemande.demiJourneeDebut,
-          demiJourneeFin: this.editingDemande.demiJourneeFin,
-          typeConge: this.editingDemande.typeConge,
-          motif: this.editForm.motif,
-          commentaireEmploye: this.editingDemande.commentaireEmploye
+          ...this.editingDemande,
+          motif: this.editForm.motif
         };
-        // Backend attend un POST sur /demandes pour update ou insert en fonction de l'id ? 
-        // En vrai il y a apiService.modifierDemande(payload) ? Non, le backend prend le POST sur /demandes.
-        await apiService.soumettreDemande(payload);
+        // USE PUT ENDPOINT !
+        await apiService.modifierDemande(this.editingDemande.id, payload);
         
         this.$emit('show-notification', "Demande modifiée avec succès.");
         this.closeEditModal();
@@ -291,18 +353,26 @@ export default {
       if (demande.typeConge && demande.typeConge.libelle) {
         return demande.typeConge.libelle;
       }
-      if (demande.typeConge && demande.typeConge.id) {
-        return 'Type #' + demande.typeConge.id;
-      }
       return 'Congé';
     },
     formatDate(dateStr) {
       if (!dateStr) return 'N/A';
       return new Date(dateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
     },
+    formatDateTime(dtStr) {
+      if (!dtStr) return 'N/A';
+      return new Date(dtStr).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+    },
     formatStatus(statut) {
       const labels = { 'EN_ATTENTE': 'En attente', 'VALIDEE': 'Validée', 'REFUSEE': 'Refusée', 'ANNULEE': 'Annulée' };
       return labels[statut] || statut;
+    },
+    formatStepAction(step) {
+      if (step.nouvelEtat === 'EN_ATTENTE') return 'Demande soumise';
+      if (step.nouvelEtat === 'VALIDEE') return 'Demande approuvée';
+      if (step.nouvelEtat === 'REFUSEE') return 'Demande refusée';
+      if (step.nouvelEtat === 'ANNULEE') return 'Demande annulée';
+      return 'Changement d\'état';
     },
     getBadgeClass(statut) {
       return {
