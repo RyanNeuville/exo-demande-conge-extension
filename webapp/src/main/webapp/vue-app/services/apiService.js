@@ -49,7 +49,14 @@ const fetchApi = async (endpoint, options = {}) => {
   try {
     const response = await fetch(url, finalOptions);
     if (!response.ok && response.status !== 404) {
-      const errorData = await response.json().catch(() => null);
+      let errorData;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        errorData = await response.json().catch(() => null);
+      } else {
+        const text = await response.text().catch(() => null);
+        errorData = { message: text };
+      }
       throw { response: { data: errorData, status: response.status } };
     }
     if (response.status === 204) {
@@ -58,7 +65,8 @@ const fetchApi = async (endpoint, options = {}) => {
     const data = await response.json().catch(() => null);
     return { data, status: response.status };
   } catch (error) {
-    console.error(`[API Error]`, error);
+    if (error.response) console.error(`[API Error ${error.response.status}]`, error.response.data);
+    else console.error(`[API Error]`, error);
     throw error;
   }
 };

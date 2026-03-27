@@ -18,38 +18,38 @@
 
     <!-- Solde + Stats Row -->
     <div class="stats-row">
-      <!-- Solde Card (blue gradient) -->
-      <div class="solde-card">
+      <!-- Solde Card (Glassmorphism + Blue Gradient) -->
+      <div class="solde-card glass-card">
         <div class="solde-label"><i class="fas fa-wallet"></i> Solde Congés Payés</div>
         <div>
-          <span class="solde-number">{{ solde }}</span>
+          <span class="solde-number text-shadow">{{ solde }}</span>
           <span class="solde-unit">jours</span>
         </div>
         <div class="solde-meta">
-          <span>Acquis : 25</span>
+          <span>Acquis : 25.0</span>
           <span>Pris : {{ validatedYear }}</span>
         </div>
       </div>
 
-      <!-- En attente -->
-      <div class="stat-card-mini">
-        <div class="stat-icon-mini orange"><i class="fas fa-clock"></i></div>
+      <!-- En attente (Glass) -->
+      <div class="stat-card-mini glass-card border-orange">
+        <div class="stat-icon-mini orange-glow"><i class="fas fa-clock"></i></div>
         <div class="stat-number">{{ pendingCount }}</div>
         <div class="stat-label">En attente</div>
       </div>
 
-      <!-- Validées (année) -->
-      <div class="stat-card-mini">
-        <div class="stat-icon-mini green"><i class="fas fa-calendar-check"></i></div>
+      <!-- Validées (Glass) -->
+      <div class="stat-card-mini glass-card border-green">
+        <div class="stat-icon-mini green-glow"><i class="fas fa-calendar-check"></i></div>
         <div class="stat-number">{{ approvedYear }}</div>
-        <div class="stat-label">Validées (année)</div>
+        <div class="stat-label">Validées (2026)</div>
       </div>
 
-      <!-- Refusées -->
-      <div class="stat-card-mini">
-        <div class="stat-icon-mini red"><i class="fas fa-times-circle"></i></div>
-        <div class="stat-number">{{ refusedCount }}</div>
-        <div class="stat-label">Refusées</div>
+      <!-- Year Countdown (New) -->
+      <div class="stat-card-mini glass-card border-blue">
+        <div class="stat-icon-mini blue-glow"><i class="fas fa-hourglass-half"></i></div>
+        <div class="stat-number">{{ daysLeftInYear }}</div>
+        <div class="stat-label">Jours restants (2026)</div>
       </div>
     </div>
 
@@ -136,13 +136,20 @@ export default {
     currentYear: new Date().getFullYear(),
     recentDemandes: [],
     loading: true,
-    userName: ''
+    userName: '',
+    daysLeftInYear: 0
   }),
   created() {
     this.loadData();
   },
   methods: {
     async loadData() {
+      // Calcul jours restants
+      const now = new Date();
+      const endOfYear = new Date(now.getFullYear(), 11, 31);
+      const diff = endOfYear - now;
+      this.daysLeftInYear = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
       try {
         const [soldeResp, demandesResp, userResp] = await Promise.allSettled([
           apiService.getMonSolde(),

@@ -183,10 +183,56 @@
 
          <div class="modal-actions" style="margin-top: 2rem; border-top: 1px solid var(--border-light); padding-top: 1.5rem;">
             <button class="btn btn-outline" @click="closeDetailModal">Fermer</button>
+            <button v-if="viewingDemande.statut === 'VALIDEE'" class="btn btn-primary" @click="printReceipt(viewingDemande)">
+              <i class="fas fa-print"></i> Télécharger Reçu
+            </button>
             <button v-if="viewingDemande.statut === 'EN_ATTENTE'" class="btn btn-primary" @click="openEditModal(viewingDemande); closeDetailModal()">
               <i class="fas fa-pen"></i> Modifier
             </button>
          </div>
+      </div>
+    </div>
+
+    <!-- Hidden Printable Receipt -->
+    <div id="print-area" v-if="printData" style="display:none">
+      <div class="receipt-container">
+        <div class="receipt-header">
+          <img src="/image/logo-kozao.png" alt="Kozao Logo" class="receipt-logo">
+          <div class="receipt-title">
+            <h1>REÇU DE DEMANDE DE CONGÉ</h1>
+            <p>Référence : #{{ printData.id.substring(0,8).toUpperCase() }}</p>
+          </div>
+        </div>
+        
+        <div class="receipt-body">
+          <div class="receipt-section">
+            <h3>INFORMATIONS EMPLOYÉ</h3>
+            <p><strong>Nom :</strong> {{ userName }}</p>
+            <p><strong>Date de demande :</strong> {{ formatDate(printData.dateSoumission) }}</p>
+          </div>
+
+          <div class="receipt-section">
+            <h3>DÉTAILS DU CONGÉ</h3>
+            <table class="receipt-table">
+              <tr><td>Type :</td><td>{{ getTypeName(printData) }}</td></tr>
+              <tr><td>Période :</td><td>Du {{ formatDate(printData.dateDebut) }} au {{ formatDate(printData.dateFin) }}</td></tr>
+              <tr><td>Durée :</td><td>{{ printData.dureeJoursOuvres }} Jours ouvrés</td></tr>
+              <tr><td>Motif :</td><td>{{ printData.motif || '—' }}</td></tr>
+            </table>
+          </div>
+
+          <div class="receipt-status">
+            <div class="status-stamp" :class="printData.statut">
+              {{ formatStatus(printData.statut).toUpperCase() }}
+            </div>
+            <p>Validé par le système le {{ formatDateTime(new Date()) }}</p>
+          </div>
+        </div>
+
+        <div class="receipt-footer">
+          <p>Ce document est généré numériquement et sert de preuve de validation.</p>
+          <p>© {{ currentYear }} Kozao Africa - Système de Gestion des Congés</p>
+        </div>
       </div>
     </div>
 
@@ -213,7 +259,10 @@ export default {
 
     viewingDemande: null,
     auditTrail: [],
-    historyLoading: false
+    historyLoading: false,
+
+    printData: null,
+    userName: ''
   }),
   computed: {
     filteredDemandes() {
