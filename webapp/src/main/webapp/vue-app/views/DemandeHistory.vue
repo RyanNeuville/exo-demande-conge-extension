@@ -431,6 +431,15 @@ export default {
         'status-pending': statut === 'EN_ATTENTE',
         'status-error': statut === 'REFUSEE' || statut === 'ANNULEE'
       };
+    },
+    printReceipt(req) {
+      this.printData = req;
+      this.$nextTick(() => {
+        // Small delay to ensure hidden DOM is populated before printing
+        setTimeout(() => {
+          window.print();
+        }, 300);
+      });
     }
   }
 };

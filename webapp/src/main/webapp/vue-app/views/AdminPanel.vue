@@ -157,6 +157,71 @@
         </table>
       </div>
     </div>
+
+    <!-- Admin Detail Modal -->
+    <div v-if="viewingDemande" class="modal-overlay" @click.self="closeDetailModal">
+      <div class="modal-box large">
+         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h3 class="modal-title" style="margin:0"><i class="fas fa-file-invoice"></i> Détails Demande</h3>
+            <span class="status-badge" :class="getBadgeClass(viewingDemande.statut)">{{ formatStatus(viewingDemande.statut) }}</span>
+         </div>
+
+         <div class="details-grid">
+            <div class="detail-item">
+              <label>Employé</label>
+              <span>{{ viewingDemande.prenomEmploye }} {{ viewingDemande.nomEmploye }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Type de Congé</label>
+              <span>{{ viewingDemande.typeConge.libelle }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Période</label>
+              <span>Du {{ formatDate(viewingDemande.dateDebut) }} au {{ formatDate(viewingDemande.dateFin) }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Durée</label>
+              <span>{{ viewingDemande.dureeJoursOuvres }} Jours</span>
+            </div>
+            <div class="detail-item">
+              <label>ID Utilisateur</label>
+              <span>{{ viewingDemande.userId }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Solde Estimé</label>
+              <span>{{ viewingDemande.soldeCongesAvant - viewingDemande.dureeJoursOuvres }} j</span>
+            </div>
+         </div>
+
+         <div class="detail-item" style="margin-bottom: 2rem; border-top: 1px solid var(--border-light); padding-top: 1.5rem;">
+            <label>Motif de la demande</label>
+            <p style="margin:0; font-size:0.9375rem; color:var(--text-dark); line-height: 1.6;">{{ viewingDemande.motif || 'Aucun motif spécifié' }}</p>
+         </div>
+
+         <div v-if="historyLoading" class="text-center py-4">
+            <i class="fas fa-spinner fa-spin text-gray-400"></i> Chargement de l'historique...
+         </div>
+         <div v-else-if="auditTrail.length > 0">
+            <h4 class="timeline-title">Historique des actions</h4>
+            <div class="timeline" style="max-height: 200px; overflow-y: auto;">
+              <div v-for="(step, idx) in auditTrail" :key="step.id || idx" class="timeline-item" :class="{active: idx === 0}">
+                <span class="timeline-date">{{ formatDateTime(step.dateChangement) }}</span>
+                <span class="timeline-desc">{{ formatStepAction(step) }}</span>
+                <span class="timeline-user">par {{ step.acteurId }}</span>
+                <span v-if="step.commentaire" class="timeline-comment">"{{ step.commentaire }}"</span>
+              </div>
+            </div>
+         </div>
+
+         <div class="modal-actions" style="margin-top: 2rem; border-top: 1px solid var(--border-light); padding-top: 1.5rem;">
+            <button class="btn btn-outline" @click="closeDetailModal">Fermer</button>
+            <div v-if="viewingDemande.statut === 'EN_ATTENTE'" style="display:flex; gap:0.5rem">
+              <button class="btn btn-danger" @click="processRequest(viewingDemande, 'refuser'); closeDetailModal()">Refuser</button>
+              <button class="btn btn-success" @click="processRequest(viewingDemande, 'valider'); closeDetailModal()">Valider</button>
+            </div>
+         </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -169,7 +234,11 @@ export default {
     pendingRequests: [],
     loading: true,
     search: '',
-    filterType: 'ALL'
+    filterType: 'ALL',
+    
+    viewingDemande: null,
+    auditTrail: [],
+    historyLoading: false
   }),
   computed: {
     approvedCount() {
@@ -191,7 +260,7 @@ export default {
       };
     },
     uniqueTypes() {
-      const types = this.pendingRequests.map(r => r.typeConge?.libelle).filter(Boolean);
+      const types = this.allRequests.map(r => r.typeConge?.libelle).filter(Boolean);
       return [...new Set(types)];
     },
     filteredRequests() {
@@ -267,18 +336,21 @@ export default {
       }
     },
     async viewDetail(req) {
-      const parent = this.$root.$children[0];
-      const fullName = `${req.prenomEmploye} ${req.nomEmploye}`;
-      if (parent && parent.showConfirm) {
-        await parent.showConfirm({
-          title: `Détails demande #${req.numero || req.id.substring(0,8)}`,
-          message: `Employé: ${fullName} (${req.userId})\nType: ${req.typeConge.libelle}\nDu ${this.formatDate(req.dateDebut)} au ${this.formatDate(req.dateFin)}\nDurée: ${req.dureeJoursOuvres} jours\nMotif: ${req.motif || 'Non spécifié'}`,
-          icon: 'fas fa-info-circle',
-          type: 'info',
-          confirmText: 'Fermer',
-          btnClass: 'btn-primary'
-        });
+      this.viewingDemande = req;
+      this.historyLoading = true;
+      this.auditTrail = [];
+      try {
+        const resp = await apiService.getHistoriqueDemande(req.id);
+        this.auditTrail = (resp.data || []).sort((a,b) => new Date(b.dateChangement) - new Date(a.dateChangement));
+      } catch (e) {
+        console.error("Failed to load audit trail", e);
+      } finally {
+        this.historyLoading = false;
       }
+    },
+    closeDetailModal() {
+      this.viewingDemande = null;
+      this.auditTrail = [];
     },
     getInitials(req) {
       if (req.prenomEmploye && req.nomEmploye) {
@@ -293,6 +365,28 @@ export default {
     formatDate(dateStr) {
       if (!dateStr) return 'N/A';
       return new Date(dateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+    },
+    formatDateTime(dtStr) {
+      if (!dtStr) return 'N/A';
+      return new Date(dtStr).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+    },
+    formatStatus(statut) {
+      const labels = { 'EN_ATTENTE': 'En attente', 'VALIDEE': 'Validée', 'REFUSEE': 'Refusée', 'ANNULEE': 'Annulée' };
+      return labels[statut] || statut;
+    },
+    formatStepAction(step) {
+      if (step.nouvelEtat === 'EN_ATTENTE') return 'Soumission';
+      if (step.nouvelEtat === 'VALIDEE') return 'Validation';
+      if (step.nouvelEtat === 'REFUSEE') return 'Refus';
+      if (step.nouvelEtat === 'ANNULEE') return 'Annulation';
+      return 'Changement d\'état';
+    },
+    getBadgeClass(statut) {
+      return {
+        'status-valid': statut === 'VALIDEE',
+        'status-pending': statut === 'EN_ATTENTE',
+        'status-error': statut === 'REFUSEE' || statut === 'ANNULEE'
+      };
     }
   }
 };
