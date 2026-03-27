@@ -1,4 +1,5 @@
 import './initComponents.js';
+import './../css/demandeCongeApp.css';
 
 /* Configuration i18n eXo */
 const lang = eXo?.env?.portal?.language || 'fr';

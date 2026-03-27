@@ -54,8 +54,8 @@ public class DemandeCongeServiceImplTest {
         /** Given */
         String userId = "user123";
         DemandeConge demande = new DemandeConge();
-        demande.setDateDebut(LocalDate.now().plusDays(1));
-        demande.setDateFin(LocalDate.now().plusDays(2)); // 2 jours ouvrés (ex: Lundi-Mardi)
+        demande.setDateDebut(LocalDate.of(2023, 1, 2)); // Lundi (Monday)
+        demande.setDateFin(LocalDate.of(2023, 1, 3)); // Mardi (Tuesday)
 
         when(demandeCongeRepository.hasChevauchement(eq(userId), isNull(), any(), any())).thenReturn(false);
         when(utilisateurRepository.getSoldeById(userId)).thenReturn(10.0);
@@ -99,8 +99,8 @@ public class DemandeCongeServiceImplTest {
         /** Given */
         String userId = "user123";
         DemandeConge demande = new DemandeConge();
-        demande.setDateDebut(LocalDate.now().plusDays(1));
-        demande.setDateFin(LocalDate.now().plusDays(10)); // Grande période
+        demande.setDateDebut(LocalDate.of(2023, 1, 2)); // Lundi
+        demande.setDateFin(LocalDate.of(2023, 1, 10)); // Mardi suivant (7 jours ouvrés)
 
         when(demandeCongeRepository.hasChevauchement(anyString(), isNull(), any(), any())).thenReturn(false);
         when(utilisateurRepository.getSoldeById(userId)).thenReturn(1.0);

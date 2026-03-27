@@ -2,7 +2,6 @@ const path = require('path');
 const { VueLoaderPlugin } = require('vue-loader');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-// the display name of the war
 const app = 'demande-conge-extension-webapp';
 
 const config = {
@@ -29,14 +28,14 @@ const config = {
           MiniCssExtractPlugin.loader,
           'css-loader'
         ]
-      },
+      }
     ]
   },
   plugins: [
     new VueLoaderPlugin(),
     new MiniCssExtractPlugin({
-      filename: 'css/demandeCongeApp.css'
-    })
+      filename: 'css/demandeCongeApp.css',
+    }),
   ],
   entry: {
     demandeCongeApp: './src/main/webapp/vue-app/main.js'
@@ -44,7 +43,6 @@ const config = {
   output: {
     path: path.join(__dirname, './src/main/webapp'),
     filename: 'js/[name].bundle.js',
-    publicPath: '/demande-conge-extension-webapp/',
     libraryTarget: 'amd'
   },
   externals: {
