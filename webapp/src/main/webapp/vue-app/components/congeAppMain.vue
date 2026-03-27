@@ -10,8 +10,8 @@
       <!-- Sidebar -->
       <aside class="sidebar">
         <div class="sidebar-brand">
-          <div class="sidebar-logo">K</div>
-          <h1>Kozao Africa</h1>
+          <div class="sidebar-logo"><i class="fas fa-plane-departure"></i></div>
+          <h1>Congés</h1>
         </div>
 
         <nav class="nav-menu">
@@ -50,10 +50,27 @@
       </main>
     </div>
 
-    <!-- Toast -->
+    <!-- Toast Notification -->
     <div v-if="notification" class="toast-container" :class="notification.type">
       <i :class="notification.icon"></i>
       {{ notification.message }}
+    </div>
+
+    <!-- Confirm Modal -->
+    <div v-if="confirmModal" class="modal-overlay" @click.self="confirmModal.onCancel">
+      <div class="modal-box">
+        <div class="modal-icon" :class="confirmModal.type || 'warning'">
+          <i :class="confirmModal.icon || 'fas fa-exclamation-triangle'"></i>
+        </div>
+        <h3 class="modal-title">{{ confirmModal.title }}</h3>
+        <p class="modal-message">{{ confirmModal.message }}</p>
+        <div class="modal-actions">
+          <button class="btn btn-outline" @click="confirmModal.onCancel">Annuler</button>
+          <button class="btn" :class="confirmModal.btnClass || 'btn-primary'" @click="confirmModal.onConfirm">
+            {{ confirmModal.confirmText || 'Confirmer' }}
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -73,6 +90,7 @@ export default {
     userRole: 'Employé',
     isAdmin: false,
     notification: null,
+    confirmModal: null,
     loading: true
   }),
   computed: {
@@ -93,14 +111,21 @@ export default {
         const resp = await apiService.getUtilisateurs();
         if (resp.data) {
           const user = resp.data;
+          console.log('[DemandeConge] Profil reçu. Username:', user.username, 'Role:', user.role);
           this.userName = `${user.prenom || ''} ${user.nom || ''}`.trim() || user.username || 'Utilisateur';
-          if (user.role === 'ADMINISTRATEUR' || user.role === 'RESPONSABLE') {
+
+          const role = (user.role || '').toUpperCase();
+          if (role === 'ADMINISTRATEUR' || role === 'ADMIN' || user.username === 'root') {
             this.isAdmin = true;
-            this.userRole = user.role === 'ADMINISTRATEUR' ? 'Administrateur' : 'Responsable';
+            this.userRole = 'Administrateur';
+          } else if (role === 'RESPONSABLE' || role === 'MANAGER') {
+            this.isAdmin = true;
+            this.userRole = 'Responsable';
           } else {
             this.isAdmin = false;
             this.userRole = 'Employé';
           }
+          console.log('[DemandeConge] isAdmin =', this.isAdmin, 'userRole =', this.userRole);
         }
       } catch (e) {
         console.error('[DemandeConge] Erreur profil:', e);
@@ -113,6 +138,20 @@ export default {
       const icons = { success: 'fas fa-check-circle', error: 'fas fa-exclamation-circle', warning: 'fas fa-exclamation-triangle' };
       this.notification = { message, type, icon: icons[type] || icons.success };
       setTimeout(() => (this.notification = null), 4000);
+    },
+    showConfirm(options) {
+      return new Promise((resolve) => {
+        this.confirmModal = {
+          title: options.title || 'Confirmation',
+          message: options.message || 'Êtes-vous sûr ?',
+          icon: options.icon || 'fas fa-exclamation-triangle',
+          type: options.type || 'warning',
+          confirmText: options.confirmText || 'Confirmer',
+          btnClass: options.btnClass || 'btn-primary',
+          onConfirm: () => { this.confirmModal = null; resolve(true); },
+          onCancel: () => { this.confirmModal = null; resolve(false); }
+        };
+      });
     }
   }
 };

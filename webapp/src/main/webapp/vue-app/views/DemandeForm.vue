@@ -9,18 +9,21 @@
           <div class="form-group">
             <label>Type de congé <span class="required">*</span></label>
             <select v-model="form.typeCongeId" class="select" required>
-              <option value="" disabled>Sélectionnez un type</option>
+              <option value="" disabled selected>— Sélectionnez un type —</option>
               <option v-for="type in leaveTypes" :key="type.id" :value="type.id">
                 {{ type.libelle }}
               </option>
             </select>
+            <p v-if="leaveTypes.length === 0 && !loadingTypes" style="font-size:0.75rem;color:var(--error);margin-top:4px">
+              <i class="fas fa-exclamation-circle"></i> Aucun type de congé disponible
+            </p>
           </div>
 
           <!-- Dates -->
           <div class="form-row">
             <div class="form-group">
               <label>Date de début <span class="required">*</span></label>
-              <input type="date" v-model="form.dateDebut" class="input" required @change="calculateDuration">
+              <input type="date" v-model="form.dateDebut" class="input" required :min="today" @change="calculateDuration">
               <div class="checkbox-group">
                 <input type="checkbox" id="half-start" v-model="form.demiJourneeDebut" @change="calculateDuration">
                 <label for="half-start">Demi-journée</label>
@@ -28,7 +31,7 @@
             </div>
             <div class="form-group">
               <label>Date de fin <span class="required">*</span></label>
-              <input type="date" v-model="form.dateFin" class="input" required @change="calculateDuration">
+              <input type="date" v-model="form.dateFin" class="input" required :min="form.dateDebut || today" @change="calculateDuration">
               <div class="checkbox-group">
                 <input type="checkbox" id="half-end" v-model="form.demiJourneeFin" @change="calculateDuration">
                 <label for="half-end">Demi-journée</label>
@@ -64,7 +67,9 @@
 
           <!-- Actions -->
           <div class="form-actions">
-            <button type="button" class="btn btn-outline" @click="$emit('change-view', 'Dashboard')">Annuler</button>
+            <button type="button" class="btn btn-outline" @click="$emit('change-view', 'Dashboard')">
+              Annuler
+            </button>
             <button type="submit" class="btn btn-primary" :disabled="submitting">
               <i v-if="submitting" class="fas fa-spinner fa-spin"></i>
               <i v-else class="fas fa-paper-plane"></i>
@@ -81,6 +86,7 @@
           <p>
             Les week-ends sont automatiquement exclus du calcul de la durée.
             Votre solde sera déduit de <strong>{{ duration || '...' }} jours</strong> après validation.
+            <strong>Les dates antérieures à aujourd'hui ne sont pas autorisées.</strong>
           </p>
         </div>
       </div>
@@ -92,31 +98,43 @@
 import apiService from '../services/apiService';
 
 export default {
-  data: () => ({
-    form: {
-      typeCongeId: '',
-      dateDebut: '',
-      dateFin: '',
-      demiJourneeDebut: false,
-      demiJourneeFin: false,
-      motif: '',
-      commentaireEmploye: '',
-      fileName: ''
-    },
-    leaveTypes: [],
-    duration: null,
-    submitting: false
-  }),
+  data() {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    return {
+      today: `${yyyy}-${mm}-${dd}`,
+      form: {
+        typeCongeId: '',
+        dateDebut: '',
+        dateFin: '',
+        demiJourneeDebut: false,
+        demiJourneeFin: false,
+        motif: '',
+        commentaireEmploye: '',
+        fileName: ''
+      },
+      leaveTypes: [],
+      loadingTypes: true,
+      duration: null,
+      submitting: false
+    };
+  },
   created() {
     this.fetchTypes();
   },
   methods: {
     async fetchTypes() {
+      this.loadingTypes = true;
       try {
         const resp = await apiService.getTypesConges();
-        this.leaveTypes = resp.data;
+        this.leaveTypes = resp.data || [];
       } catch (e) {
+        console.error('[DemandeForm] Erreur chargement types:', e);
         this.$emit('show-notification', "Erreur lors du chargement des types de congés", "error");
+      } finally {
+        this.loadingTypes = false;
       }
     },
     triggerUpload() {
@@ -151,6 +169,11 @@ export default {
       this.duration = Math.max(0, count);
     },
     async submitForm() {
+      /* Vérification date dans le passé */
+      if (this.form.dateDebut < this.today) {
+        this.$emit('show-notification', "La date de début ne peut pas être dans le passé.", "error");
+        return;
+      }
       if (this.duration <= 0) {
         this.$emit('show-notification', "La durée doit être supérieure à 0.", "warning");
         return;

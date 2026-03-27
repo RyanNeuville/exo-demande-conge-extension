@@ -174,25 +174,50 @@ export default {
       }
     },
     async processRequest(req, action) {
-      const label = action === 'valider' ? 'validation' : 'refus';
-      const comment = prompt(`Commentaire pour cette ${label} (optionnel) :`);
-      if (comment === null) return;
+      const parent = this.$root.$children[0];
+      const isValider = action === 'valider';
+
+      if (parent && parent.showConfirm) {
+        const confirmed = await parent.showConfirm({
+          title: isValider ? 'Valider la demande ?' : 'Refuser la demande ?',
+          message: `Voulez-vous vraiment ${isValider ? 'valider' : 'refuser'} cette demande de ${req.employeId} ?`,
+          icon: isValider ? 'fas fa-check-circle' : 'fas fa-times-circle',
+          type: isValider ? 'success' : 'danger',
+          confirmText: isValider ? 'Oui, valider' : 'Oui, refuser',
+          btnClass: isValider ? 'btn-success' : 'btn-danger'
+        });
+
+        if (!confirmed) return;
+      }
+
+      /* On the mock we don't handle comment from a prompt, we just send empty. For a real app, you would add an input to the modal. */
+      const comment = '';
 
       try {
-        if (action === 'valider') {
+        if (isValider) {
           await apiService.validerDemande(req.id, comment);
           this.$emit('show-notification', "Demande validée avec succès !");
         } else {
           await apiService.refuserDemande(req.id, comment);
           this.$emit('show-notification', "Demande refusée.", "warning");
         }
-        this.fetchRequests();
+        await this.fetchRequests();
       } catch (e) {
         this.$emit('show-notification', "Erreur lors du traitement.", "error");
       }
     },
-    viewDetail(req) {
-      alert(`Détails de la demande #${req.id}\n\nEmployé: ${req.employeId}\nType: ${req.typeConge.libelle}\nDu ${req.dateDebut} au ${req.dateFin}\nDurée: ${req.dureeJoursOuvres} jours\nMotif: ${req.motif || 'Non spécifié'}`);
+    async viewDetail(req) {
+      const parent = this.$root.$children[0];
+      if (parent && parent.showConfirm) {
+        await parent.showConfirm({
+          title: `Détails demande #${req.id}`,
+          message: `Employé: ${req.employeId}\nType: ${req.typeConge.libelle}\nDu ${this.formatDate(req.dateDebut)} au ${this.formatDate(req.dateFin)}\nDurée: ${req.dureeJoursOuvres} jours\nMotif: ${req.motif || 'Non spécifié'}`,
+          icon: 'fas fa-info-circle',
+          type: 'info',
+          confirmText: 'Fermer',
+          btnClass: 'btn-primary'
+        });
+      }
     },
     getInitials(id) {
       if (!id) return '?';

@@ -53,11 +53,11 @@
                 </div>
               </td>
             </tr>
-            <tr v-for="demande in paginatedDemandes" :key="demande.id">
+            <tr v-for="(demande, index) in paginatedDemandes" :key="demande.id">
               <td data-label="N° Demande">
-                <strong style="color:var(--primary-blue)">#{{ formatId(demande.id) }}</strong>
+                <strong style="color:var(--primary-blue)">#REQ-{{ currentYear }}-{{ String(startIndex + index + 1).padStart(3, '0') }}</strong>
               </td>
-              <td class="type-cell" data-label="Type">{{ demande.typeConge.libelle }}</td>
+              <td class="type-cell" data-label="Type">{{ getTypeName(demande) }}</td>
               <td class="period-cell" data-label="Période">
                 {{ formatDate(demande.dateDebut) }} <i class="fas fa-arrow-right"></i> {{ formatDate(demande.dateFin) }}
               </td>
@@ -71,7 +71,7 @@
                 <button v-if="demande.statut === 'EN_ATTENTE'" class="btn btn-icon btn-reject" title="Annuler" @click="cancelDemande(demande.id)">
                   <i class="fas fa-times"></i>
                 </button>
-                <span v-else class="text-gray-400" style="font-size:0.75rem">—</span>
+                <span v-else style="font-size:0.75rem;color:var(--text-muted)">—</span>
               </td>
             </tr>
           </tbody>
@@ -106,7 +106,8 @@ export default {
     filterStatus: 'ALL',
     loading: true,
     currentPage: 1,
-    perPage: 8
+    perPage: 8,
+    currentYear: new Date().getFullYear()
   }),
   computed: {
     filteredDemandes() {
@@ -114,7 +115,7 @@ export default {
         const q = this.search.toLowerCase();
         const motifMatch = d.motif && d.motif.toLowerCase().includes(q);
         const dateMatch = d.dateDebut && d.dateDebut.includes(this.search);
-        const typeMatch = d.typeConge && d.typeConge.libelle && d.typeConge.libelle.toLowerCase().includes(q);
+        const typeMatch = this.getTypeName(d).toLowerCase().includes(q);
         const matchesSearch = !q || motifMatch || dateMatch || typeMatch;
         const matchesStatus = this.filterStatus === 'ALL' || d.statut === this.filterStatus;
         return matchesSearch && matchesStatus;
@@ -153,22 +154,41 @@ export default {
       }
     },
     async cancelDemande(id) {
-      if (confirm("Voulez-vous vraiment annuler cette demande ?")) {
-        try {
-          await apiService.annulerDemande(id);
-          this.$emit('show-notification', "Demande annulée.");
-          this.fetchDemandes();
-        } catch (e) {
-          this.$emit('show-notification', "Erreur lors de l'annulation.", "error");
-        }
+      /* Use custom modal from parent */
+      const parent = this.$root.$children[0];
+      if (parent && parent.showConfirm) {
+        const confirmed = await parent.showConfirm({
+          title: 'Annuler la demande ?',
+          message: 'Cette action est irréversible. La demande sera définitivement annulée.',
+          icon: 'fas fa-exclamation-triangle',
+          type: 'danger',
+          confirmText: 'Oui, annuler',
+          btnClass: 'btn-danger'
+        });
+        if (!confirmed) return;
       }
+
+      try {
+        await apiService.annulerDemande(id);
+        this.$emit('show-notification', "Demande annulée avec succès.");
+        /* Refresh the list to update the status */
+        await this.fetchDemandes();
+      } catch (e) {
+        this.$emit('show-notification', "Erreur lors de l'annulation.", "error");
+      }
+    },
+    getTypeName(demande) {
+      if (demande.typeConge && demande.typeConge.libelle) {
+        return demande.typeConge.libelle;
+      }
+      if (demande.typeConge && demande.typeConge.id) {
+        return 'Type #' + demande.typeConge.id;
+      }
+      return 'Congé';
     },
     formatDate(dateStr) {
       if (!dateStr) return 'N/A';
       return new Date(dateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
-    },
-    formatId(id) {
-      return `REQ-${new Date().getFullYear()}-${String(id).padStart(3, '0')}`;
     },
     formatStatus(statut) {
       const labels = { 'EN_ATTENTE': 'En attente', 'VALIDEE': 'Validée', 'REFUSEE': 'Refusée', 'ANNULEE': 'Annulée' };
