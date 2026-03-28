@@ -72,22 +72,82 @@ const fetchApi = async (endpoint, options = {}) => {
 };
 
 export default {
-  /** --- Demandes --- **/
+  /** 
+   * Récupère la liste des demandes de congés de l'utilisateur actuellement connecté.
+   * @returns {Promise<{data: Array}>} Liste des objets DemandeCongeResponseDTO.
+   */
   getMesDemandes: () => fetchApi('/demandes/me', { method: 'GET' }),
+
+  /** 
+   * Récupère les demandes que le manager connecté doit valider ou refuser.
+   * @returns {Promise<{data: Array}>} Liste des demandes en attente de traitement.
+   */
   getDemandesATraiter: () => fetchApi('/demandes/a-traiter', { method: 'GET' }),
+
+  /** 
+   * [ADMIN] Récupère l'intégralité des demandes de l'entreprise pour le rapport global.
+   * @returns {Promise<{data: Array}>} Historique complet pour la traçabilité.
+   */
   getToutesLesDemandes: () => fetchApi('/demandes/toutes', { method: 'GET' }),
+
+  /** 
+   * Récupère les détails complets d'une demande spécifique par son ID.
+   * @param {string} id - Identifiant unique de la demande.
+   */
   getDemande: (id) => fetchApi(`/demandes/${id}`, { method: 'GET' }),
+
+  /** 
+   * Soumet une nouvelle demande de congé au serveur.
+   * @param {Object} data - Objet DemandeCongeDTO contenant dates, type et motif.
+   */
   soumettreDemande: (data) => fetchApi('/demandes', { method: 'POST', body: data }),
+
+  /** 
+   * Modifie une demande existante avant qu'elle ne soit traitée.
+   * @param {string} id - ID de la demande.
+   * @param {Object} data - Nouvelles données de la demande.
+   */
   modifierDemande: (id, data) => fetchApi(`/demandes/${id}`, { method: 'PUT', body: data }),
+
+  /** 
+   * Approuve officiellement une demande de congé.
+   * @param {string} id - ID de la demande.
+   * @param {string} commentaire - Raison de l'approbation (optionnel).
+   */
   validerDemande: (id, commentaire) => fetchApi(`/demandes/${id}/valider`, { method: 'POST', body: { commentaire } }),
+
+  /** 
+   * Rejette une demande de congé.
+   * @param {string} id - ID de la demande.
+   * @param {string} commentaire - Motif obligatoire du refus.
+   */
   refuserDemande: (id, commentaire) => fetchApi(`/demandes/${id}/refuser`, { method: 'POST', body: { commentaire } }),
+
+  /** 
+   * Annule une demande (action effectuée par le demandeur lui-même).
+   * @param {string} id - ID de la demande à annuler.
+   */
   annulerDemande: (id) => fetchApi(`/demandes/${id}`, { method: 'DELETE' }),
+
+  /** 
+   * Récupère l'historique complet des changements d'état (workflow) pour une demande.
+   * @param {string} id - ID de la demande.
+   */
   getHistoriqueDemande: (id) => fetchApi(`/demandes/${id}/historique`, { method: 'GET' }),
 
-  /** --- Utilisateurs & Solde --- **/
+  /** 
+   * Récupère le solde de congés annuel restant pour l'utilisateur connecté.
+   * @returns {Promise<{data: Object}>} Objet contenant le champ 'solde'.
+   */
   getMonSolde: () => fetchApi('/utilisateurs/me/solde', { method: 'GET' }),
+
+  /** 
+   * Récupère les informations de profil de base de l'utilisateur connecté.
+   */
   getUtilisateurs: () => fetchApi('/utilisateurs/me', { method: 'GET' }),
 
-  /** --- Types de Congés --- **/
+  /** 
+   * Liste les types de congés disponibles (Formation, CP, Maladie, etc.).
+   */
   getTypesConges: () => fetchApi('/types-conges', { method: 'GET' })
 };

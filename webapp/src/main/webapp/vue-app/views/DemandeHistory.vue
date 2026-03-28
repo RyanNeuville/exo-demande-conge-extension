@@ -242,33 +242,50 @@
 </template>
 
 <script>
+/**
+ * Composant d'Historique des Demandes de Congés.
+ * Ce composant permet à l'employé de suivre l'état de ses demandes,
+ * de les modifier (si en attente), de les annuler ou de générer un reçu PDF.
+ */
 import apiService from '../services/apiService';
 import KozaoLogo from '../components/KozaoLogo.vue';
 
 export default {
   components: { KozaoLogo },
+  
+  /**
+   * État local du composant.
+   * Contient la liste des demandes, les états des modales et les données d'impression.
+   */
   data: () => ({
     demandes: [],
-    typesMap: {},
-    search: '',
-    filterStatus: 'ALL',
+    typesMap: {}, // Cache pour mapper les IDs de types aux libellés
+    search: '',   // Chaîne de recherche utilisateur
+    filterStatus: 'ALL', // Filtre de statut actif
     loading: true,
     currentPage: 1,
     perPage: 8,
     currentYear: new Date().getFullYear(),
     
+    // État de la modale d'édition
     editingDemande: null,
     editForm: { motif: '' },
     submittingEdit: false,
 
+    // État de la modale de détails premium
     viewingDemande: null,
-    auditTrail: [],
+    auditTrail: [], // Historique des changements d'état
     historyLoading: false,
 
+    // Données pour le template d'impression masqué
     printData: null,
     userName: ''
   }),
+
   computed: {
+    /**
+     * Filtre la liste brute des demandes en fonction de la recherche et du statut.
+     */
     filteredDemandes() {
       return this.demandes.filter(d => {
         const q = this.search.toLowerCase();
@@ -280,6 +297,10 @@ export default {
         return matchesSearch && matchesStatus;
       });
     },
+
+    /**
+     * Calcul de la pagination dynamique.
+     */
     totalPages() {
       return Math.max(1, Math.ceil(this.filteredDemandes.length / this.perPage));
     },
@@ -293,15 +314,25 @@ export default {
       return this.filteredDemandes.slice(this.startIndex, this.endIndex);
     }
   },
+
   watch: {
+    // Réinitialisation de la page lors d'un changement de filtre
     search() { this.currentPage = 1; },
     filterStatus() { this.currentPage = 1; }
   },
+
+  /**
+   * Initialisation : récupération des types de congés et des demandes.
+   */
   async created() {
     await this.fetchTypes();
     await this.fetchDemandes();
   },
+
   methods: {
+    /**
+     * Charge les types de congés pour l'affichage des libellés conviviaux.
+     */
     async fetchTypes() {
       try {
         const resp = await apiService.getTypesConges();
@@ -313,6 +344,10 @@ export default {
         console.warn("Could not fetch types map", e);
       }
     },
+
+    /**
+     * Récupère toutes les demandes liées à l'utilisateur authentifié.
+     */
     async fetchDemandes() {
       this.loading = true;
       try {
@@ -324,6 +359,11 @@ export default {
         this.loading = false;
       }
     },
+
+    /**
+     * Annule une demande après confirmation. 
+     * Uniquement possible si la demande n'est pas encore traitée.
+     */
     async cancelDemande(id) {
       const parent = this.$root.$children[0];
       if (parent && parent.showConfirm) {
@@ -350,6 +390,10 @@ export default {
         this.$emit('show-notification', msg, "error");
       }
     },
+
+    /**
+     * Ouvre la modale de détails et charge le workflow complet de la demande.
+     */
     async openDetailModal(req) {
       this.viewingDemande = req;
       this.historyLoading = true;
@@ -363,18 +407,28 @@ export default {
         this.historyLoading = false;
       }
     },
+
     closeDetailModal() {
       this.viewingDemande = null;
       this.auditTrail = [];
     },
+
+    /**
+     * Initialise l'édition du motif d'une demande.
+     */
     openEditModal(demande) {
       this.editingDemande = demande;
       this.editForm.motif = demande.motif || '';
     },
+
     closeEditModal() {
       this.editingDemande = null;
       this.editForm.motif = '';
     },
+
+    /**
+     * Envoie la modification du motif au serveur.
+     */
     async submitEdit() {
       if (!this.editingDemande) return;
       this.submittingEdit = true;
@@ -383,7 +437,6 @@ export default {
           ...this.editingDemande,
           motif: this.editForm.motif
         };
-        // USE PUT ENDPOINT !
         await apiService.modifierDemande(this.editingDemande.id, payload);
         
         this.$emit('show-notification', "Demande modifiée avec succès.");
@@ -399,6 +452,10 @@ export default {
         this.submittingEdit = false;
       }
     },
+
+    /**
+     * Résolution sécurisée du nom du type de congé.
+     */
     getTypeName(demande) {
       if (demande.typeConge && demande.typeConge.id && this.typesMap[demande.typeConge.id]) {
         return this.typesMap[demande.typeConge.id];
@@ -408,18 +465,34 @@ export default {
       }
       return 'Congé';
     },
+
+    /**
+     * Formate une date pour l'affichage (JJ MMM AAAA).
+     */
     formatDate(dateStr) {
       if (!dateStr) return 'N/A';
       return new Date(dateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
     },
+
+    /**
+     * Formate une date et heure pour l'historique d'audit.
+     */
     formatDateTime(dtStr) {
       if (!dtStr) return 'N/A';
       return new Date(dtStr).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
     },
+
+    /**
+     * Traduit le statut technique en libellé compréhensible.
+     */
     formatStatus(statut) {
       const labels = { 'EN_ATTENTE': 'En attente', 'VALIDEE': 'Validée', 'REFUSEE': 'Refusée', 'ANNULEE': 'Annulée' };
       return labels[statut] || statut;
     },
+
+    /**
+     * Libellé de l'action pour le flux d'historique.
+     */
     formatStepAction(step) {
       if (step.nouvelEtat === 'EN_ATTENTE') return 'Demande soumise';
       if (step.nouvelEtat === 'VALIDEE') return 'Demande approuvée';
@@ -427,6 +500,10 @@ export default {
       if (step.nouvelEtat === 'ANNULEE') return 'Demande annulée';
       return 'Changement d\'état';
     },
+
+    /**
+     * Classe CSS pour le badge de statut.
+     */
     getBadgeClass(statut) {
       return {
         'status-valid': statut === 'VALIDEE',
@@ -434,10 +511,15 @@ export default {
         'status-error': statut === 'REFUSEE' || statut === 'ANNULEE'
       };
     },
+
+    /**
+     * Déclenche l'impression système pour générer un reçu PDF.
+     * Utilise un template masqué (#print-area) qui n'est visible que lors de l'impression.
+     */
     printReceipt(req) {
       this.printData = req;
       this.$nextTick(() => {
-        // Small delay to ensure hidden DOM is populated before printing
+        // Délai pour s'assurer que le contenu masqué est peuplé avant l'impression
         setTimeout(() => {
           window.print();
         }, 300);

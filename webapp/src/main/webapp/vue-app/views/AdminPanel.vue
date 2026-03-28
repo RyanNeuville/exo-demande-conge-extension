@@ -288,35 +288,63 @@
 </template>
 
 <script>
+/**
+ * Composant du Panneau d'Administration des Congés.
+    * Réservé aux Managers et Administrateurs.
+ * Permet de valider/refuser les demandes en attente, de consulter les statistiques
+ * globales et d'exporter des rapports d'activité.
+ */
 import apiService from '../services/apiService';
 import KozaoLogo from '../components/KozaoLogo.vue';
 
 export default {
   components: { KozaoLogo },
+
+  /**
+   * État du composant Administrateur.
+   */
   data: () => ({
-    allRequests: [],
-    pendingRequests: [],
+    allRequests: [],      // Historique complet pour les statistiques et rapports
+    pendingRequests: [],  // Demandes en attente d'action immédiate
     loading: true,
-    search: '',
-    filterType: 'ALL',
+    search: '',           // Recherche par nom d'employé
+    filterType: 'ALL',    // Filtre par type de congé (CP, Formation, etc.)
     
+    // État de la modale de détails
     viewingDemande: null,
     auditTrail: [],
     historyLoading: false,
 
+    // Données pour le rapport PDF global
     printData: null
   }),
+
   computed: {
+    /**
+     * Nombre total de demandes approuvées.
+     */
     approvedCount() {
       return this.allRequests.filter(r => r.statut === 'VALIDEE').length;
     },
+
+    /**
+     * Nombre total de demandes refusées.
+     */
     refusedCount() {
       return this.allRequests.filter(r => r.statut === 'REFUSEE').length;
     },
+
+    /**
+     * Calcul du taux d'absence (ratio demandes validées / total).
+     */
     absenceRate() {
       if (this.allRequests.length === 0) return '0.0';
       return ((this.approvedCount / Math.max(this.allRequests.length, 1)) * 100).toFixed(1);
     },
+
+    /**
+     * Prépare les données pour le graphique Donut (SVG).
+     */
     chartData() {
       const total = Math.max(this.allRequests.length, 1);
       return {
@@ -325,10 +353,18 @@ export default {
         refused: (this.refusedCount / total) * 100
       };
     },
+
+    /**
+     * Extrait la liste unique des types de congés présents en BDD.
+     */
     uniqueTypes() {
       const types = this.allRequests.map(r => r.typeConge?.libelle).filter(Boolean);
       return [...new Set(types)];
     },
+
+    /**
+     * Filtre la file de traitement (demandes en attente) selon la recherche.
+     */
     filteredRequests() {
       return this.pendingRequests.filter(r => {
         const q = this.search.toLowerCase();
@@ -339,10 +375,18 @@ export default {
       });
     }
   },
+
+  /**
+   * Chargement initial des données administratives.
+   */
   created() {
     this.fetchRequests();
   },
+
   methods: {
+    /**
+     * Récupère parallèlement les demandes à traiter et l'historique complet.
+     */
     async fetchRequests() {
       this.loading = true;
       try {
@@ -364,11 +408,18 @@ export default {
         this.loading = false;
       }
     },
+
+    /**
+     * Traite une demande (Validation ou Refus).
+     * @param {Object} req - La demande à traiter.
+     * @param {string} action - 'valider' ou 'refuser'.
+     */
     async processRequest(req, action) {
       const parent = this.$root.$children[0];
       const isValider = action === 'valider';
       const fullName = `${req.prenomEmploye} ${req.nomEmploye}`;
 
+      // Demande de confirmation via le composant racine
       if (parent && parent.showConfirm) {
         const confirmed = await parent.showConfirm({
           title: isValider ? 'Valider la demande ?' : 'Refuser la demande ?',
@@ -401,6 +452,10 @@ export default {
         this.$emit('show-notification', msg, "error");
       }
     },
+
+    /**
+     * Affiche les détails d'une demande et son historique complet de changement d'état.
+     */
     async viewDetail(req) {
       this.viewingDemande = req;
       this.historyLoading = true;
@@ -414,32 +469,42 @@ export default {
         this.historyLoading = false;
       }
     },
+
     closeDetailModal() {
       this.viewingDemande = null;
       this.auditTrail = [];
     },
+
+    /**
+     * Génère les initiales pour l'avatar de l'employé.
+     */
     getInitials(req) {
       if (req.prenomEmploye && req.nomEmploye) {
         return (req.prenomEmploye[0] + req.nomEmploye[0]).toUpperCase();
       }
       return req.userId ? req.userId.substring(0, 2).toUpperCase() : '?';
     },
+
     truncate(str, max) {
       if (!str) return '';
       return str.length > max ? str.substring(0, max) + '...' : str;
     },
+
     formatDate(dateStr) {
       if (!dateStr) return 'N/A';
       return new Date(dateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
     },
+
     formatDateTime(dtStr) {
       if (!dtStr) return 'N/A';
       return new Date(dtStr).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
     },
+
     formatStatus(statut) {
       const labels = { 'EN_ATTENTE': 'En attente', 'VALIDEE': 'Validée', 'REFUSEE': 'Refusée', 'ANNULEE': 'Annulée' };
       return labels[statut] || statut;
     },
+
     formatStepAction(step) {
       if (step.nouvelEtat === 'EN_ATTENTE') return 'Soumission';
       if (step.nouvelEtat === 'VALIDEE') return 'Validation';
@@ -447,6 +512,7 @@ export default {
       if (step.nouvelEtat === 'ANNULEE') return 'Annulation';
       return 'Changement d\'état';
     },
+
     getBadgeClass(statut) {
       return {
         'status-valid': statut === 'VALIDEE',
@@ -454,6 +520,10 @@ export default {
         'status-error': statut === 'REFUSEE' || statut === 'ANNULEE'
       };
     },
+
+    /**
+     * Formate une date complète avec jour de la semaine pour le rapport.
+     */
     formatFullDate(date) {
       if (!date) return '';
       return new Date(date).toLocaleDateString('fr-FR', {
@@ -465,6 +535,11 @@ export default {
         minute: '2-digit'
       });
     },
+
+    /**
+     * Déclenche la génération du rapport d'activité PDF. 
+     * Utilise le template masqué #admin-print-area.
+     */
     exportReport() {
       this.printData = { generatedAt: new Date() };
       this.$nextTick(() => {

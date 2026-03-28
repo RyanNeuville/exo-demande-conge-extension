@@ -124,27 +124,45 @@
 </template>
 
 <script>
+/**
+ * Composant Dashboard - Vue principale de l'employé.
+ * Affiche un résumé global : solde de congés, statistiques annuelles,
+ * compte à rebours de fin d'année et activités récentes.
+ */
 import apiService from '../services/apiService';
 
 export default {
+  /**
+   * État local du Dashboard.
+   */
   data: () => ({
-    solde: '...',
-    pendingCount: 0,
-    approvedYear: 0,
-    refusedCount: 0,
-    validatedYear: 0,
+    solde: '...',        // Solde actuel récupéré du backend
+    pendingCount: 0,     // Nombre de demandes en attente de validation
+    approvedYear: 0,     // Nombre de demandes approuvées sur l'année civile
+    refusedCount: 0,     // Nombre total de refus (historique)
+    validatedYear: 0,    // Somme des jours de congés déjà pris cette année
     currentYear: new Date().getFullYear(),
-    recentDemandes: [],
+    recentDemandes: [],  // Les 5 dernières demandes pour la liste d'activité
     loading: true,
-    userName: '',
-    daysLeftInYear: 0
+    userName: '',        // Nom d'affichage de l'utilisateur (eXo sync)
+    daysLeftInYear: 0    // Information contextuelle pour la planification
   }),
+
+  /**
+   * Cycle de vie : Chargement des données dès le montage du composant.
+   */
   created() {
     this.loadData();
   },
+
   methods: {
+    /**
+     * Charge l'ensemble des données nécessaires au tableau de bord.
+     * Utilise Promise.allSettled pour éviter qu'une erreur sur un endpoint
+     * ne bloque l'affichage des autres informations.
+     */
     async loadData() {
-      // Calcul jours restants
+      // Calcul des jours restants avant la fin de l'année (KPI contextuel)
       const now = new Date();
       const endOfYear = new Date(now.getFullYear(), 11, 31);
       const diff = endOfYear - now;
@@ -157,23 +175,30 @@ export default {
           apiService.getUtilisateurs()
         ]);
 
+        // Traitement du solde de congés
         if (soldeResp.status === 'fulfilled' && soldeResp.value.data) {
           this.solde = soldeResp.value.data.solde ?? 25;
         }
 
+        // Traitement des informations utilisateur (synchronisées depuis eXo)
         if (userResp.status === 'fulfilled' && userResp.value.data) {
           const u = userResp.value.data;
           this.userName = `${u.prenom || ''} ${u.nom || ''}`.trim() || u.username || 'Utilisateur';
         }
 
+        // Analyse de l'historique pour extraire les KPIs
         if (demandesResp.status === 'fulfilled' && demandesResp.value.data) {
           const all = demandesResp.value.data;
-          this.recentDemandes = all.slice(0, 5);
+          this.recentDemandes = all.slice(0, 5); // Uniquement les plus récentes
+          
           this.pendingCount = all.filter(d => d.statut === 'EN_ATTENTE').length;
           this.refusedCount = all.filter(d => d.statut === 'REFUSEE').length;
+          
+          // Statistiques filtrées sur l'année en cours
           this.approvedYear = all
             .filter(d => d.statut === 'VALIDEE' && new Date(d.dateDebut).getFullYear() === this.currentYear)
             .length;
+            
           this.validatedYear = all
             .filter(d => d.statut === 'VALIDEE' && new Date(d.dateDebut).getFullYear() === this.currentYear)
             .reduce((acc, d) => acc + (d.dureeJoursOuvres || 0), 0);
@@ -184,11 +209,19 @@ export default {
         this.loading = false;
       }
     },
+
+    /**
+     * Formate une date technique en format local français (JJ/MM/AAAA).
+     */
     formatDate(dateStr) {
       if (!dateStr) return '';
       const d = new Date(dateStr);
       return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
     },
+
+    /**
+     * Traduit les statuts de la base de données vers l'UI.
+     */
     formatStatus(statut) {
       const labels = {
         'EN_ATTENTE': 'En attente',
@@ -198,6 +231,10 @@ export default {
       };
       return labels[statut] || statut;
     },
+
+    /**
+     * Renvoie la classe CSS de fond pour les indicateurs de liste.
+     */
     getStatusClass(statut) {
       return {
         'status-bg-green': statut === 'VALIDEE',
@@ -206,6 +243,10 @@ export default {
         'status-bg-gray': statut === 'BROUILLON'
       };
     },
+
+    /**
+     * Renvoie la classe CSS pour les badges de statut.
+     */
     getBadgeClass(statut) {
       return {
         'status-valid': statut === 'VALIDEE',
