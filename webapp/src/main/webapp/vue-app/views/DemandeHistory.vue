@@ -197,7 +197,7 @@
     <div id="print-area">
       <div v-if="printData" class="receipt-container">
         <div class="receipt-header">
-          <img src="/image/logo-kozao.png" alt="Kozao Logo" class="receipt-logo">
+          <kozao-logo width="150" height="40" class="receipt-logo"></kozao-logo>
           <div class="receipt-title">
             <h1>REÇU DE DEMANDE DE CONGÉ</h1>
             <p>Référence : #{{ printData.id.substring(0,8).toUpperCase() }}</p>
@@ -243,8 +243,10 @@
 
 <script>
 import apiService from '../services/apiService';
+import KozaoLogo from '../components/KozaoLogo.vue';
 
 export default {
+  components: { KozaoLogo },
   data: () => ({
     demandes: [],
     typesMap: {},

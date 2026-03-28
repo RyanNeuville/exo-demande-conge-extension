@@ -73,16 +73,19 @@
 
       <!-- Toolbar -->
       <div class="table-toolbar">
-        <div class="search-wrapper">
-          <i class="fas fa-search"></i>
-          <input type="text" v-model="search" placeholder="Rechercher un employé..." class="input">
-        </div>
-        <div class="filter-wrapper">
-          <select v-model="filterType" class="select select-sm">
-            <option value="ALL">Tous les types</option>
-            <option v-for="t in uniqueTypes" :key="t" :value="t">{{ t }}</option>
-          </select>
-        </div>
+         <div class="search-wrapper">
+           <i class="fas fa-search"></i>
+           <input type="text" v-model="search" placeholder="Rechercher un employé..." class="input">
+         </div>
+         <div class="flex-actions" style="display:flex; gap:0.75rem">
+           <select v-model="filterType" class="select select-sm">
+             <option value="ALL">Tous les types</option>
+             <option v-for="t in uniqueTypes" :key="t" :value="t">{{ t }}</option>
+           </select>
+           <button class="btn btn-outline btn-sm" @click="exportReport" title="Générer Rapport PDF">
+             <i class="fas fa-file-pdf"></i> Exporter Rapport
+           </button>
+         </div>
       </div>
 
       <!-- Table -->
@@ -143,18 +146,77 @@
               </td>
               <td class="text-right actions-cell" data-label="Actions">
                 <button class="btn btn-icon btn-approve" title="Valider" @click="processRequest(req, 'valider')">
-                  <i class="fas fa-check"></i>
+                   <i class="fas fa-check"></i>
                 </button>
                 <button class="btn btn-icon btn-reject" title="Refuser" @click="processRequest(req, 'refuser')">
-                  <i class="fas fa-times"></i>
+                   <i class="fas fa-times"></i>
                 </button>
                 <button class="btn btn-icon btn-view" title="Détails" @click="viewDetail(req)">
-                  <i class="fas fa-eye"></i>
+                   <i class="fas fa-eye"></i>
                 </button>
               </td>
             </tr>
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- Admin Activity Report (Print Only) -->
+    <div id="admin-print-area">
+      <div v-if="printData" class="report-container">
+        <header class="report-header">
+          <kozao-logo width="150" height="50"></kozao-logo>
+          <div class="report-title-box">
+             <h1>RAPPORT D'ACTIVITÉ DES CONGÉS</h1>
+             <p>Généré le {{ formatFullDate(new Date()) }}</p>
+          </div>
+        </header>
+
+        <section class="report-summary">
+          <div class="report-stat-box">
+            <span class="label">Total Demandes</span>
+            <span class="value">{{ allRequests.length }}</span>
+          </div>
+          <div class="report-stat-box">
+            <span class="label">Validées</span>
+            <span class="value">{{ approvedCount }}</span>
+          </div>
+          <div class="report-stat-box">
+            <span class="label">En Attente</span>
+            <span class="value">{{ pendingRequests.length }}</span>
+          </div>
+          <div class="report-stat-box">
+            <span class="label">Taux d'Absence</span>
+            <span class="value">{{ absenceRate }}%</span>
+          </div>
+        </section>
+
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>Réf</th>
+              <th>Employé</th>
+              <th>Type</th>
+              <th>Période</th>
+              <th>Durée</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="req in allRequests" :key="'print-'+req.id">
+              <td>#{{ req.id.substring(0,6) }}</td>
+              <td>{{ req.prenomEmploye }} {{ req.nomEmploye }}</td>
+              <td>{{ req.typeConge.libelle }}</td>
+              <td>{{ formatDate(req.dateDebut) }} - {{ formatDate(req.dateFin) }}</td>
+              <td>{{ req.dureeJoursOuvres }} J</td>
+              <td>{{ formatStatus(req.statut) }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <footer class="report-footer">
+          <p>Ce document est destiné à la traçabilité interne de Kozao Africa.</p>
+          </footer>
       </div>
     </div>
 
@@ -227,8 +289,10 @@
 
 <script>
 import apiService from '../services/apiService';
+import KozaoLogo from '../components/KozaoLogo.vue';
 
 export default {
+  components: { KozaoLogo },
   data: () => ({
     allRequests: [],
     pendingRequests: [],
@@ -238,7 +302,9 @@ export default {
     
     viewingDemande: null,
     auditTrail: [],
-    historyLoading: false
+    historyLoading: false,
+
+    printData: null
   }),
   computed: {
     approvedCount() {
@@ -387,6 +453,25 @@ export default {
         'status-pending': statut === 'EN_ATTENTE',
         'status-error': statut === 'REFUSEE' || statut === 'ANNULEE'
       };
+    },
+    formatFullDate(date) {
+      if (!date) return '';
+      return new Date(date).toLocaleDateString('fr-FR', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    },
+    exportReport() {
+      this.printData = { generatedAt: new Date() };
+      this.$nextTick(() => {
+        setTimeout(() => {
+          window.print();
+        }, 500);
+      });
     }
   }
 };
