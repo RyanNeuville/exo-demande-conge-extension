@@ -68,10 +68,15 @@
                 <span class="status-badge" :class="getBadgeClass(demande.statut)">{{ formatStatus(demande.statut) }}</span>
               </td>
               <td class="text-right actions-cell" data-label="Actions">
+                <button v-if="demande.statut === 'EN_ATTENTE'" class="btn btn-icon btn-approve" style="color:var(--warning)" title="Modifier" @click="openEditModal(demande)">
+                  <i class="fas fa-pen"></i>
+                </button>
                 <button v-if="demande.statut === 'EN_ATTENTE'" class="btn btn-icon btn-reject" title="Annuler" @click="cancelDemande(demande.id)">
                   <i class="fas fa-times"></i>
                 </button>
-                <span v-else style="font-size:0.75rem;color:var(--text-muted)">—</span>
+                <button class="btn btn-icon btn-view" title="Détails" @click="openDetailModal(demande)">
+                  <i class="fas fa-eye"></i>
+                </button>
               </td>
             </tr>
           </tbody>
@@ -93,23 +98,194 @@
         </div>
       </div>
     </div>
+
+    <!-- Edit Modal -->
+    <div v-if="editingDemande" class="modal-overlay" @click.self="closeEditModal">
+      <div class="modal-box" style="width: 95%; max-width: 500px; text-align: left;">
+        <h3 class="modal-title mb-4"><i class="fas fa-pen"></i> Modifier la demande</h3>
+        
+        <div class="form-group">
+          <label>Motif / Commentaire</label>
+          <textarea v-model="editForm.motif" class="textarea" rows="3" required></textarea>
+        </div>
+
+        <div class="info-card mt-4 mb-4" style="padding: 1rem;">
+          <p style="margin: 0; font-size: 0.8125rem; color: #9A4A28;">
+            <i class="fas fa-info-circle"></i> Seul le motif de la demande peut être modifié pour l'instant via l'interface simplifiée.
+          </p>
+        </div>
+
+        <div class="modal-actions" style="justify-content: flex-end; margin-top: 1rem;">
+          <button class="btn btn-outline" @click="closeEditModal">Annuler</button>
+          <button class="btn btn-primary" :disabled="submittingEdit" @click="submitEdit">
+            <i v-if="submittingEdit" class="fas fa-spinner fa-spin"></i>
+            <i v-else class="fas fa-save"></i>
+            Enregistrer
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Premium Detail Modal -->
+    <div v-if="viewingDemande" class="modal-overlay" @click.self="closeDetailModal">
+      <div class="modal-box large">
+         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h3 class="modal-title" style="margin:0"><i class="fas fa-file-alt"></i> Détails de la Demande</h3>
+            <span class="status-badge" :class="getBadgeClass(viewingDemande.statut)">{{ formatStatus(viewingDemande.statut) }}</span>
+         </div>
+
+         <div class="details-grid">
+            <div class="detail-item">
+              <label>ID de Référence</label>
+              <span>#{{ viewingDemande.id.substring(0,8).toUpperCase() }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Type de Congé</label>
+              <span>{{ getTypeName(viewingDemande) }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Date de Début</label>
+              <span>{{ formatDate(viewingDemande.dateDebut) }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Date de Fin</label>
+              <span>{{ formatDate(viewingDemande.dateFin) }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Durée Totale</label>
+              <span>{{ viewingDemande.dureeJoursOuvres }} Jours ouvrés</span>
+            </div>
+            <div class="detail-item">
+              <label>Date Soumission</label>
+              <span>{{ formatDate(viewingDemande.dateSoumission) }}</span>
+            </div>
+         </div>
+
+         <div class="detail-item" style="margin-bottom: 2rem; border-top: 1px solid var(--border-light); padding-top: 1.5rem;">
+            <label>Motif de la demande</label>
+            <p style="margin:0; font-size:0.9375rem; color:var(--text-dark); line-height: 1.6;">{{ viewingDemande.motif || 'Aucun motif spécifié' }}</p>
+         </div>
+
+         <div v-if="historyLoading" class="text-center py-4">
+            <i class="fas fa-spinner fa-spin text-gray-400"></i> Chargement de l'historique...
+         </div>
+         <div v-else-if="auditTrail.length > 0">
+            <h4 class="timeline-title">Historique des actions</h4>
+            <div class="timeline">
+              <div v-for="(step, idx) in auditTrail" :key="step.id || idx" class="timeline-item" :class="{active: idx === 0}">
+                <span class="timeline-date">{{ formatDateTime(step.dateChangement) }}</span>
+                <span class="timeline-desc">{{ formatStepAction(step) }}</span>
+                <span class="timeline-user">par {{ step.acteurId }}</span>
+                <span v-if="step.commentaire" class="timeline-comment">"{{ step.commentaire }}"</span>
+              </div>
+            </div>
+         </div>
+
+         <div class="modal-actions" style="margin-top: 2rem; border-top: 1px solid var(--border-light); padding-top: 1.5rem;">
+            <button class="btn btn-outline" @click="closeDetailModal">Fermer</button>
+            <button v-if="viewingDemande.statut === 'VALIDEE'" class="btn btn-primary" @click="printReceipt(viewingDemande)">
+              <i class="fas fa-print"></i> Télécharger Reçu
+            </button>
+            <button v-if="viewingDemande.statut === 'EN_ATTENTE'" class="btn btn-primary" @click="openEditModal(viewingDemande); closeDetailModal()">
+              <i class="fas fa-pen"></i> Modifier
+            </button>
+         </div>
+      </div>
+    </div>
+
+    <!-- Hidden Printable Receipt -->
+    <div id="print-area">
+      <div v-if="printData" class="receipt-container">
+        <div class="receipt-header">
+          <kozao-logo width="150" height="40" class="receipt-logo"></kozao-logo>
+          <div class="receipt-title">
+            <h1>REÇU DE DEMANDE DE CONGÉ</h1>
+            <p>Référence : #{{ printData.id.substring(0,8).toUpperCase() }}</p>
+          </div>
+        </div>
+        
+        <div class="receipt-body">
+          <div class="receipt-section">
+            <h3>INFORMATIONS EMPLOYÉ</h3>
+            <p><strong>Nom :</strong> {{ printData.prenomEmploye }} {{ printData.nomEmploye }}</p>
+            <p><strong>Matricule/ID :</strong> {{ printData.userId }}</p>
+            <p><strong>Date de demande :</strong> {{ formatDate(printData.dateSoumission) }}</p>
+          </div>
+
+          <div class="receipt-section">
+            <h3>DÉTAILS DU CONGÉ</h3>
+            <table class="receipt-table">
+              <tr><td>Type :</td><td>{{ getTypeName(printData) }}</td></tr>
+              <tr><td>Période :</td><td>Du {{ formatDate(printData.dateDebut) }} au {{ formatDate(printData.dateFin) }}</td></tr>
+              <tr><td>Durée :</td><td>{{ printData.dureeJoursOuvres }} Jours ouvrés</td></tr>
+              <tr><td>Motif :</td><td>{{ printData.motif || '—' }}</td></tr>
+            </table>
+          </div>
+
+          <div class="receipt-status">
+            <div class="status-stamp" :class="printData.statut">
+              {{ formatStatus(printData.statut).toUpperCase() }}
+            </div>
+            <p v-if="printData.dateValidation">Validé officiellement le {{ formatDate(printData.dateValidation) }}</p>
+            <p v-else>Document généré le {{ formatDateTime(new Date()) }}</p>
+          </div>
+        </div>
+
+        <div class="receipt-footer">
+          <p>Ce document est généré numériquement et sert de preuve de validation au sein de Kozao Africa.</p>
+          <p>© {{ currentYear }} Kozao Africa - Système de Gestion des Congés</p>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
 <script>
+/**
+ * Composant d'Historique des Demandes de Congés.
+ * Ce composant permet à l'employé de suivre l'état de ses demandes,
+ * de les modifier (si en attente), de les annuler ou de générer un reçu PDF.
+ */
 import apiService from '../services/apiService';
+import KozaoLogo from '../components/KozaoLogo.vue';
 
 export default {
+  components: { KozaoLogo },
+  
+  /**
+   * État local du composant.
+   * Contient la liste des demandes, les états des modales et les données d'impression.
+   */
   data: () => ({
     demandes: [],
-    search: '',
-    filterStatus: 'ALL',
+    typesMap: {}, // Cache pour mapper les IDs de types aux libellés
+    search: '',   // Chaîne de recherche utilisateur
+    filterStatus: 'ALL', // Filtre de statut actif
     loading: true,
     currentPage: 1,
     perPage: 8,
-    currentYear: new Date().getFullYear()
+    currentYear: new Date().getFullYear(),
+    
+    // État de la modale d'édition
+    editingDemande: null,
+    editForm: { motif: '' },
+    submittingEdit: false,
+
+    // État de la modale de détails premium
+    viewingDemande: null,
+    auditTrail: [], // Historique des changements d'état
+    historyLoading: false,
+
+    // Données pour le template d'impression masqué
+    printData: null,
+    userName: ''
   }),
+
   computed: {
+    /**
+     * Filtre la liste brute des demandes en fonction de la recherche et du statut.
+     */
     filteredDemandes() {
       return this.demandes.filter(d => {
         const q = this.search.toLowerCase();
@@ -121,6 +297,10 @@ export default {
         return matchesSearch && matchesStatus;
       });
     },
+
+    /**
+     * Calcul de la pagination dynamique.
+     */
     totalPages() {
       return Math.max(1, Math.ceil(this.filteredDemandes.length / this.perPage));
     },
@@ -134,14 +314,40 @@ export default {
       return this.filteredDemandes.slice(this.startIndex, this.endIndex);
     }
   },
+
   watch: {
+    // Réinitialisation de la page lors d'un changement de filtre
     search() { this.currentPage = 1; },
     filterStatus() { this.currentPage = 1; }
   },
-  created() {
-    this.fetchDemandes();
+
+  /**
+   * Initialisation : récupération des types de congés et des demandes.
+   */
+  async created() {
+    await this.fetchTypes();
+    await this.fetchDemandes();
   },
+
   methods: {
+    /**
+     * Charge les types de congés pour l'affichage des libellés conviviaux.
+     */
+    async fetchTypes() {
+      try {
+        const resp = await apiService.getTypesConges();
+        const types = resp.data || [];
+        types.forEach(t => {
+          this.typesMap[t.id] = t.libelle;
+        });
+      } catch (e) {
+        console.warn("Could not fetch types map", e);
+      }
+    },
+
+    /**
+     * Récupère toutes les demandes liées à l'utilisateur authentifié.
+     */
     async fetchDemandes() {
       this.loading = true;
       try {
@@ -153,8 +359,12 @@ export default {
         this.loading = false;
       }
     },
+
+    /**
+     * Annule une demande après confirmation. 
+     * Uniquement possible si la demande n'est pas encore traitée.
+     */
     async cancelDemande(id) {
-      /* Use custom modal from parent */
       const parent = this.$root.$children[0];
       if (parent && parent.showConfirm) {
         const confirmed = await parent.showConfirm({
@@ -171,35 +381,149 @@ export default {
       try {
         await apiService.annulerDemande(id);
         this.$emit('show-notification', "Demande annulée avec succès.");
-        /* Refresh the list to update the status */
         await this.fetchDemandes();
       } catch (e) {
-        this.$emit('show-notification', "Erreur lors de l'annulation.", "error");
+        let msg = "Erreur lors de l'annulation.";
+        if (e.response && e.response.data && e.response.data.message) {
+          msg = e.response.data.message;
+        }
+        this.$emit('show-notification', msg, "error");
       }
     },
+
+    /**
+     * Ouvre la modale de détails et charge le workflow complet de la demande.
+     */
+    async openDetailModal(req) {
+      this.viewingDemande = req;
+      this.historyLoading = true;
+      this.auditTrail = [];
+      try {
+        const resp = await apiService.getHistoriqueDemande(req.id);
+        this.auditTrail = (resp.data || []).sort((a,b) => new Date(b.dateChangement) - new Date(a.dateChangement));
+      } catch (e) {
+        console.error("Failed to load audit trail", e);
+      } finally {
+        this.historyLoading = false;
+      }
+    },
+
+    closeDetailModal() {
+      this.viewingDemande = null;
+      this.auditTrail = [];
+    },
+
+    /**
+     * Initialise l'édition du motif d'une demande.
+     */
+    openEditModal(demande) {
+      this.editingDemande = demande;
+      this.editForm.motif = demande.motif || '';
+    },
+
+    closeEditModal() {
+      this.editingDemande = null;
+      this.editForm.motif = '';
+    },
+
+    /**
+     * Envoie la modification du motif au serveur.
+     */
+    async submitEdit() {
+      if (!this.editingDemande) return;
+      this.submittingEdit = true;
+      try {
+        const payload = {
+          ...this.editingDemande,
+          motif: this.editForm.motif
+        };
+        await apiService.modifierDemande(this.editingDemande.id, payload);
+        
+        this.$emit('show-notification', "Demande modifiée avec succès.");
+        this.closeEditModal();
+        await this.fetchDemandes();
+      } catch (e) {
+        let msg = "Erreur lors de la modification.";
+        if (e.response && e.response.data && e.response.data.message) {
+          msg = e.response.data.message;
+        }
+        this.$emit('show-notification', msg, "error");
+      } finally {
+        this.submittingEdit = false;
+      }
+    },
+
+    /**
+     * Résolution sécurisée du nom du type de congé.
+     */
     getTypeName(demande) {
+      if (demande.typeConge && demande.typeConge.id && this.typesMap[demande.typeConge.id]) {
+        return this.typesMap[demande.typeConge.id];
+      }
       if (demande.typeConge && demande.typeConge.libelle) {
         return demande.typeConge.libelle;
       }
-      if (demande.typeConge && demande.typeConge.id) {
-        return 'Type #' + demande.typeConge.id;
-      }
       return 'Congé';
     },
+
+    /**
+     * Formate une date pour l'affichage (JJ MMM AAAA).
+     */
     formatDate(dateStr) {
       if (!dateStr) return 'N/A';
       return new Date(dateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
     },
+
+    /**
+     * Formate une date et heure pour l'historique d'audit.
+     */
+    formatDateTime(dtStr) {
+      if (!dtStr) return 'N/A';
+      return new Date(dtStr).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+    },
+
+    /**
+     * Traduit le statut technique en libellé compréhensible.
+     */
     formatStatus(statut) {
       const labels = { 'EN_ATTENTE': 'En attente', 'VALIDEE': 'Validée', 'REFUSEE': 'Refusée', 'ANNULEE': 'Annulée' };
       return labels[statut] || statut;
     },
+
+    /**
+     * Libellé de l'action pour le flux d'historique.
+     */
+    formatStepAction(step) {
+      if (step.nouvelEtat === 'EN_ATTENTE') return 'Demande soumise';
+      if (step.nouvelEtat === 'VALIDEE') return 'Demande approuvée';
+      if (step.nouvelEtat === 'REFUSEE') return 'Demande refusée';
+      if (step.nouvelEtat === 'ANNULEE') return 'Demande annulée';
+      return 'Changement d\'état';
+    },
+
+    /**
+     * Classe CSS pour le badge de statut.
+     */
     getBadgeClass(statut) {
       return {
         'status-valid': statut === 'VALIDEE',
         'status-pending': statut === 'EN_ATTENTE',
         'status-error': statut === 'REFUSEE' || statut === 'ANNULEE'
       };
+    },
+
+    /**
+     * Déclenche l'impression système pour générer un reçu PDF.
+     * Utilise un template masqué (#print-area) qui n'est visible que lors de l'impression.
+     */
+    printReceipt(req) {
+      this.printData = req;
+      this.$nextTick(() => {
+        // Délai pour s'assurer que le contenu masqué est peuplé avant l'impression
+        setTimeout(() => {
+          window.print();
+        }, 300);
+      });
     }
   }
 };

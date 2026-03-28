@@ -1,8 +1,19 @@
+/**
+ * Configuration du Routeur Vue.
+ * 
+ * NOTE CRITIQUE : Nous utilisons le mode 'abstract' pour la navigation.
+ * En tant qu'extension eXo Platform (Portlet), l'application ne doit pas
+ * manipuler directement l'URL du navigateur pour ne pas interférer avec le portail.
+ * La navigation est gérée en mémoire par Vue.
+ */
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 
-/* Import des vues (à créer) */
-/* Note: On utilise le chargement dynamique pour les performances */
+/* 
+ * Chargement Dynamique (Lazy Loading).
+ * Les composants ne sont chargés que lorsque l'utilisateur accède à la vue,
+ * ce qui réduit le temps de chargement initial de la portlet.
+ */
 const Dashboard = () => import('./views/Dashboard.vue');
 const DemandeForm = () => import('./views/DemandeForm.vue');
 const DemandeHistory = () => import('./views/DemandeHistory.vue');
@@ -10,6 +21,9 @@ const AdminPanel = () => import('./views/AdminPanel.vue');
 
 Vue.use(VueRouter);
 
+/**
+ * Définition des routes applicatives internes.
+ */
 const routes = [
   {
     path: '/',
@@ -38,7 +52,7 @@ const routes = [
 ];
 
 const router = new VueRouter({
-  mode: 'abstract', /* Requis pour l'intégration en Portlet si on ne veut pas interférer avec l'URL du portail */
+  mode: 'abstract', 
   routes
 });
 

@@ -95,16 +95,24 @@
 </template>
 
 <script>
+/**
+ * Composant Formulaire de Nouvelle Demande de Congé.
+ * Permet à l'employé de saisir les dates, le type de congé et le motif.
+ * Gère le calcul automatique de la durée (hors week-ends) et la validation des dates.
+ */
 import apiService from '../services/apiService';
 
 export default {
+  /**
+   * État initial du formulaire.
+   */
   data() {
     const now = new Date();
     const yyyy = now.getFullYear();
     const mm = String(now.getMonth() + 1).padStart(2, '0');
     const dd = String(now.getDate()).padStart(2, '0');
     return {
-      today: `${yyyy}-${mm}-${dd}`,
+      today: `${yyyy}-${mm}-${dd}`, // Utilisé pour bloquer les dates passées
       form: {
         typeCongeId: '',
         dateDebut: '',
@@ -115,16 +123,24 @@ export default {
         commentaireEmploye: '',
         fileName: ''
       },
-      leaveTypes: [],
+      leaveTypes: [],      // Liste des types chargés depuis le backend
       loadingTypes: true,
-      duration: null,
-      submitting: false
+      duration: null,      // Durée calculée dynamiquement
+      submitting: false    // État de chargement du bouton de soumission
     };
   },
+
+  /**
+   * Initialisation : pré-chargement des types de congés autorisés.
+   */
   created() {
     this.fetchTypes();
   },
+
   methods: {
+    /**
+     * Récupère la liste des types de congés (CP, RTT, Maladie...) via l'API.
+     */
     async fetchTypes() {
       this.loadingTypes = true;
       try {
@@ -137,17 +153,35 @@ export default {
         this.loadingTypes = false;
       }
     },
+
+    /**
+     * Déclenche le sélecteur de fichier masqué.
+     */
     triggerUpload() {
       this.$refs.fileInput.click();
     },
+
+    /**
+     * Gère la sélection de fichier via le navigateur.
+     */
     handleFileSelect(e) {
       const file = e.target.files[0];
       if (file) this.form.fileName = file.name;
     },
+
+    /**
+     * Gère le glisser-déposer de fichiers.
+     */
     handleDrop(e) {
       const file = e.dataTransfer.files[0];
       if (file) this.form.fileName = file.name;
     },
+
+    /**
+     * Calcule le nombre de jours ouvrés entre deux dates.
+     * Exclut les samedis et dimanches.
+     * Prend en compte les demi-journées de début et de fin.
+     */
     calculateDuration() {
       if (!this.form.dateDebut || !this.form.dateFin) {
         this.duration = null;
@@ -155,21 +189,36 @@ export default {
       }
       const start = new Date(this.form.dateDebut);
       const end = new Date(this.form.dateFin);
-      if (end < start) { this.duration = 0; return; }
+      
+      if (end < start) { 
+        this.duration = 0; 
+        return; 
+      }
 
       let count = 0;
       const current = new Date(start);
       while (current <= end) {
         const day = current.getDay();
-        if (day !== 0 && day !== 6) count++;
+        // 0 = Dimanche, 6 = Samedi
+        if (day !== 0 && day !== 6) {
+          count++;
+        }
         current.setDate(current.getDate() + 1);
       }
+
+      // Déduction des demi-journées
       if (this.form.demiJourneeDebut) count -= 0.5;
       if (this.form.demiJourneeFin) count -= 0.5;
+      
       this.duration = Math.max(0, count);
     },
+
+    /**
+     * Valide et soumet la demande au service REST.
+     * Inclut une étape de confirmation visuelle avant envoi.
+     */
     async submitForm() {
-      /* Vérification date dans le passé */
+      // Validation client de sécurité
       if (this.form.dateDebut < this.today) {
         this.$emit('show-notification', "La date de début ne peut pas être dans le passé.", "error");
         return;
@@ -178,6 +227,21 @@ export default {
         this.$emit('show-notification', "La durée doit être supérieure à 0.", "warning");
         return;
       }
+
+      // Demande de confirmation
+      const parent = this.$root.$children[0];
+      if (parent && parent.showConfirm) {
+        const confirmed = await parent.showConfirm({
+          title: 'Soumettre la demande ?',
+          message: `Confirmez-vous la soumission de cette demande de ${this.duration} jour(s) ?`,
+          icon: 'fas fa-paper-plane',
+          type: 'info',
+          confirmText: 'Oui, soumettre',
+          btnClass: 'btn-primary'
+        });
+        if (!confirmed) return;
+      }
+
       this.submitting = true;
       try {
         await apiService.soumettreDemande({
@@ -189,10 +253,16 @@ export default {
           motif: this.form.motif,
           commentaireEmploye: this.form.commentaireEmploye
         });
+        
         this.$emit('show-notification', "Demande soumise avec succès !");
         this.$emit('change-view', 'DemandeHistory');
       } catch (e) {
-        const msg = e.response?.data?.message || "Erreur lors de la soumission.";
+        let msg = "Erreur lors de la soumission.";
+        if (e.response && e.response.data && e.response.data.message) {
+          msg = e.response.data.message;
+        } else if (e.message) {
+          msg = e.message;
+        }
         this.$emit('show-notification', msg, "error");
       } finally {
         this.submitting = false;
