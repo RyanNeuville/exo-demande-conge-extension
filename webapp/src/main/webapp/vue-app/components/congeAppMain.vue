@@ -76,6 +76,12 @@
 </template>
 
 <script>
+/**
+ * Composant Racine de l'Application de Gestion des Congés.
+ * Gère la structure globale (Layout), la navigation latérale (Sidebar),
+ * ainsi que les services globaux (Notifications et Boîtes de confirmation).
+ * Assure la synchronisation du rôle utilisateur avec eXo Platform.
+ */
 import apiService from '../services/apiService';
 import Dashboard from '../views/Dashboard.vue';
 import DemandeForm from '../views/DemandeForm.vue';
@@ -83,38 +89,60 @@ import DemandeHistory from '../views/DemandeHistory.vue';
 import AdminPanel from '../views/AdminPanel.vue';
 
 export default {
+  /**
+   * Enregistrement des composants correspondant aux différentes vues.
+   */
   components: { Dashboard, DemandeForm, DemandeHistory, AdminPanel },
+
+  /**
+   * État global de l'application.
+   */
   data: () => ({
-    currentView: 'Dashboard',
-    userName: 'Utilisateur',
-    userRole: 'Employé',
-    isAdmin: false,
-    notification: null,
-    confirmModal: null,
-    loading: true
+    currentView: 'Dashboard', // Vue actuellement affichée (Composant dynamique)
+    userName: 'Utilisateur',    // Nom complet synchronisé
+    userRole: 'Employé',       // Libellé du rôle pour l'affichage
+    isAdmin: false,            // Flag déterminant l'accès aux fonctions d'administration
+    notification: null,        // État de la notification Toast active
+    confirmModal: null,        // État de la boîte de dialogue de confirmation
+    loading: true             // État de chargement initial de l'application
   }),
+
   computed: {
+    /**
+     * Génère les initiales à partir du nom d'utilisateur pour l'avatar.
+     */
     userInitials() {
       if (!this.userName) return 'U';
-      return this.userName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+      return this.userName.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase().substring(0, 2);
     }
   },
+
+  /**
+   * Montage : Vérification des droits d'accès dès le chargement.
+   */
   async mounted() {
     await this.checkUserRole();
   },
+
   methods: {
+    /**
+     * Synchronise le profil utilisateur actuel avec le backend.
+     * Détermine si l'utilisateur a des droits de Responsable ou d'Administrateur
+     * pour débloquer les menus correspondants.
+     */
     async checkUserRole() {
       this.loading = true;
+      // Sécurité : Timeout pour éviter de bloquer l'App si eXo est lent
       const timeout = setTimeout(() => { if (this.loading) this.loading = false; }, 8000);
 
       try {
         const resp = await apiService.getUtilisateurs();
         if (resp.data) {
           const user = resp.data;
-          console.log('[DemandeConge] Profil reçu. Username:', user.username, 'Role:', user.role);
           this.userName = `${user.prenom || ''} ${user.nom || ''}`.trim() || user.username || 'Utilisateur';
 
           const role = (user.role || '').toUpperCase();
+          // Logique de droits : root ou groupe admin => Administrateur. Managers => Responsable.
           if (role === 'ADMINISTRATEUR' || role === 'ADMIN' || user.username === 'root') {
             this.isAdmin = true;
             this.userRole = 'Administrateur';
@@ -125,7 +153,6 @@ export default {
             this.isAdmin = false;
             this.userRole = 'Employé';
           }
-          console.log('[DemandeConge] isAdmin =', this.isAdmin, 'userRole =', this.userRole);
         }
       } catch (e) {
         console.error('[DemandeConge] Erreur profil:', e);
@@ -134,11 +161,24 @@ export default {
         this.loading = false;
       }
     },
+
+    /**
+     * Service global de notification (Toast).
+     * Peut être déclenché depuis n'importe quelle vue via @show-notification.
+     * @param {string} message - Texte à afficher.
+     * @param {string} type - 'success', 'error' ou 'warning'.
+     */
     showNotification(message, type = 'success') {
       const icons = { success: 'fas fa-check-circle', error: 'fas fa-exclamation-circle', warning: 'fas fa-exclamation-triangle' };
       this.notification = { message, type, icon: icons[type] || icons.success };
       setTimeout(() => (this.notification = null), 4000);
     },
+
+    /**
+     * Service global de confirmation (Modal).
+     * Accessible via l'instance racine ($root) pour les actions critiques.
+     * Retourne une Promise résolue en true (confirmer) ou false (annuler).
+     */
     showConfirm(options) {
       return new Promise((resolve) => {
         this.confirmModal = {

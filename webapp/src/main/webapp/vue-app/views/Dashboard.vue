@@ -18,38 +18,38 @@
 
     <!-- Solde + Stats Row -->
     <div class="stats-row">
-      <!-- Solde Card (blue gradient) -->
-      <div class="solde-card">
+      <!-- Solde Card (Glassmorphism + Blue Gradient) -->
+      <div class="solde-card glass-card">
         <div class="solde-label"><i class="fas fa-wallet"></i> Solde Congés Payés</div>
         <div>
-          <span class="solde-number">{{ solde }}</span>
+          <span class="solde-number text-shadow">{{ solde }}</span>
           <span class="solde-unit">jours</span>
         </div>
         <div class="solde-meta">
-          <span>Acquis : 25</span>
+          <span>Acquis : 25.0</span>
           <span>Pris : {{ validatedYear }}</span>
         </div>
       </div>
 
-      <!-- En attente -->
-      <div class="stat-card-mini">
-        <div class="stat-icon-mini orange"><i class="fas fa-clock"></i></div>
+      <!-- En attente (Glass) -->
+      <div class="stat-card-mini glass-card border-orange">
+        <div class="stat-icon-mini orange-glow"><i class="fas fa-clock"></i></div>
         <div class="stat-number">{{ pendingCount }}</div>
         <div class="stat-label">En attente</div>
       </div>
 
-      <!-- Validées (année) -->
-      <div class="stat-card-mini">
-        <div class="stat-icon-mini green"><i class="fas fa-calendar-check"></i></div>
+      <!-- Validées (Glass) -->
+      <div class="stat-card-mini glass-card border-green">
+        <div class="stat-icon-mini green-glow"><i class="fas fa-calendar-check"></i></div>
         <div class="stat-number">{{ approvedYear }}</div>
-        <div class="stat-label">Validées (année)</div>
+        <div class="stat-label">Validées (2026)</div>
       </div>
 
-      <!-- Refusées -->
-      <div class="stat-card-mini">
-        <div class="stat-icon-mini red"><i class="fas fa-times-circle"></i></div>
-        <div class="stat-number">{{ refusedCount }}</div>
-        <div class="stat-label">Refusées</div>
+      <!-- Year Countdown (New) -->
+      <div class="stat-card-mini glass-card border-blue">
+        <div class="stat-icon-mini blue-glow"><i class="fas fa-hourglass-half"></i></div>
+        <div class="stat-number">{{ daysLeftInYear }}</div>
+        <div class="stat-label">Jours restants (2026)</div>
       </div>
     </div>
 
@@ -124,25 +124,50 @@
 </template>
 
 <script>
+/**
+ * Composant Dashboard - Vue principale de l'employé.
+ * Affiche un résumé global : solde de congés, statistiques annuelles,
+ * compte à rebours de fin d'année et activités récentes.
+ */
 import apiService from '../services/apiService';
 
 export default {
+  /**
+   * État local du Dashboard.
+   */
   data: () => ({
-    solde: '...',
-    pendingCount: 0,
-    approvedYear: 0,
-    refusedCount: 0,
-    validatedYear: 0,
+    solde: '...',        // Solde actuel récupéré du backend
+    pendingCount: 0,     // Nombre de demandes en attente de validation
+    approvedYear: 0,     // Nombre de demandes approuvées sur l'année civile
+    refusedCount: 0,     // Nombre total de refus (historique)
+    validatedYear: 0,    // Somme des jours de congés déjà pris cette année
     currentYear: new Date().getFullYear(),
-    recentDemandes: [],
+    recentDemandes: [],  // Les 5 dernières demandes pour la liste d'activité
     loading: true,
-    userName: ''
+    userName: '',        // Nom d'affichage de l'utilisateur (eXo sync)
+    daysLeftInYear: 0    // Information contextuelle pour la planification
   }),
+
+  /**
+   * Cycle de vie : Chargement des données dès le montage du composant.
+   */
   created() {
     this.loadData();
   },
+
   methods: {
+    /**
+     * Charge l'ensemble des données nécessaires au tableau de bord.
+     * Utilise Promise.allSettled pour éviter qu'une erreur sur un endpoint
+     * ne bloque l'affichage des autres informations.
+     */
     async loadData() {
+      // Calcul des jours restants avant la fin de l'année (KPI contextuel)
+      const now = new Date();
+      const endOfYear = new Date(now.getFullYear(), 11, 31);
+      const diff = endOfYear - now;
+      this.daysLeftInYear = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
       try {
         const [soldeResp, demandesResp, userResp] = await Promise.allSettled([
           apiService.getMonSolde(),
@@ -150,23 +175,30 @@ export default {
           apiService.getUtilisateurs()
         ]);
 
+        // Traitement du solde de congés
         if (soldeResp.status === 'fulfilled' && soldeResp.value.data) {
           this.solde = soldeResp.value.data.solde ?? 25;
         }
 
+        // Traitement des informations utilisateur (synchronisées depuis eXo)
         if (userResp.status === 'fulfilled' && userResp.value.data) {
           const u = userResp.value.data;
           this.userName = `${u.prenom || ''} ${u.nom || ''}`.trim() || u.username || 'Utilisateur';
         }
 
+        // Analyse de l'historique pour extraire les KPIs
         if (demandesResp.status === 'fulfilled' && demandesResp.value.data) {
           const all = demandesResp.value.data;
-          this.recentDemandes = all.slice(0, 5);
+          this.recentDemandes = all.slice(0, 5); // Uniquement les plus récentes
+          
           this.pendingCount = all.filter(d => d.statut === 'EN_ATTENTE').length;
           this.refusedCount = all.filter(d => d.statut === 'REFUSEE').length;
+          
+          // Statistiques filtrées sur l'année en cours
           this.approvedYear = all
             .filter(d => d.statut === 'VALIDEE' && new Date(d.dateDebut).getFullYear() === this.currentYear)
             .length;
+            
           this.validatedYear = all
             .filter(d => d.statut === 'VALIDEE' && new Date(d.dateDebut).getFullYear() === this.currentYear)
             .reduce((acc, d) => acc + (d.dureeJoursOuvres || 0), 0);
@@ -177,11 +209,19 @@ export default {
         this.loading = false;
       }
     },
+
+    /**
+     * Formate une date technique en format local français (JJ/MM/AAAA).
+     */
     formatDate(dateStr) {
       if (!dateStr) return '';
       const d = new Date(dateStr);
       return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
     },
+
+    /**
+     * Traduit les statuts de la base de données vers l'UI.
+     */
     formatStatus(statut) {
       const labels = {
         'EN_ATTENTE': 'En attente',
@@ -191,6 +231,10 @@ export default {
       };
       return labels[statut] || statut;
     },
+
+    /**
+     * Renvoie la classe CSS de fond pour les indicateurs de liste.
+     */
     getStatusClass(statut) {
       return {
         'status-bg-green': statut === 'VALIDEE',
@@ -199,6 +243,10 @@ export default {
         'status-bg-gray': statut === 'BROUILLON'
       };
     },
+
+    /**
+     * Renvoie la classe CSS pour les badges de statut.
+     */
     getBadgeClass(statut) {
       return {
         'status-valid': statut === 'VALIDEE',

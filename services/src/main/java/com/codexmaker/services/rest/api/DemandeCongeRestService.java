@@ -1,6 +1,7 @@
 package com.codexmaker.services.rest.api;
 
 import com.codexmaker.services.rest.dto.DemandeCongeDTO;
+import com.codexmaker.services.rest.dto.DemandeCongeResponseDTO;
 import com.codexmaker.services.rest.dto.SoldeResponseDTO;
 import com.codexmaker.services.rest.mapper.DemandeCongeMapper;
 import com.codexmaker.services.rest.model.entity.DemandeConge;
@@ -137,9 +138,20 @@ public class DemandeCongeRestService implements ResourceContainer {
     public Response getMyDemandes() {
         syncUserWithExo(); // Sync before fetch
         List<DemandeConge> demandes = demandeCongeService.getDemandesParUtilisateur(getAuthenticatedUserId());
-        return Response.ok(demandes.stream()
+        List<DemandeCongeResponseDTO> dtos = demandes.stream()
                 .map(DemandeCongeMapper::toResponseDTO)
-                .toList()).build();
+                .toList();
+        
+        // Populate for current user
+        Utilisateur me = syncUserWithExo();
+        if (me != null) {
+            for (DemandeCongeResponseDTO dto : dtos) {
+                dto.setNomEmploye(me.getNom());
+                dto.setPrenomEmploye(me.getPrenom());
+            }
+        }
+        
+        return Response.ok(dtos).build();
     }
 
     /**
@@ -172,7 +184,10 @@ public class DemandeCongeRestService implements ResourceContainer {
         DemandeConge demande = demandeCongeService.getDemande(id);
         if (demande == null)
             return Response.status(Response.Status.NOT_FOUND).build();
-        return Response.ok(DemandeCongeMapper.toResponseDTO(demande)).build();
+        
+        DemandeCongeResponseDTO dto = DemandeCongeMapper.toResponseDTO(demande);
+        populateUserInfo(java.util.Collections.singletonList(dto));
+        return Response.ok(dto).build();
     }
 
     /**
@@ -233,9 +248,11 @@ public class DemandeCongeRestService implements ResourceContainer {
     @RolesAllowed("users")
     public Response getDemandesATraiter() {
         List<DemandeConge> demandes = demandeCongeService.getDemandesATraiter(getAuthenticatedUserId());
-        return Response.ok(demandes.stream()
+        List<DemandeCongeResponseDTO> dtos = demandes.stream()
                 .map(DemandeCongeMapper::toResponseDTO)
-                .toList()).build();
+                .toList();
+        populateUserInfo(dtos);
+        return Response.ok(dtos).build();
     }
 
     /**
@@ -278,9 +295,38 @@ public class DemandeCongeRestService implements ResourceContainer {
     @RolesAllowed("administrators")
     public Response getToutesLesDemandes() {
         List<DemandeConge> toutes = demandeCongeService.getToutesLesDemandes();
-        return Response.ok(toutes.stream()
+        List<DemandeCongeResponseDTO> dtos = toutes.stream()
                 .map(DemandeCongeMapper::toResponseDTO)
-                .toList()).build();
+                .toList();
+        populateUserInfo(dtos);
+        return Response.ok(dtos).build();
+    }
+
+    /**
+     * Helper pour enrichir les DTOs avec les informations des utilisateurs.
+     */
+    private void populateUserInfo(List<DemandeCongeResponseDTO> dtos) {
+        if (dtos == null || dtos.isEmpty()) return;
+        
+        java.util.Map<String, Utilisateur> userCache = new java.util.HashMap<>();
+        for (DemandeCongeResponseDTO dto : dtos) {
+            String uid = dto.getUserId();
+            if (uid == null) continue;
+            
+            Utilisateur user = userCache.computeIfAbsent(uid, id -> utilisateurService.getUtilisateur(id));
+            if (user != null) {
+                dto.setNomEmploye(user.getNom());
+                dto.setPrenomEmploye(user.getPrenom());
+            }
+            
+            String vid = dto.getValideurId();
+            if (vid != null) {
+                Utilisateur val = userCache.computeIfAbsent(vid, id -> utilisateurService.getUtilisateur(id));
+                if (val != null) {
+                    dto.setNomValideur(val.getPrenom() + " " + val.getNom());
+                }
+            }
+        }
     }
 
     /**
