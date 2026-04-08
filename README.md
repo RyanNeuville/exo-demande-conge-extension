@@ -1,98 +1,87 @@
-# Projet de Gestion des Conges - Extension eXo Platform
+# Gestion des Conges - Extension native pour eXo Platform
 
-## Description du projet
+Ce projet constitue une solution logicielle complete pour la gestion du cycle de vie des demandes de conges au sein de l'ecosysteme eXo Platform. Il a ete concu pour offrir une experience utilisateur fluide tout en garantissant une rigueur administrative maximale.
 
-Ce projet est une extension developpee specifiquement pour eXo Platform, ayant pour but de gerer le cycle d'approbation et l'historique complet des demandes de conges au sein d'une organisation.
+## 1. Vision et Mission (Volet Humain)
 
-L'application integre un workflow natif permettant :
+La gestion des absences est un pilier de la satisfaction collaborateur et de l'efficacite organisationnelle. Notre mission avec cette extension est de :
+- Simplifier la communication entre les collaborateurs et leur hierarchie.
+- Garantir l'equite par un calcul automatisé et transparent des droits aux conges.
+- Offrir aux gestionnaires une vision claire des disponibilites de leurs equipes pour optimiser le pilotage de l'activite.
 
-- Aux employes de declarer leurs indisponibilites et de consulter leur solde.
-- Aux responsables d'equipe d'approuver ou refuser les demandes avec un systeme de commentaires obligatoires.
-- Aux administrateurs de superviser l'integralite du processus et de configurer globalement les catalogues de types de conges.
+Ce projet se veut un trait d'union entre les exigences RH et le confort de travail des employes.
 
-Ce projet se divise strategiquement en deux modules Maven independants, delimitant la responsabilite du code backend lie a la logique metier et du code frontend integre a l'UI du portail.
+## 2. Architecture et Concept Technique
 
-## Architecture Technique
+L'application repose sur une architecture modulaire Maven, separee en deux couches distinctes pour assurer une maintenance isolee et une robustesse accrue.
 
-Le composant logiciel s'articule autour des developpements suivants :
+### 2.1 Services Backend (Module services)
+Le cœur de l'application est un service Java s'appuyant sur les standards JAX-RS pour l'exposition REST.
+- Persistance : Utilisation de SQLite pour une base de donnees embarquee, performante et sans dependance externe lourde.
+- Pattern DAO/Repository : Acces aux donnees via JDBC natif pour un controle total sur les performances.
+- Mappage : Conversion manuelle des ResultSets vers des entites POJO pour eviter la surcharge d'un ORM.
 
-### 1. Module Services (Cœur Backend)
+### 2.2 Interface Utilisateur (Module webapp)
+Le frontend est une application Vue.js dynamique integree sous forme de portlet eXo.
+- Bundle : Compilation Webpack produisant un module AMD compatible avec le kernel JavaScript de GateIn (eXo Platform).
+- i18n : Chargement asynchrone des ressources linguistiques via le module exoi18n natif.
 
-Ce module garantit la securite fonctionnelle de l'application, les points d'acces API pour le frontend ainsi que l'interaction native avec la base de donnees.
+---
 
-- **API REST (JAX-RS)** : Les methodes `RestService` integrent les appels du repertoire frontend et protegent les routes metier.
-- **Pattern Repository (JDBC Pur)** : Pour maximiser les performances et le contole des transactions, l'interrogation de la base de donnees se fait exclusivement au travers d'interfaces et de leurs implementations JDBC respectives (Exemple: `TypeCongeRepositoryImpl`, `UtilisateurRepositoryImpl`).
-- **Pattern Mapper** : La restitution des reponses SQL (`ResultSet`) est centralisee dans le package `mapper`, deleguant l'instantiation des entites metier a des classes de conversion (Exemples: `UtilisateurMapper.fromResultSet`).
-- **Persistance native (SQLite)** : **Point materiel fondamental**, l'extension gere souverainement sa propre base de donnees embarquee. Le projet s'appuie sur `SQLite` (`demande_conge.db`) optimise activement via des directives PRAGMA (`journal_mode = WAL`, configuration memoire tampon, etc.) implantees dans `DatabaseConnection.java`. En l'etat actuel du code source, l'extension est agnostique de la connexion base de donnees principale du portail eXo.
+## 3. Mise en œuvre et Deploiement Cloud
 
-### 2. Module Webapp (Interface Vue.js)
+### 3.1 Deploiement sur Railway
+Cette extension est prete pour un deploiement sur Railway via le Dockerfile multi-stage present a la racine.
 
-Il compose le portlet qui sera affiche au sein du portail de collaboration.
+- Prerequis de Persistence : Vous devez configurer un Railway Volume monté sur le chemin `/opt/exo/gatein/data`. Sans ce volume, la base SQLite sera reinitialisee a chaque deploiement.
+- Variables d'Environnement :
+    - DB_PATH : Definit l'emplacement du fichier .db (Defaut: /opt/exo/gatein/data/demande_conge.db).
+    - JAVA_OPTS : Configuration de la memoire (Ex: -Xmx4g).
 
-- **Technologie front** : Entierement realisee a l'aide du framework Vue.js. Les fichiers sources applicatifs se situent sous `webapp/src/main/webapp/vue-app/`.
-- **Ecosystème Component-Based** : Les formulaires (ex: `congeForm.vue`), les inventaires administrateurs et les etats individuels ont des logiques disociees pour un rendu optimisé a l'execution.
+---
 
-## Environnement et Prerequis
+## 4. Installation et Developpement Local
 
-- **Version Java Requise** : JDK 17 / JDK 21.
-- **Gestionnaire de Build** : Apache Maven (version recommandee : 3.6+).
-- **Plateforme Cible** : eXo Platform Community 7.0.0.
-- **Frontend Build Tooling** : Node.js installe en local.
+### 4.1 Prerequis
+- JDK 21 & Maven 3.8+
+- Node.js 18+
 
-## Deploiement Local et Tests
-
-### 1. Clonage de l'espace de developpement
-
+### 4.2 Compilation Complète
 ```bash
-git clone https://github.com/RyanNeuville/exo-demande-conge-extension.git
-cd exo-demande-conge-extension
+# 1. Build de l'interface Vue.js
+cd webapp && npm install && npm run build && cd ..
+
+# 2. Package Java (JAR & WAR)
+mvn clean install -DskipTests
 ```
 
-### 2. Package de l'application
-
-Le build complet necessite la generation concurrente du portlet (npm) et l'assembly des differents JAR/WAR via Maven.
-
+### 4.3 Execution avec Docker Compose
 ```bash
-# Etape 1 : Construction de l'interface Vue.js
-cd webapp
-npm install
-npm run build
-
-# Etape 2 : Construction globale des paquets Java
-cd ..
-mvn clean install
+cd docker && docker-compose up -d
 ```
+Lien local : http://localhost:9099/portal
 
-A la de la sequence, le JAR appele a regir la logique serveur est localise dans `services/target` et l'archive WAR destinee au web-container sera dans `webapp/target`.
+---
 
-### 3. Deploiement Docker sur eXo Platform
+## 5. Documentation de l'API (Swagger / OpenAPI)
 
-Le repertoire racine donne acces a l'arretract `docker` pour bootstrapper un tenant eXo Platform fonctionnel en isolation, et deployer l'extension au vol.
+Le projet integre une documentation complete et interactive de ses services REST via le standard OpenAPI 3.0.
 
-#### A propos de la base MySQL
+### 5.1 Acceder a l'interface Swagger UI
+Une interface interactive est disponible pour tester les endpoints en temps reel :
+- URL d'acces : http://localhost:9099/demande-conge-extension-webapp/swagger/index.html
+- Specification brute : `webapp/src/main/webapp/swagger/openapi.yaml`
 
-Bien qu'une instance `mysql` soit necessaire et declaree dans votre section de `docker-compose.yml`, elle est confiee **strictement au noyau dur eXo Platform** (`EXO_DB_TYPE=mysql`). L'extension traitera son registre de conges sur la base du driver `org.sqlite.JDBC` de maniere silencieuse.
+### 5.2 Standards de Developpement
+- Annotations : Les classes Java sont annotées avec @Operation et @ApiResponse pour une documentation au plus proche du code.
+- Securité : Tous les endpoints sont proteges par les rôles eXo Platform (@RolesAllowed).
 
-#### Demarer l'infrastructure complete :
+---
 
-Le montage de fichiers integre nativement dans `docker-compose` projetera le `.jar` backend et le `.war` frontend compile au bon endroit dans le tomcat conteneurise de l'applicatif eXo Platform.
+## 6. Documentation Detaillee par Module
 
-Apres la compilation validee :
+- Documentation Technique du Backend : services/README.md
+- Documentation Technique du Frontend : webapp/README.md
 
-```bash
-cd docker
-docker-compose up -d
-```
-
-L'URL d'accees du collaboratif est standardement : http://localhost:9099/portal.
-
-## Conformite de developpement
-
-Le design pattern et le code impliquent les contraintes d'execution suivantes pour la conformite continue :
-
-- Lancer le build sans erreurs grace a `mvn test`.
-- Les nouvelles methodes interagissant avec JDBC ont obligation de se plier a l'architecture du framework interne (Implementation Repository -> Passage au mapper -> Retour API REST).
-
-## Mentions de propriete
-
-Le repository concerne les developpements prives. Les requetes de redistribution non accordees ne sont pas autorisees sur le domaine applicatif complet des services.
+## 6. Gouvernance et Propriete
+Ce projet est une propriete de Kozao Africa. Toute modification ou redistribution doit faire l'objet d'une autorisation officielle.

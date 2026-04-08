@@ -16,6 +16,18 @@ import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.services.rest.resource.ResourceContainer;
 import org.exoplatform.services.security.ConversationState;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.info.Contact;
+import io.swagger.v3.oas.annotations.servers.Server;
+
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -29,6 +41,16 @@ import java.util.List;
  * Ce service expose les endpoints nécessaires pour les employés, les
  * responsables et les administrateurs.
  */
+@OpenAPIDefinition(
+    info = @Info(
+        title = "API de Gestion des Congés - Kozao Africa",
+        version = "1.0.0",
+        description = "Documentation complète des services REST pour la gestion du cycle de vie des demandes de congés.",
+        contact = @Contact(name = "Support Kozao", email = "dev@kozao.africa")
+    ),
+    servers = @Server(url = "/portal/rest", description = "Serveur d'intégration eXo Platform")
+)
+@Tag(name = "Demandes de Congés", description = "Endpoints pour la soumission et le suivi des demandes")
 @Path(Constants.API_BASE)
 @Produces(MediaType.APPLICATION_JSON)
 public class DemandeCongeRestService implements ResourceContainer {
@@ -135,6 +157,15 @@ public class DemandeCongeRestService implements ResourceContainer {
     @GET
     @Path(Constants.API_DEMANDES_ME)
     @RolesAllowed("users")
+    @Operation(
+        summary = "Lister mes demandes",
+        description = "Retourne l'intégralité des demandes soumises par l'utilisateur authentifié, incluant leur historique.",
+        security = @SecurityRequirement(name = "eXoSession"),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Liste récupérée avec succès", content = @Content(schema = @Schema(implementation = DemandeCongeResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Utilisateur non authentifié")
+        }
+    )
     public Response getMyDemandes() {
         syncUserWithExo(); // Sync before fetch
         List<DemandeConge> demandes = demandeCongeService.getDemandesParUtilisateur(getAuthenticatedUserId());
@@ -164,6 +195,15 @@ public class DemandeCongeRestService implements ResourceContainer {
     @Path(Constants.API_DEMANDES)
     @Consumes(MediaType.APPLICATION_JSON)
     @RolesAllowed("users")
+    @Operation(
+        summary = "Soumettre une demande",
+        description = "Crée une nouvelle demande de congé. Le solde est immédiatement réservé en base de données.",
+        security = @SecurityRequirement(name = "eXoSession"),
+        responses = {
+            @ApiResponse(responseCode = "201", description = "Demande créée avec succès", content = @Content(schema = @Schema(implementation = DemandeConge.class))),
+            @ApiResponse(responseCode = "400", description = "Données invalides ou solde insuffisant")
+        }
+    )
     public Response submitDemande(DemandeCongeDTO dto) {
         DemandeConge demande = DemandeCongeMapper.toEntity(dto);
         DemandeConge saved = demandeCongeService.soumettreDemande(demande, getAuthenticatedUserId());
@@ -180,7 +220,15 @@ public class DemandeCongeRestService implements ResourceContainer {
     @GET
     @Path(Constants.API_DEMANDES_BY_ID)
     @RolesAllowed("users")
-    public Response getDemandeById(@PathParam("id") String id) {
+    @Operation(
+        summary = "Détails d'une demande",
+        description = "Récupère les informations détaillées d'une demande spécifique par son UUID.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Demande trouvée", content = @Content(schema = @Schema(implementation = DemandeCongeResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Demande introuvable")
+        }
+    )
+    public Response getDemandeById(@PathParam("id") @Parameter(description = "UUID de la demande") String id) {
         DemandeConge demande = demandeCongeService.getDemande(id);
         if (demande == null)
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -246,6 +294,14 @@ public class DemandeCongeRestService implements ResourceContainer {
     @GET
     @Path(Constants.API_DEMANDES_A_TRAITER)
     @RolesAllowed("users")
+    @Tag(name = "Validation Management")
+    @Operation(
+        summary = "Lister les demandes à valider",
+        description = "Retourne toutes les demandes en attente dont l'utilisateur connecté est le valideur désigné.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Succès")
+        }
+    )
     public Response getDemandesATraiter() {
         List<DemandeConge> demandes = demandeCongeService.getDemandesATraiter(getAuthenticatedUserId());
         List<DemandeCongeResponseDTO> dtos = demandes.stream()
@@ -375,6 +431,14 @@ public class DemandeCongeRestService implements ResourceContainer {
     @GET
     @Path(Constants.API_UTILISATEUR_ME_SOLDE)
     @RolesAllowed("users")
+    @Tag(name = "Utilisateurs")
+    @Operation(
+        summary = "Consulter mon solde",
+        description = "Retourne le nombre de jours de congés restants pour l'utilisateur authentifié.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Succès", content = @Content(schema = @Schema(implementation = SoldeResponseDTO.class)))
+        }
+    )
     public Response getMySolde() {
         try {
             double solde = utilisateurService.consulterSolde(getAuthenticatedUserId());
@@ -406,6 +470,14 @@ public class DemandeCongeRestService implements ResourceContainer {
      */
     @GET
     @Path(Constants.API_TYPES_CONGES)
+    @Tag(name = "Configuration")
+    @Operation(
+        summary = "Lister les types de congés",
+        description = "Récupère le catalogue des types de congés configurés (CP, RTT, Maladie, etc.).",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Succès")
+        }
+    )
     public Response getTypesConges() {
         List<TypeConge> types = typeCongeService.getTousLesTypesConges();
         return Response.ok(types).build();
