@@ -1,10 +1,10 @@
 openapi: 3.0.0
 info:
   title: API de Gestion des Congés - Kozao Africa
-  description: Documentation complète des services REST pour la gestion du cycle de vie des demandes de congés.
+  description: Documentation exhaustive de A à Z des services REST pour la gestion du cycle de vie des demandes de congés.
   version: 1.0.0
   contact:
-    name: Support Kozao
+    name: Support technique Kozao
     email: dev@kozao.africa
 
 servers:
@@ -13,26 +13,29 @@ servers:
 
 tags:
   - name: Demandes de Congés
-    description: Opérations liées aux demandes (soumission, suivi, annulation)
-  - name: Validation Management
-    description: Opérations pour les managers et responsables
-  - name: Utilisateurs
-    description: Profils et soldes de congés
-  - name: Configuration
-    description: Gestion des types de congés (Admin)
+    description: Opérations pour les employés (Soumission, Suivi, Annulation)
+  - name: Validation et Management
+    description: Opérations pour les responsables (Approbation, Rejet)
+  - name: Administration
+    description: Supervision globale et rapports (Administrateurs uniquement)
+  - name: Utilisateurs et Profils
+    description: Gestion des identités et des soldes
+  - name: Configuration Système
+    description: Paramétrage des types de congés
 
 paths:
+  # --- SECTION DEMANDES ---
   /api/demandes/me:
     get:
       tags:
         - Demandes de Congés
-      summary: Lister mes demandes
-      description: Retourne l'historique des demandes de l'utilisateur authentifié.
+      summary: Lister mes demandes personnelles
+      description: Récupère l'intégralité des demandes soumises par l'utilisateur connecté.
       security:
         - eXoSession: []
       responses:
         '200':
-          description: Succès
+          description: Liste récupérée avec succès
           content:
             application/json:
               schema:
@@ -44,7 +47,8 @@ paths:
     post:
       tags:
         - Demandes de Congés
-      summary: Soumettre une demande
+      summary: Soumettre une nouvelle demande
+      description: Crée une demande de congé. Le solde est immédiatement débité sous condition de validation.
       requestBody:
         required: true
         content:
@@ -53,15 +57,96 @@ paths:
               $ref: '#/components/schemas/DemandeCongeCreate'
       responses:
         '201':
-          description: Créé
+          description: Demande créée avec succès
         '400':
           description: Solde insuffisant ou dates invalides
+
+  /api/demandes/{id}:
+    get:
+      tags:
+        - Demandes de Congés
+      summary: Détails d'une demande spécifique
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: UUID de la demande
+      responses:
+        '200':
+          description: Détails de la demande
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DemandeCongeResponse'
+        '404':
+          description: Demande introuvable
+    put:
+      tags:
+        - Demandes de Congés
+      summary: Modifier une demande en attente
+      description: Uniquement possible si le statut est EN_ATTENTE.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DemandeCongeCreate'
+      responses:
+        '200':
+          description: Mise à jour effectuée
+    delete:
+      tags:
+        - Demandes de Congés
+      summary: Annuler ou supprimer une demande
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Annulation réussie
+
+  /api/demandes/{id}/historique:
+    get:
+      tags:
+        - Demandes de Congés
+      summary: Consulter l'historique d'une demande
+      description: Retourne la trace d'audit (changement de statuts, commentaires).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Historique récupéré
+
+  # --- SECTION MANAGEMENT ---
+  /api/demandes/a-traiter:
+    get:
+      tags:
+        - Validation et Management
+      summary: Liste des demandes en attente de validation
+      description: Réservé aux responsables pour traiter les demandes de leur équipe.
+      responses:
+        '200':
+          description: Liste des demandes filtrée par valideur
 
   /api/demandes/{id}/valider:
     post:
       tags:
-        - Validation Management
-      summary: Valider une demande
+        - Validation et Management
+      summary: Approuver une demande de congé
       parameters:
         - name: id
           in: path
@@ -70,24 +155,157 @@ paths:
             type: string
         - name: commentaire
           in: query
+          description: Commentaire optionnel du valideur
           schema:
             type: string
       responses:
         '200':
-          description: Validée avec succès
+          description: Demande validée
+
+  /api/demandes/{id}/refuser:
+    post:
+      tags:
+        - Validation et Management
+      summary: Refuser une demande de congé
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: commentaire
+          in: query
+          description: Motif obligatoire du refus
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Demande refusée
+
+  # --- SECTION ADMINISTRATION ---
+  /api/demandes/toutes:
+    get:
+      tags:
+        - Administration
+      summary: Supervision globale (Toutes les demandes)
+      description: Réservé aux membres du groupe /administrators.
+      responses:
+        '200':
+          description: Vue panoramique de l'entreprise
+
+  /api/demandes/export:
+    get:
+      tags:
+        - Administration
+      summary: Exporter les données au format CSV
+      parameters:
+        - name: format
+          in: query
+          schema:
+            type: string
+            default: CSV
+        - name: debut
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: fin
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Fichier CSV généré
+
+  # --- SECTION UTILISATEURS ---
+  /api/utilisateurs/me:
+    get:
+      tags:
+        - Utilisateurs et Profils
+      summary: Mon profil utilisateur
+      responses:
+        '200':
+          description: Informations de profil eXo synchronisées
 
   /api/utilisateurs/me/solde:
     get:
       tags:
-        - Utilisateurs
-      summary: Consulter mon solde
+        - Utilisateurs et Profils
+      summary: Mon solde de congés actuel
       responses:
         '200':
-          description: Succès
+          description: Solde en jours
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SoldeResponse'
+
+  /api/utilisateurs/responsables:
+    get:
+      tags:
+        - Utilisateurs et Profils
+      summary: Lister les validateurs disponibles
+      description: Retourne la liste des managers pour assignation de demande.
+      responses:
+        '200':
+          description: Succès
+
+  # --- SECTION CONFIGURATION ---
+  /api/types-conges:
+    get:
+      tags:
+        - Configuration Système
+      summary: Liste des types de congés paramétrés
+      responses:
+        '200':
+          description: Succès
+    post:
+      tags:
+        - Configuration Système
+      summary: Créer un nouveau type de congé
+      description: Admin uniquement.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TypeConge'
+      responses:
+        '201':
+          description: Créé
+
+  /api/types-conges/{id}:
+    put:
+      tags:
+        - Configuration Système
+      summary: Modifier un type de congé
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TypeConge'
+      responses:
+        '200':
+          description: Mis à jour
+    delete:
+      tags:
+        - Configuration Système
+      summary: Supprimer un type de congé
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Supprimé
 
 components:
   securitySchemes:
@@ -99,17 +317,27 @@ components:
   schemas:
     DemandeCongeCreate:
       type: object
+      required: [dateDebut, dateFin, typeCongeId]
       properties:
         dateDebut:
           type: string
           format: date
+          example: "2026-05-15"
         dateFin:
           type: string
           format: date
+          example: "2026-05-20"
         motif:
           type: string
+          example: "Congés annuels"
         typeCongeId:
           type: string
+          example: "CP"
+        commentaireEmploye:
+          type: string
+        valideurId:
+          type: string
+          example: "manager1"
 
     DemandeCongeResponse:
       type: object
@@ -118,9 +346,10 @@ components:
           type: string
         numero:
           type: string
+          example: "DC-2026-0001"
         statut:
           type: string
-          enum: [EN_ATTENTE, VALIDEE, REFUSEE, ANNULEE]
+          enum: [BROUILLON, EN_ATTENTE, VALIDEE, REFUSEE, ANNULEE]
         dateDebut:
           type: string
         dateFin:
@@ -129,9 +358,26 @@ components:
           type: string
         dureeJoursOuvres:
           type: number
+          example: 5.5
 
     SoldeResponse:
       type: object
       properties:
         solde:
           type: number
+          example: 21.5
+
+    TypeConge:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "RTT"
+        libelle:
+          type: string
+          example: "Réduction Temps Travail"
+        code:
+          type: string
+        actif:
+          type: boolean
+          default: true
