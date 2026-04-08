@@ -69,7 +69,7 @@ Le projet integre une documentation complete et interactive de ses services REST
 
 ### 5.1 Acceder a l'interface Swagger UI
 Une interface interactive est disponible pour tester les endpoints en temps reel :
-- URL d'acces : http://localhost:9099/demande-conge-extension-webapp/swagger/index.html
+- URL d'acces : ../webapp/swagger/index.html
 - Specification brute : `webapp/src/main/webapp/swagger/openapi.yaml`
 
 ### 5.2 Standards de Developpement
