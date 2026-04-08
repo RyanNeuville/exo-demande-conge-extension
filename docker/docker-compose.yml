@@ -29,6 +29,7 @@ services:
       - xpack.security.enabled=false
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
       - cluster.name=exo-cluster
+      - bootstrap.memory_lock=true
     volumes:
       - es_data:/usr/share/elasticsearch/data
     networks:
@@ -37,7 +38,8 @@ services:
       test: ["CMD-SHELL", "curl -f -s http://localhost:9200"]
       interval: 10s
       timeout: 5s
-      retries: 60            # Très important sur Railway
+      retries: 80          # Très augmenté pour Railway
+      start_period: 30s
 
   onlyoffice:
     image: onlyoffice/documentserver
