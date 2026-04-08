@@ -1,0 +1,137 @@
+openapi: 3.0.0
+info:
+  title: API de Gestion des Congés - Kozao Africa
+  description: Documentation complète des services REST pour la gestion du cycle de vie des demandes de congés.
+  version: 1.0.0
+  contact:
+    name: Support Kozao
+    email: dev@kozao.africa
+
+servers:
+  - url: /portal/rest
+    description: Serveur d'intégration eXo Platform
+
+tags:
+  - name: Demandes de Congés
+    description: Opérations liées aux demandes (soumission, suivi, annulation)
+  - name: Validation Management
+    description: Opérations pour les managers et responsables
+  - name: Utilisateurs
+    description: Profils et soldes de congés
+  - name: Configuration
+    description: Gestion des types de congés (Admin)
+
+paths:
+  /api/demandes/me:
+    get:
+      tags:
+        - Demandes de Congés
+      summary: Lister mes demandes
+      description: Retourne l'historique des demandes de l'utilisateur authentifié.
+      security:
+        - eXoSession: []
+      responses:
+        '200':
+          description: Succès
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DemandeCongeResponse'
+
+  /api/demandes:
+    post:
+      tags:
+        - Demandes de Congés
+      summary: Soumettre une demande
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DemandeCongeCreate'
+      responses:
+        '201':
+          description: Créé
+        '400':
+          description: Solde insuffisant ou dates invalides
+
+  /api/demandes/{id}/valider:
+    post:
+      tags:
+        - Validation Management
+      summary: Valider une demande
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: commentaire
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Validée avec succès
+
+  /api/utilisateurs/me/solde:
+    get:
+      tags:
+        - Utilisateurs
+      summary: Consulter mon solde
+      responses:
+        '200':
+          description: Succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SoldeResponse'
+
+components:
+  securitySchemes:
+    eXoSession:
+      type: apiKey
+      in: cookie
+      name: JSESSIONID
+
+  schemas:
+    DemandeCongeCreate:
+      type: object
+      properties:
+        dateDebut:
+          type: string
+          format: date
+        dateFin:
+          type: string
+          format: date
+        motif:
+          type: string
+        typeCongeId:
+          type: string
+
+    DemandeCongeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        numero:
+          type: string
+        statut:
+          type: string
+          enum: [EN_ATTENTE, VALIDEE, REFUSEE, ANNULEE]
+        dateDebut:
+          type: string
+        dateFin:
+          type: string
+        nomEmploye:
+          type: string
+        dureeJoursOuvres:
+          type: number
+
+    SoldeResponse:
+      type: object
+      properties:
+        solde:
+          type: number

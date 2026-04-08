@@ -30,6 +30,18 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>org.exoplatform.commons-exo</groupId>
+                <artifactId>commons-exo</artifactId>
+                <version>${org.exoplatform.commons-exo.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>2.2.8</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
