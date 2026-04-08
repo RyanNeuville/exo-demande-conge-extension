@@ -63,7 +63,22 @@ Lien local : http://localhost:9099/portal
 
 ---
 
-## 5. Documentation Detaillee par Module
+## 5. Documentation de l'API (Swagger / OpenAPI)
+
+Le projet integre une documentation complete et interactive de ses services REST via le standard OpenAPI 3.0.
+
+### 5.1 Acceder a l'interface Swagger UI
+Une interface interactive est disponible pour tester les endpoints en temps reel :
+- URL d'acces : http://localhost:9099/demande-conge-extension-webapp/swagger/index.html
+- Specification brute : `webapp/src/main/webapp/swagger/openapi.yaml`
+
+### 5.2 Standards de Developpement
+- Annotations : Les classes Java sont annotées avec @Operation et @ApiResponse pour une documentation au plus proche du code.
+- Securité : Tous les endpoints sont proteges par les rôles eXo Platform (@RolesAllowed).
+
+---
+
+## 6. Documentation Detaillee par Module
 
 - Documentation Technique du Backend : services/README.md
 - Documentation Technique du Frontend : webapp/README.md
