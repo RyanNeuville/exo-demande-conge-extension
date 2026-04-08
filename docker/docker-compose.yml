@@ -1,6 +1,8 @@
 # -----------------------------------
 # docker-compose.yml (exécution des services)
 # -----------------------------------
+version: '3.8'
+
 services:
   mysql:
     image: mysql:8.0
@@ -16,10 +18,10 @@ services:
     networks:
       - exo-net
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$MYSQL_ROOT_PASSWORD"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${MYSQL_USER}", "-p${MYSQL_PASSWORD}"]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 20
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
@@ -29,12 +31,16 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
-    ports:
-      - "9200:9200"
+      - cluster.name=exo-cluster
     volumes:
       - es_data:/usr/share/elasticsearch/data
     networks:
       - exo-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200"]
+      interval: 10s
+      timeout: 5s
+      retries: 40
 
   onlyoffice:
     image: onlyoffice/documentserver
@@ -55,7 +61,7 @@ services:
       mysql:
         condition: service_healthy
       elasticsearch:
-        condition: service_started
+        condition: service_healthy
       onlyoffice:
         condition: service_started
     ports:
