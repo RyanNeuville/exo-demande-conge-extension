@@ -1,68 +1,54 @@
-# Documentation Technique : Module `webapp`
+# Documentation Technique et Humaine : Module webapp
 
-Ce document detaille l'architecture et le processus de compilation du module `webapp`. Ce sous-module constitue l'interface utilisateur (UI) de l'extension de gestion des demandes de conges, specifique a eXo Platform.
+Ce document detaille l'architecture et le fonctionnement du module frontend, qui constitue l'interface utilisateur (UI) reactive pour la gestion des conges dans eXo Platform.
 
-## 1. Role et Structure Globale
+## 1. Experience Utilisateur (Aspect Humain)
 
-Le module `webapp` repose sur une architecture hybride. Son but est de fournir une interface reactive et dynamique hebergee en tant qu'application Java web portlet :
+L'interface a ete conçue pour etre inclusive et intuitive. Nous savons que la soumission d'un conge est une interaction sensible ; l'application propose donc :
+- Une navigation fluide par onglets pour separer l'activite personnelle de l'activite de gestion.
+- Des retours visuels immediats sur la validité des dates (ex: calcul de durée en temps reel).
+- Une transparence totale sur l'etat d'avancement des demandes via un historique detaille.
+- Des composants UI modernes (via DaisyUI et Tailwind) pour reduire la fatigue cognitive des utilisateurs.
 
-- **Frontend asynchrone** : Le code applicatif deployee est code en **Vue.js** (version 3.x), compilé par Webpack.
-- **Backend d'empaquetage** : Le resultat binaire final prend la forme d'un **WAR Java**, standard decrit par `pom.xml`, lui permettant d'etre ingéré par Tomcat/eXo Platform.
+## 2. Architecture Frontend (Aspect Technique)
 
-## 2. Processus de Build Hybride (Node / Maven)
+Le module repose sur Vue.js (version standard eXo) et utilise Webpack pour produire un livrable compatible avec l'ecosysteme GateIn.
 
-La construction de l'interface depend d'une double compilation chainee : ECMAScript -> Java Packaging.
+### 2.1 Cycle de Build Hybride
+Le build suit une chaine de transformation specifique :
+1. Compilation JavaScript : Webpack transforme le code Vue.js moderne en un bundle AMD (Asynchronous Module Definition), format requis pour l'injection propre de scripts dans eXo Platform.
+2. Packaging JEE : Maven encapsule les fichiers compiles dans une archive .war. Les ressources statiques sont placees sous META-INF/resources pour etre servies par le container.
 
-### Etape 2.1 : Compilation Frontend (Node.js & Vue)
+### 2.2 Composants et Gestion d'Etat
+L'application est decoupee en composants atomiques :
+- Dashboard : Affiche les KPIs et les statistiques individuelles à l'aide de graphiques.
+- Formulaire : Gère la saisie intelligente avec validation dynamique des champs.
+- Administration : Interface reservee aux managers et administrateurs pour le pilotage d'equipe.
+- API Service : Couche d'abstraction (apiService.js) simulant un client REST pour communiquer avec le module services.
 
-Le dossier applicatif de developpement se trouve physiquement sous `src/main/webapp/vue-app/`. Les dependances `package.json` et les logiques de bundling en ont le controle :
+## 3. Integration avec eXo Platform
 
-1. Installer la chaine d'outillage front via `npm install`.
-2. Packager la logue metier Vue.js via `npm run build`.
-   - Webpack utilise le point d'entree statique `main.js`.
-   - Le module exporte un code cible AMD (Asynchronous Module Definition), format intrinsequement reclame par le kernel eXo JavaScript.
-   - L'output est recrachie dynamiquement sous `src/main/webapp/js/[name].bundle.js`.
+### 3.1 Mode Portlet
+Le module webapp n'est pas une application autonome mais un Portlet. Son integration est definie par plusieurs descripteurs XML :
+- portlet.xml : Declare le point d'entree Java eXo (GenericDispatchedViewPortlet).
+- gatein-resources.xml : Orchestre le chargement asynchrone des bundles JS et des feuilles de style CSS.
 
-### Etape 2.2 : Packaging Backend (Maven)
+### 3.2 i18n et Localisation
+L'application detecte automatiquement la langue de l'utilisateur declaree dans eXo. Elle utilise le service exoi18n pour charger dynamiquement les fichiers de traduction (.properties ou .json) sans necessiter un rafraichissement de page.
 
-Une fois les assets javascript rafraichis, Maven prend le relai (`mvn clean install`).
-L'operation specifique du `pom.xml` consiste a detecter et copier la source `/src/main/webapp/` vers le manifest internal `META-INF/resources` de la future archive `demande-conge-extension-webapp.war`.
-Les ressources deviennent alors des "GateIn Resources" accessibles au container web.
+## 4. Maintenance et Developpement
 
-## 3. Architecture Component-Based (Vue.js)
+### 4.1 Commandes de Build
+```bash
+# Installation des dependances Node
+npm install
 
-L'arborescence UI Vue.js est concue par separation des espaces d'interfaces.
+# Compilation Frontend
+npm run build
 
-### Point de montage (`main.js`)
+# Packaging Final
+mvn clean install
+```
 
-Point d'injection dynamique. Il agit pour instancier _Vue_ selon le contexte d'eXo Platform (detection locale, langue d'eXo : `eXo.env.portal.language`, et chargement asynchrone des traductions `exoi18n.loadLanguageAsync`).
-
-### Les Composants Cles
-
-- **`congeAppMain.vue`** : Composant maitre. Sorte de controleur de vues, distribuant le rendu general vers les vues enfants et filtrant via roles les onglets d'administration.
-- **`congeList.vue`** : Formate le tableau d'historique utilisateur au format de donnees JSON eues depuis le serveur. S'ajoute la possibilite d'appeler asynchroniquement `fetchRelationsDemandes()` pour les gestionnaires d'equipes.
-- **`congeForm.vue`** : S'occupe de compiler de facon statefull des variables input, interagit avec l'API pour instancier la verification du motif et l'enregistrement statique de `congeType`.
-- **`congeFeatures.vue`** / **`congeAdminList.vue`** : Exclues des profils standards (uniquement administrateurs).
-
-_L'usage global de la fonction `fetch` native recupere les structures payload JSON du module `services`._
-
-## 4. Methodes d'Integration eXo Platform
-
-Le couplage avec le panel eXo (le portail) rend necessaire la description d'une injection par le systeme **Portlet**. Cette etape transite par les descripteurs XML definis dans `WEB-INF/`.
-
-### 4.1 Le moteur de la Vue (`portlet.xml`)
-
-Declares formellement l'existence du composant applicatif `demandeCongePortlet`. Il delègue la resolution HTML pure à la classe systeme eXo : `GenericDispatchedViewPortlet`.
-La reponse va distribuer la page basique `index.html`. Celle ci precharge les CDN (DaisyUI, FontAwesome, Tailwind) et offre le receptacle vide `<div id="demandeCongeApp"></div>` aux scripts ECMAScript de Vue.js de monter en memoire.
-
-### 4.2 La declaration asynchrone (`gatein-resources.xml`)
-
-Document sensible decrivant a eXo qu'un script client a besoin d'etre resolut a l'ecran.
-
-- Associe le bundle genéré par Webpack (`/js/demandeCongeApp.bundle.js`).
-- Impose a eXo Platform d'injecter **dans ce context isole** l'instance tierce de `"vue"` et le dictionnaire `"eXoVueI18n"`. Vue et le module d'i18n ne sont pas embarques dans le `war`, ils sont fournis par l'hote (eXo Platform) a l'execution pour preserver une legere empreinte.
-- Declares isolément le bloc stylistique global `demandeCongeApp.css`.
-
-## Mentions
-
-- **Developpement asynchrone** (Polling/API). Les developpeurs peuvent observer le temps de rafraichissement declare au coeur de `main.js` ou dans les hooks cycles the vie vue (`mounted()`, etc).
+### 4.2 Styles et Design System
+Le projet utilise TailwindCSS et DaisyUI via CDN dans la page index.html pour garantir une interface legere et facilement personnalisable sans recompiler l'integralité du framework CSS.
